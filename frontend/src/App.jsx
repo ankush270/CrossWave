@@ -7,17 +7,21 @@ import Footer from './pages/Footer'
 import SignUp from './pages/SignUp'
 import Buyer from './pages/Buyer'
 import Seller from './pages/Seller'
+import Payments from './pages/Payments'
+import Logistics from './pages/Logistics'
 
 const App = () => {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
-        {/* Navbar will show on all pages except Login, Buyer and Seller Dashboard */}
+        {/* Navbar will show on all pages except specified routes */}
         <Routes>
           <Route path="/login" element={null} />
           <Route path="/signup" element={null} />
           <Route path="/buyer/dashboard" element={null} />
           <Route path="/seller/dashboard" element={null} />
+          <Route path="/seller/payments" element={null} />
+          <Route path="/logistics" element={null} />
           <Route path="*" element={<Navbar />} />
         </Routes>
 
@@ -29,16 +33,20 @@ const App = () => {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/buyer/dashboard" element={<Buyer />} />
             <Route path="/seller/dashboard" element={<Seller />} />
+            <Route path="/seller/payments" element={<Payments />} />
+            <Route path="/logistics" element={<Logistics />} />
             {/* Add more routes here */}
           </Routes>
         </main>
 
-        {/* Footer will show on all pages except Login, Buyer and Seller Dashboard */}
+        {/* Footer will show on all pages except specified routes */}
         <Routes>
           <Route path="/login" element={null} />
           <Route path="/signup" element={null} />
           <Route path="/buyer/dashboard" element={null} />
           <Route path="/seller/dashboard" element={null} />
+          <Route path="/seller/payments" element={null} />
+          <Route path="/logistics" element={null} />
           <Route path="*" element={<Footer />} />
         </Routes>
       </div>
