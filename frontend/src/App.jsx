@@ -7,8 +7,6 @@ import Footer from './pages/Footer'
 import SignUp from './pages/SignUp'
 import Buyer from './pages/Buyer'
 import Seller from './pages/Seller'
-import Payments from './pages/Payments'
-import Logistics from './pages/Logistics'
 
 const App = () => {
   return (
