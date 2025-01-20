@@ -1,19 +1,23 @@
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { 
+  FaEnvelope, FaLock, FaGoogle, FaGithub, 
+  FaLinkedin, FaEye, FaEyeSlash 
+} from 'react-icons/fa'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    keepLoggedIn: false
+    password: ''
   })
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }))
   }
 
@@ -23,161 +27,409 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <div className="w-full max-w-4xl flex rounded-2xl shadow-2xl overflow-hidden bg-white">
-        {/* Left Section - Decorative */}
-        <div className="hidden lg:block lg:w-1/2 relative bg-gradient-to-br from-blue-600 to-blue-800 p-12">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1)_0%,transparent_70%)]" />
-          <div className="relative h-full flex flex-col justify-between">
-            <div className="text-white space-y-6">
-              <h1 className="text-4xl font-bold leading-tight">
-                Welcome Back to TradePro
-              </h1>
-              <p className="text-blue-100 text-lg">
-                Your gateway to seamless international trade
-              </p>
-            </div>
-            
-            {/* Decorative Elements */}
-            <div className="grid grid-cols-2 gap-4 mt-8">
-              <div className="h-24 rounded-xl bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm" />
-              <div className="h-24 rounded-xl bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm transform translate-y-8" />
-              <div className="h-24 rounded-xl bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm transform translate-y-4" />
-              <div className="h-24 rounded-xl bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm" />
-            </div>
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4">
+      <div className="w-full max-w-5xl bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden flex">
+        {/* Left Section - Illustration & Info */}
+        <div className="relative hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-600 p-12 items-center justify-center overflow-hidden">
+          {/* Animated Background Elements */}
+          <motion.div 
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            {/* Animated Circles */}
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-64 h-64 border border-white/20 rounded-full"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }}
+                animate={{
+                  scale: [1 + i * 0.2, 1.2 + i * 0.2, 1 + i * 0.2],
+                  rotate: [0, 360],
+                  opacity: [0.3, 0.5, 0.3]
+                }}
+                transition={{
+                  duration: 10 + i * 2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+            ))}
+
+            {/* Floating Particles */}
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={`particle-${i}`}
+                className="absolute w-1 h-1 bg-white rounded-full"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  y: [-20, 20],
+                  x: [-20, 20],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 3 + Math.random() * 2,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                  delay: Math.random() * 2
+                }}
+              />
+            ))}
+
+            {/* Gradient Orbs */}
+            <motion.div
+              className="absolute top-0 left-0 w-96 h-96 bg-blue-400/30 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                x: [-50, 50, -50],
+                y: [-50, 50, -50],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div
+              className="absolute bottom-0 right-0 w-96 h-96 bg-purple-400/30 rounded-full blur-3xl"
+              animate={{
+                scale: [1.2, 1, 1.2],
+                x: [50, -50, 50],
+                y: [50, -50, 50],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+            />
+          </motion.div>
+
+          {/* Content */}
+          <div className="relative z-10 max-w-xl text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <motion.h2 
+                className="text-4xl font-bold text-white mb-6"
+                animate={{ 
+                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                }}
+                transition={{ 
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0.8), rgba(255,255,255,1))',
+                  backgroundSize: '200% 100%',
+                  backgroundClip: 'text',
+                }}
+              >
+                Welcome Back!
+              </motion.h2>
+              
+              <motion.p 
+                className="text-lg text-blue-100 mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                Continue your trading journey with us
+              </motion.p>
+
+              {/* Custom Animated Illustration */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="relative my-12 mx-auto w-64 h-64"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full blur-2xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 0],
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
+                
+                {/* Custom SVG Illustration */}
+                <motion.div
+                  className="relative w-full h-full rounded-full overflow-hidden border-4 border-white/20 backdrop-blur-sm flex items-center justify-center"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <svg 
+                    viewBox="0 0 200 200" 
+                    className="w-40 h-40"
+                  >
+                    {/* Animated Circle Background */}
+                    <motion.circle
+                      cx="100"
+                      cy="100"
+                      r="80"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.2)"
+                      strokeWidth="2"
+                      animate={{ 
+                        rotate: [0, 360],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                    />
+
+                    {/* User Icon Circle */}
+                    <motion.circle
+                      cx="100"
+                      cy="80"
+                      r="25"
+                      fill="rgba(255,255,255,0.2)"
+                      animate={{
+                        scale: [1, 1.05, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+
+                    {/* User Icon Body */}
+                    <motion.path
+                      d="M60,140 Q100,180 140,140"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.2)"
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{
+                        duration: 2,
+                        ease: "easeInOut",
+                        delay: 0.5
+                      }}
+                    />
+
+                    {/* Decorative Elements */}
+                    {[...Array(8)].map((_, i) => (
+                      <motion.circle
+                        key={i}
+                        cx={100 + 50 * Math.cos((i * Math.PI) / 4)}
+                        cy={100 + 50 * Math.sin((i * Math.PI) / 4)}
+                        r="4"
+                        fill="rgba(255,255,255,0.3)"
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0.3, 0.7, 0.3],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                  </svg>
+
+                  {/* Animated Rings */}
+                  {[...Array(3)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className={`absolute w-full h-full border-2 border-white/10 rounded-full`}
+                      style={{ scale: 0.6 + i * 0.2 }}
+                      animate={{
+                        rotate: [0, 360],
+                      }}
+                      transition={{
+                        duration: 10 + i * 5,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                    />
+                  ))}
+                </motion.div>
+
+                {/* Decorative Dots */}
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-white/40 rounded-full"
+                    style={{
+                      top: `${20 + i * 15}%`,
+                      left: `${80 + i * 3}%`,
+                    }}
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.3, 0.7, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: i * 0.2,
+                    }}
+                  />
+                ))}
+              </motion.div>
+            </motion.div>
           </div>
         </div>
 
         {/* Right Section - Form */}
-        <div className="w-full lg:w-1/2 p-8 lg:p-12">
-          <div className="max-w-md mx-auto space-y-8">
-            {/* Logo */}
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center p-2 rounded-xl bg-blue-600 mb-4 group hover:bg-blue-700 transition-all duration-300 cursor-pointer">
-                <svg className="w-8 h-8 text-white transform group-hover:rotate-12 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Sign in to TradePro</h2>
-              <p className="mt-2 text-gray-600">Manage your international trade efficiently</p>
-            </div>
+        <div className="w-full lg:w-7/12 p-8 relative overflow-hidden">
+          {/* Background Gradient & Glassmorphism */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md" />
+          
+          {/* Form Content */}
+          <div className="relative z-10 max-w-md mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl font-bold text-white mb-2">
+                Login to Your Account
+              </h2>
+              <p className="text-gray-300">Welcome back! Please enter your details</p>
+            </motion.div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 hover:bg-gray-100 focus:bg-white"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-
-              {/* Password */}
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <div className="relative group">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 group-hover:bg-gray-100 focus:bg-white"
-                    placeholder="Enter your password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 transition-colors"
-                  >
-                    {showPassword ? (
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    )}
-                  </button>
+              {/* Input Fields */}
+              <motion.div className="space-y-4">
+                {/* Email Input */}
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 pl-11 bg-white/20 border-2 border-white/20 rounded-xl 
+                        focus:border-blue-400 focus:ring-2 focus:ring-blue-500/50 
+                        text-white placeholder-gray-300 transition-all backdrop-blur-sm
+                        hover:bg-white/25 focus:bg-white/25"
+                      placeholder="john@example.com"
+                    />
+                    <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
+                  </div>
                 </div>
-              </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    name="keepLoggedIn"
-                    checked={formData.keepLoggedIn}
-                    onChange={handleChange}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+                {/* Password Input */}
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 pl-11 pr-11 bg-white/20 border-2 border-white/20 rounded-xl 
+                        focus:border-blue-400 focus:ring-2 focus:ring-blue-500/50 
+                        text-white placeholder-gray-300 transition-all backdrop-blur-sm
+                        hover:bg-white/25 focus:bg-white/25"
+                      placeholder="••••••••"
+                    />
+                    <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember & Forgot Password */}
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center text-gray-300">
+                    <input type="checkbox" className="mr-2" />
                     Remember me
-                  </span>
-                </label>
-                <Link 
-                  to="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
+                  </label>
+                  <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300">
+                    Forgot password?
+                  </Link>
+                </div>
+              </motion.div>
 
-              {/* Sign In Button */}
-              <button
+              {/* Submit Button */}
+              <motion.button
                 type="submit"
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500/50 transform hover:translate-y-[-1px] transition-all duration-200 font-medium text-sm"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 
+                  text-white rounded-xl font-medium shadow-lg shadow-blue-500/25 
+                  hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200"
               >
                 Sign In
-              </button>
+              </motion.button>
 
-              {/* Social Login */}
-              <div className="relative">
+              {/* Social Sign In */}
+              <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
+                  <div className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-4 bg-transparent text-gray-400">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
               {/* Social Buttons */}
               <div className="grid grid-cols-3 gap-3">
-                {['Google', 'Facebook', 'LinkedIn'].map((provider) => (
-                  <button
-                    key={provider}
+                {[
+                  { icon: FaGoogle, color: 'hover:bg-red-500/20 hover:border-red-500/50' },
+                  { icon: FaGithub, color: 'hover:bg-gray-500/20 hover:border-gray-500/50' },
+                  { icon: FaLinkedin, color: 'hover:bg-blue-500/20 hover:border-blue-500/50' }
+                ].map(({ icon: Icon, color }, index) => (
+                  <motion.button
+                    key={index}
                     type="button"
-                    className="flex items-center justify-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transform hover:translate-y-[-1px] transition-all duration-200"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`p-3 bg-white/5 backdrop-blur-sm rounded-xl border-2 border-white/10 
+                      ${color} transition-all duration-200 text-gray-300 hover:text-white`}
                   >
-                    <span className="sr-only">Sign in with {provider}</span>
-                    <div className="w-5 h-5 text-gray-700">{provider[0]}</div>
-                  </button>
+                    <Icon className="mx-auto text-xl" />
+                  </motion.button>
                 ))}
               </div>
 
               {/* Sign Up Link */}
-              <p className="text-center text-gray-600">
+              <p className="text-center text-gray-400 mt-8">
                 Don't have an account?{' '}
                 <Link 
                   to="/signup"
-                  className="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors"
+                  className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
                 >
-                  Create Account
+                  Sign up
                 </Link>
               </p>
             </form>
