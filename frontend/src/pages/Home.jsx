@@ -166,7 +166,7 @@ const Home = () => {
       name: "Sarah Johnson",
       role: "Small Business Owner",
       image: img1,
-      quote: "TradeFlow has revolutionized how we handle international trade. The platform is intuitive and the support is exceptional.",
+      quote: "CrossWave has revolutionized how we handle international trade. The platform is intuitive and the support is exceptional.",
       companyLogo: c1
     },
     {
@@ -180,7 +180,7 @@ const Home = () => {
       name: "Emma Rodriguez",
       role: "Logistics Coordinator",
       image: img3,
-      quote: "Documentation and compliance used to be a nightmare. With TradeFlow, everything is streamlined and automated.",
+      quote: "Documentation and compliance used to be a nightmare. With CrossWave, everything is streamlined and automated.",
       companyLogo: c3
     }
   ]

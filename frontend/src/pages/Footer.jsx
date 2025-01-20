@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">TradeFlow</h3>
+            <h3 className="text-xl font-bold mb-4">CrossWave</h3>
             <p className="text-sm text-gray-400">
               Empowering global trade for small and medium enterprises.
             </p>
@@ -85,7 +85,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center text-gray-400">
-          © 2024 TradeFlow. All rights reserved.
+          © 2025 CrossWave. All rights reserved.
         </div>
       </div>
     </footer>

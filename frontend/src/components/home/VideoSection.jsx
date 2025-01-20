@@ -40,7 +40,7 @@ const VideoSection = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              See How TradeFlow
+              See How CrossWave
               <motion.span 
                 className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600"
                 animate={{ 
