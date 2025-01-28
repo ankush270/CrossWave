@@ -16,7 +16,7 @@ const FeedbackForm = () => {
 
   const feedbackTypes = [
     { id: 'general', label: 'General Experience' },
-    { id: 'products', label: 'Product Listings' },
+    { id: 'products', label: 'Order Listings' },
     { id: 'payment', label: 'Payment Process' },
     { id: 'interface', label: 'User Interface' },
     { id: 'support', label: 'Customer Support' },
