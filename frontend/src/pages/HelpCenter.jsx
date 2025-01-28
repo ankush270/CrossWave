@@ -21,7 +21,7 @@ const faqData = {
     {
       id: 1,
       question: "How do I list a new product?",
-      answer: "To list a new product, go to your Seller Dashboard, click on 'Products', then 'Add New Product'. Fill in the required details and click 'Publish'."
+      answer: "To list a new product, go to your Seller Dashboard, click on 'Products', then 'Add New Order'. Fill in the required details and click 'Publish'."
     },
     // Add more seller FAQs...
   ],

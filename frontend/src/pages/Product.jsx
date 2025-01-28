@@ -221,7 +221,7 @@ const Product = () => {
           </ol>
         </motion.nav>
 
-        {/* Product Overview with Glass Effect */}
+        {/* Order Overview with Glass Effect */}
         <div className="grid lg:grid-cols-2 gap-12 mb-12">
           {/* Image Gallery with Enhanced Design */}
           <motion.div 
@@ -232,7 +232,7 @@ const Product = () => {
             {renderImageGallery()}
           </motion.div>
 
-          {/* Product Info with Glass Effect */}
+          {/* Order Info with Glass Effect */}
           <motion.div 
             className="space-y-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg"
             initial={{ opacity: 0, x: 20 }}
