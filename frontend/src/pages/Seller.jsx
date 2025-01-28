@@ -199,7 +199,7 @@ const Seller = () => {
     {
       id: 2,
       title: 'Stock Alert',
-      message: 'Low stock warning for Product SKU-456',
+      message: 'Low stock warning for Order SKU-456',
       time: '1 hour ago',
       type: 'inventory'
     }
@@ -254,7 +254,7 @@ const Seller = () => {
 
   // Quick actions configuration
   const quickActions = [
-    { icon: FaPlus, label: 'Add Product', color: 'blue' },
+    { icon: FaPlus, label: 'Add Order', color: 'blue' },
     { icon: FaWarehouse, label: 'Inventory', color: 'green' },
     { icon: FaGlobe, label: 'Store', color: 'purple' },
     { icon: FaHandshake, label: 'Support', color: 'orange' }

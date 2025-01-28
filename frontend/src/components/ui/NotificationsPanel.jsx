@@ -15,7 +15,7 @@ const NotificationsPanel = ({ isOpen, onClose, isDarkMode }) => {
     {
       id: 2,
       title: 'Stock Alert',
-      message: 'Low stock warning for Product SKU-456',
+      message: 'Low stock warning for Order SKU-456',
       time: '1 hour ago',
       type: 'inventory',
       icon: <FaExclamationCircle className="text-orange-500" />

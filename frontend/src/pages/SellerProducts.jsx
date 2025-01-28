@@ -37,7 +37,7 @@ const SellerProducts = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, message: 'New inquiry for iPhone 14 Pro', type: 'inquiry', time: '2 mins ago', isRead: false },
-    { id: 2, message: 'Product "MacBook Pro" is low on stock', type: 'stock', time: '5 mins ago', isRead: false },
+    { id: 2, message: 'Order "MacBook Pro" is low on stock', type: 'stock', time: '5 mins ago', isRead: false },
     { id: 3, message: 'New order received', type: 'order', time: '10 mins ago', isRead: false }
   ]);
 
@@ -407,7 +407,7 @@ const SellerProducts = () => {
               }`}
               whileHover={{ y: -5, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
             >
-              {/* Product Image */}
+              {/* Order Image */}
               <div className={`relative ${viewMode === 'list' ? 'w-48' : 'aspect-video'}`}>
                 <img
                   src={product.image}
@@ -449,7 +449,7 @@ const SellerProducts = () => {
                 </div>
               </div>
 
-              {/* Product Info */}
+              {/* Order Info */}
               <div className="p-6 flex-1">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -533,7 +533,7 @@ const SellerProducts = () => {
         </motion.div>
       </main>
 
-      {/* Add Product Modal */}
+      {/* Add Order Modal */}
       <AnimatePresence>
         {showAddProduct && (
           <motion.div

@@ -277,7 +277,7 @@ const SellerProducts = () => {
           ))}
         </div>
 
-        {/* Add/Edit Product Modal */}
+        {/* Add/Edit Order Modal */}
         <AnimatePresence>
           {showAddModal && (
             <motion.div
@@ -296,7 +296,7 @@ const SellerProducts = () => {
               >
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-semibold">
-                    {selectedProduct ? 'Edit Product' : 'Add New Product'}
+                    {selectedProduct ? 'Edit Order' : 'Add New Order'}
                   </h3>
                   <button
                     onClick={() => {
@@ -322,7 +322,7 @@ const SellerProducts = () => {
                     </button>
                   </div>
 
-                  {/* Product Details */}
+                  {/* Order Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -411,7 +411,7 @@ const SellerProducts = () => {
                       className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2"
                     >
                       {selectedProduct ? <FaEdit /> : <FaPlus />}
-                      {selectedProduct ? 'Update Product' : 'Add Product'}
+                      {selectedProduct ? 'Update Order' : 'Add Order'}
                     </motion.button>
                   </div>
                 </form>
