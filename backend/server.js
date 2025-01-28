@@ -1,14 +1,19 @@
 // import 'dotenv/config';
 import express from 'express';
-import prisma from "./src/config/database.js";
+import prisma from "./src/config/prisma_db.js";
+import connectMongoDB from "./src/config/mongo_db.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+//Connect with MongoDB
+connectMongoDB();
 
 // Start server
 const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 
 // Graceful shutdown
