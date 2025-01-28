@@ -3,8 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 const app = express();
 
-import orderRouter from './order.routes.js'
-import reviewRouter from './review.routes.js'
+import orderRouter from './routes/order.routes.js'
+import reviewRouter from './routes/review.routes.js'
 
 app.use(
   cors({
