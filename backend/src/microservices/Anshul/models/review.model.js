@@ -9,6 +9,17 @@ const reviewSchema = new Schema({
     description:{
         type: String,
         required: true
+    },
+    reviewee_id:{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    rating:{
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5
     }
 })
 
