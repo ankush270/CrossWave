@@ -1,12 +1,12 @@
 import dotenv from "dotenv";
-import connectDB from "./config/db.js";
+import connectMongoDB from "../../config/mongo_db.js";
 import { app } from "./app.js";
 
 dotenv.config({
   path: "./.env",
 });
 
-connectDB()
+connectMongoDB()
   .then(() => {
     const PORT = process.env.PORT || 4000;
     app.listen(PORT, () => {
