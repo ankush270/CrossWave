@@ -1,0 +1,56 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-livenessdetection-dev-20ad4-authRole",
+      "UnauthRoleArn": "arn:aws:iam::977099014524:role/amplify-livenessdetection-dev-20ad4-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::977099014524:role/amplify-livenessdetection-dev-20ad4-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-livenessdetection-dev-20ad4-deployment",
+      "UnauthRoleName": "amplify-livenessdetection-dev-20ad4-unauthRole",
+      "StackName": "amplify-livenessdetection-dev-20ad4",
+      "StackId": "arn:aws:cloudformation:us-east-1:977099014524:stack/amplify-livenessdetection-dev-20ad4/6fd0cf50-de20-11ef-866b-120ab07e5ab5",
+      "AmplifyAppId": "d1wcnyzs149gyb"
+    }
+  },
+  "auth": {
+    "livenessdetection": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-livenessdetection-dev-20ad4-deployment/amplify-cfn-templates/auth/livenessdetection-cloudformation-template.json",
+        "logicalId": "authlivenessdetection"
+      },
+      "lastPushTimeStamp": "2025-01-29T09:17:26.719Z",
+      "output": {
+        "UserPoolId": "us-east-1_TRcaZQlZ3",
+        "AppClientIDWeb": "81tdif2sun5h2ovvfbr7nkbc3",
+        "AppClientID": "2311talsgq5l9erauos8lpkcka",
+        "IdentityPoolId": "us-east-1:5c02b6f6-43ab-44a9-9f42-e15d098961aa",
+        "UserPoolArn": "arn:aws:cognito-idp:us-east-1:977099014524:userpool/us-east-1_TRcaZQlZ3",
+        "IdentityPoolName": "livenessdetection3cab02bb_identitypool_3cab02bb__dev",
+        "UserPoolName": "livenessdetection3cab02bb_userpool_3cab02bb"
+      },
+      "lastPushDirHash": "+PT0qKRqUkIfIiBYgIP8PKn+Ly4="
+    }
+  }
+}
