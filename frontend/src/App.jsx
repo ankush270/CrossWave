@@ -27,6 +27,7 @@ import AdminPanel from './pages/AdminPanel'
 import Products from './pages/Products'
 import ErrorBoundary from './components/ErrorBoundary'
 import BuyNow from './pages/BuyNow'
+import {AuthProvider} from "./contexts/AuthContext.jsx";
 
 const App = () => {
   // Routes where Navbar and Footer should be hidden
@@ -46,6 +47,7 @@ const App = () => {
 
   return (
     <Router>
+      <AuthProvider>
       <div className="min-h-screen flex flex-col">
         {/* Navbar will show on all pages except specified routes */}
         <Routes>
@@ -121,6 +123,7 @@ const App = () => {
           <Route path="*" element={<Footer />} />
         </Routes>
       </div>
+      </AuthProvider>
     </Router>
   )
 }

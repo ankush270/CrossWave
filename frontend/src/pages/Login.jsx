@@ -1,17 +1,21 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { 
   FaEnvelope, FaLock, FaGoogle, FaGithub, 
   FaLinkedin, FaEye, FaEyeSlash 
 } from 'react-icons/fa'
+import {useAuth} from "../contexts/AuthContext.jsx";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState(null)
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -21,9 +25,18 @@ const Login = () => {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('Form submitted:', formData)
+
+    try{
+      await login(formData.email, formData.password);
+      navigate('/');
+    }catch (e) {
+      setError(error.response?.data?.error || 'Failed to login');
+      console.log('Error occurred: ' , e);
+    }
+
   }
 
   return (
