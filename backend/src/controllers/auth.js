@@ -114,7 +114,6 @@ export const getCurrentUser = async (req, res) => {
     where: { id: id },
     select: {
       id: true,
-      name: true,
       email: true
     }
   })

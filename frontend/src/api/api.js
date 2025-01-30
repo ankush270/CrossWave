@@ -25,3 +25,13 @@ export const authAPI = {
     return api.get('/user/user')
   }
 }
+
+export const profileAPI = {
+  getProfile: () => {
+    return api.get('/profile/profile');
+  },
+
+  updateProfile: (profileData) => {
+    return api.post('profile/update', profileData)
+  }
+}
