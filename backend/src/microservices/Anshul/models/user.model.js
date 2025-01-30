@@ -45,7 +45,11 @@ const userSchema = new Schema(
     },
     documents: [{
       type: String,
-    }]
+    }],
+    country:{
+      type: String,
+      required: true,
+    }
   },
   { timestamps: true }
 );
