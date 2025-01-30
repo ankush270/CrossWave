@@ -6,6 +6,9 @@ export const getProfile = async (req, res) => {
         const data = await prisma.user.findUnique({
             where: {
                 id: id
+            },
+            include:{
+                profile: true
             }
         })
 
@@ -51,6 +54,9 @@ export const updateProfile = async (req,res) =>{
                     }
 
                 }
+            },
+            include:{
+                profile: true
             }
         })
 
