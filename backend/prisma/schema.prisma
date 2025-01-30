@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider =  "prisma-client-js"
 }
 
 datasource db {
@@ -14,20 +14,32 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  name         String
+  id           String            @id @default(uuid())
   email        String         @unique
   passwordHash String
-  phone        String         @unique
   is_buyer     Boolean
   is_seller    Boolean
   document     UserDocument[]
+  profile      UserProfile?
+  order_buyer  Order[] @relation(name: "BuyerRelation")
+  order_seller Order[] @relation(name: "SellerRelation")
+}
+
+model UserProfile {
+  id          String         @id @default(uuid())
+  companyName String  
+  address     String
+  GST         String         
+  phoneNo     String
+  name        String
+  user        User @relation(fields: [userId], references: [id])
+  userId      String @unique
 }
 
 model UserDocument {
-  id     Int  @id @default(autoincrement())
+  id     String  @id @default(uuid())
   user   User @relation(fields: [userId], references: [id])
-  userId Int
+  userId String
 }
 
 model Order {
@@ -39,7 +51,9 @@ model Order {
   logistics_id    String
   payment_id      String
   quantity        Int
-  price          Float
+  price           Float
+  buyer_status   User @relation(name: "BuyerRelation", fields: [buyer_id], references: [id])
+  seller_status  User @relation(name: "SellerRelation", fields: [seller_id], references: [id])
   status         OrderStatus @default(PENDING)
   shiping_address Json
   billing_address Json
@@ -48,6 +62,7 @@ model Order {
 
   @@map("orders")
 }
+
 
 enum OrderStatus {
   PENDING
