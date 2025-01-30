@@ -4,10 +4,8 @@ import fs from "fs";
 import path from "path";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-const genAI = new GoogleGenerativeAI("AIzaSyDiHYdawicnFhpGcZMoMSbpTBi65Rg6F68");
-const fileManager = new GoogleAIFileManager(
-  "AIzaSyDiHYdawicnFhpGcZMoMSbpTBi65Rg6F68"
-);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
 import { fileURLToPath } from "url";
 import { log } from "console";
 
