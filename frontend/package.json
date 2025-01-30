@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@aws-amplify/ui-react-liveness": "^3.3.1",
+    "@rollup/rollup-darwin-x64": "^4.32.1",
     "@tensorflow/tfjs-core": "^4.22.0",
     "aws-amplify": "^6.12.2",
     "axios": "^1.7.9",
