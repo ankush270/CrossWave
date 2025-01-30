@@ -4,14 +4,15 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try{
-    const {email, password, role, phone, name} = req.body;
+    const {email, password, role, phone, fullName} = req.body;
+    console.log(phone);
     const hashedPassword = await bcrypt.hash(password, 10);
     const is_buyer = role === "buyer"
     const is_seller = role === "seller"
 
     const user = await prisma.user.create({
       data: {
-        name,
+        name: fullName,
         email,
         passwordHash: hashedPassword,
         is_buyer,
@@ -107,4 +108,19 @@ export const logout = async (req, res) => {
       msg: err.message
     })
   }
+}
+
+export const getCurrentUser = async (req, res) => {
+  const id = req.id;
+
+  const user = await prisma.user.findUnique({
+    where: { id: id },
+    select: {
+      id: true,
+      name: true,
+      email: true
+    }
+  })
+
+  return res.status(200).json(user);
 }
