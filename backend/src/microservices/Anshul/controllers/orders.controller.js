@@ -73,24 +73,6 @@ export const updateOrderStatus = async (req, res, next) => {
   }
 };
 
-export const review = async (req, res, next) => {
-  const { reviewer_id, description } = req.body;
-  if (!description)
-    return res.status(400).json({ message: "Missing required fields" });
-
-  try {
-    const review = await prisma.review.create({
-      data: {
-        description,
-        reviewer_id,
-      },
-    });
-    res.status(201).json(review);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getOrdersForBuyer = async (req, res, next) => {
   try {
     const orders = await prisma.order.findMany({

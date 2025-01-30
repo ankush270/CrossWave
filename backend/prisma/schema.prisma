@@ -49,15 +49,6 @@ model Order {
   @@map("orders")
 }
 
-model Review {
-  id           String   @id @default(uuid())
-  reviewer_id  String
-  description  String
-  created_at   DateTime @default(now())
-
-  @@map("reviews")
-}
-
 enum OrderStatus {
   PENDING
   PROCESSING
