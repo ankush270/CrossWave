@@ -3,10 +3,12 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export const createOrder = async (req, res, next) => {
+  const buyer_id = req.user._id;
+  if (!buyer_id) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
   const {
-    buyer_id,
-    seller_id,
-    product_id,
     quote_id,
     logistics_id,
     payment_id,
@@ -16,10 +18,18 @@ export const createOrder = async (req, res, next) => {
     billing_address,
   } = req.body;
 
+  const {product_id} = req.params;
+  const product = await prisma.product.findUnique({ product_id });
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  const seller_id = product.seller;
+  if (!seller_id) {
+    return res.status(404).json({ message: "Seller not found" });
+  }
+
   if (
-    !buyer_id ||
-    !seller_id ||
-    !product_id ||
     !quote_id ||
     !logistics_id ||
     !payment_id ||
@@ -30,6 +40,13 @@ export const createOrder = async (req, res, next) => {
   ) {
     return res.status(400).json({ message: "Missing required fields" });
   }
+  if (buyer_id === seller_id) {
+    return res.status(400).json({ message: "Cannot place an order with yourself" });
+  }
+  if (product.quantity < quantity) {
+    return res.status(400).json({ message: "Insufficient quantity" });
+  }
+  
   try {
     const order = await prisma.order.create({
       data: {
