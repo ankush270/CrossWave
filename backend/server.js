@@ -2,12 +2,26 @@
 import express from 'express';
 import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
+import userRouter from "./src/routes/auth.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
 //Connect with MongoDB
 connectMongoDB();
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
+
+app.use(express.json());
+app.use(cookieParser())
+
+app.use('/user', userRouter)
 
 // Start server
 const server = app.listen(PORT, () => {

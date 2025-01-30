@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import photo from '../assets/signup.png'
 import { motion } from 'framer-motion'
 import { FaStore, FaShoppingBag, FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
 import { FaGoogle, FaGithub, FaLinkedin } from 'react-icons/fa'
+import {useAuth} from "../contexts/AuthContext.jsx";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showStrength, setShowStrength] = useState(false)
   const [isStrongPassword, setIsStrongPassword] = useState(false)
   const [selectedRole, setSelectedRole] = useState('')
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -19,6 +22,7 @@ const SignUp = () => {
   })
 
   const [passwordsMatch, setPasswordsMatch] = useState(true)
+  const {register} = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -61,9 +65,17 @@ const SignUp = () => {
     )
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('Form submitted:', { ...formData, role: selectedRole })
+
+    try {
+      await register({ ...formData, role: selectedRole, phone: String(10000000*Math.random()) });
+      navigate('/');
+    }catch (e) {
+      setError(e.response?.data?.error || 'Failed to register');
+      console.log('Error occurred during registration: ', e)
+    }
   }
 
   return (

@@ -9,11 +9,7 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  price: {
-    type: Number,
-    required: true,
-  },
-  min_quantity: {
+  stock : {
     type: Number,
     required: true,
   },
@@ -49,16 +45,33 @@ const productSchema = new Schema({
       type: String,
     },
   ],
-  weight_per_unit: {
+  weight_per_unit_in_gm: {
     type: Number,
     required: true,
   },
-  buy_options: [
-    {
+  buy_options: [{
+    categories:{
       type: String,
+      enum: ["Sample", "Standard", "Premium"],
       required: true,
     },
-  ],
+    min_quantity: {
+      type: Number,
+      required: true,
+    },
+    price_per_unit: {
+      type: Number,
+      required: true,
+    },
+  }],
+  height_in_cm: {
+    type: Number,
+    required: true,
+  },
+  width_in_cm: {
+    type: Number,
+    required: true,
+  },
 });
 
 export const Product = mongoose.model("Product", productSchema);
