@@ -4,19 +4,17 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try{
-    const {email, password, role, phone, name} = req.body;
+    const {email, password, role} = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const is_buyer = role === "buyer"
     const is_seller = role === "seller"
 
     const user = await prisma.user.create({
       data: {
-        name,
         email,
         passwordHash: hashedPassword,
         is_buyer,
         is_seller,
-        phone
       }
     })
 
