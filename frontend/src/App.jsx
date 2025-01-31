@@ -29,6 +29,9 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import BuyNow from "./pages/BuyNow";
 import {AuthProvider} from "./contexts/AuthContext.jsx";
 import Kyc from "./components/kyc/Kyc";
+import PayNow from "./pages/PayNow.jsx";
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
+import PaymentFailure from "./pages/PaymentFailure.jsx";
 
 
 const App = () => {
@@ -46,6 +49,9 @@ const App = () => {
     "/help",
     "/admin",
     "/kyc",
+    "/pay-now",
+    "/paymet-success",
+    "/paymet-failure"
   ];
 
   return (
@@ -105,6 +111,9 @@ const App = () => {
             {/* <Route path="/logistics" element={<Logistics />} /> */}
             <Route path="/feedback" element={<FeedbackForm />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/pay-now" element={<PayNow/>}></Route>
+            <Route path="/payment-success" element={<PaymentSuccess/>}></Route>
+            <Route path="/pay-failure" element={<PaymentFailure/>}></Route>
 
             {/* Add Help Center Route */}
             <Route path="/help" element={<HelpCenter />} />

@@ -1,63 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, Link , useNavigate} from 'react-router-dom';
 import { FaArrowLeft, FaTruck, FaCreditCard, FaShieldAlt, FaCheckCircle, FaBuilding, FaUser, FaShippingFast, FaFileInvoice } from 'react-icons/fa';
 import { productsData } from '../data/productsData';
+import axios from 'axios';
 
 const BuyNow = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const location = useLocation();
+  
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { selectedPricing = 'standard' } = location.state || {};
+  const [amount, setAmount] = useState(null);
+  
+  const { selectedPricing = "standard" } = location.state || {};
+
   const [formData, setFormData] = useState({
-    // Company Information
-    companyName: '',
-    gstin: '',
-    businessType: 'manufacturer',
-    
-    // Contact Information
-    contactName: '',
-    email: '',
-    phone: '',
-    
-    // Shipping Information
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    pincode: '',
-    country: 'India',
-    
-    // Delivery Preferences
-    deliveryType: 'standard',
-    specialInstructions: '',
-    
-    // Payment Information
-    paymentMethod: 'bank_transfer',
-    currency: 'INR',
+    companyName: "",
+    gstin: "",
+    businessType: "manufacturer",
+    contactName: "",
+    email: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    pincode: "",
+    country: "India",
+    deliveryType: "standard",
+    specialInstructions: "",
+    paymentMethod: "bank_transfer",
+    currency: "INR",
   });
 
   useEffect(() => {
-    const foundProduct = productsData.find(p => p.id === parseInt(id));
+    const foundProduct = productsData.find(p => p.id === Number(id)); // Ensure ID comparison works
     if (foundProduct) {
       setProduct(foundProduct);
     }
     setLoading(false);
-  }, [id]);
+  }, [id, productsData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    setAmount(calculateTotal());
+  }, [formData, product]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    console.log("Form submitted:", formData);
+
+
+    try {
+      const { data } = await axios.post(
+        "http://localhost:3000/payment/create-payment",
+        { amount }
+      );
+      console.log("Payment request response:", data);
+
+      if (data.id) {
+        navigate("/pay-now", { state: { order_id: data.id, amount } });
+      } else {
+        console.error("Payment request did not return an ID.");
+      }
+    } catch (e) {
+      console.error("Error during payment request:", e);
+    }
+  };
+
+  const calculateSubtotal = () => {
+    if (!product?.pricing?.[selectedPricing]) return 0;
+
+    const price = parseFloat(
+      product.pricing[selectedPricing].price.replace(/[^0-9.]/g, "")
+    );
+    const quantity = parseInt(product.pricing[selectedPricing].moq);
+    return (price * quantity).toFixed(2);
+  };
+
+  const calculateShipping = () => {
+    const subtotal = parseFloat(calculateSubtotal());
+
+    switch (formData.deliveryType) {
+      case "express":
+        return (subtotal * 0.1).toFixed(2);
+      case "priority":
+        return (subtotal * 0.15).toFixed(2);
+      default:
+        return (subtotal * 0.05).toFixed(2);
+    }
+  };
+
+  const calculateTax = () => {
+    const subtotal = parseFloat(calculateSubtotal());
+    return (subtotal * 0.18).toFixed(2);
+  };
+
+  const calculateTotal = () => {
+    const subtotal = parseFloat(calculateSubtotal());
+    const shipping = parseFloat(calculateShipping());
+    const tax = parseFloat(calculateTax());
+    const total = (subtotal + shipping + tax).toFixed(2);
+    return total;
   };
 
   const formSections = [
@@ -86,39 +139,6 @@ const BuyNow = () => {
       description: 'Choose how you want your order delivered'
     }
   ];
-
-  const calculateSubtotal = () => {
-    if (!product || !product.pricing || !product.pricing[selectedPricing]) return 0;
-    
-    const price = parseFloat(product.pricing[selectedPricing].price.replace(/[^0-9.]/g, ''));
-    const quantity = parseInt(product.pricing[selectedPricing].moq);
-    return (price * quantity).toFixed(2);
-  };
-
-  const calculateShipping = () => {
-    const subtotal = parseFloat(calculateSubtotal());
-    // Calculate shipping based on delivery type
-    switch(formData.deliveryType) {
-      case 'express':
-        return (subtotal * 0.1).toFixed(2); // 10% of subtotal
-      case 'priority':
-        return (subtotal * 0.15).toFixed(2); // 15% of subtotal
-      default:
-        return (subtotal * 0.05).toFixed(2); // 5% of subtotal for standard
-    }
-  };
-
-  const calculateTax = () => {
-    const subtotal = parseFloat(calculateSubtotal());
-    return (subtotal * 0.18).toFixed(2); // 18% GST
-  };
-
-  const calculateTotal = () => {
-    const subtotal = parseFloat(calculateSubtotal());
-    const shipping = parseFloat(calculateShipping());
-    const tax = parseFloat(calculateTax());
-    return (subtotal + shipping + tax).toFixed(2);
-  };
 
   if (loading || !product) {
     return (
@@ -456,7 +476,7 @@ const BuyNow = () => {
                 </div>
 
                 {/* Enhanced Payment Method Selection */}
-                <div className="space-y-4">
+                {/* <div className="space-y-4">
                   <label className="block text-sm font-medium text-gray-700">Payment Method</label>
                   <div className="space-y-2">
                     {['bank_transfer', 'letter_of_credit', 'advance_payment'].map((method) => (
@@ -483,7 +503,7 @@ const BuyNow = () => {
                       </motion.button>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Place Order Button */}
                 <motion.button
