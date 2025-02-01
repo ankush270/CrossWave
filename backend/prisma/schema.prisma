@@ -9,25 +9,37 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") 
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  name         String
+  id           String         @id @default(uuid())
   email        String         @unique
   passwordHash String
-  phone        String         @unique
   is_buyer     Boolean
   is_seller    Boolean
   document     UserDocument[]
+  profile      UserProfile?
+  order_buyer  Order[]        @relation(name: "BuyerRelation")
+  order_seller Order[]        @relation(name: "SellerRelation")
+}
+
+model UserProfile {
+  id          String @id @default(uuid())
+  companyName String
+  address     String
+  GST         String
+  phoneNo     String
+  name        String
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String @unique
 }
 
 model UserDocument {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 }
 
 model Order {
@@ -39,12 +51,14 @@ model Order {
   logistics_id    String
   payment_id      String
   quantity        Int
-  price          Float
-  status         OrderStatus @default(PENDING)
+  price           Float
+  buyer_status    User        @relation(name: "BuyerRelation", fields: [buyer_id], references: [id])
+  seller_status   User        @relation(name: "SellerRelation", fields: [seller_id], references: [id])
+  status          OrderStatus @default(PENDING)
   shiping_address Json
   billing_address Json
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
 
   @@map("orders")
 }

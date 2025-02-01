@@ -1,12 +1,20 @@
-// import 'dotenv/config';
+import 'dotenv/config';
 import express from "express";
 import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
 import userRouter from "./src/routes/auth.js";
+import profileRouter from "./src/routes/profile.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+<<<<<<< HEAD
 import kycRouter from "./src/routes/kyc.js";
 import { extractText } from "./src/microservices/kyc/aadhaar.js";
+=======
+// payment routes
+import PaymentRoutes from "./src/routes/PaymentRoutes.js"
+
+
+>>>>>>> 15a6519c6a96e831fdce5492b9c2b4f8a2d0e8f5
 import {
   verifyProduct,
   upload,
@@ -33,6 +41,11 @@ app.use("/user", userRouter);
 app.use("/kyc", kycRouter);
 app.post("/verify-product", upload.array("files", 10), verifyProduct);
 app.post("/extract-text", extractText);
+app.use('/user', userRouter)
+app.use('/profile', profileRouter)
+app.use('/payment' ,PaymentRoutes);
+
+
 // Start server
 const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
