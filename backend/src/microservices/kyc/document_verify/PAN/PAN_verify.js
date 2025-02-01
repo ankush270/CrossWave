@@ -20,31 +20,25 @@
 //   return remainder === 0 ? 'Z' : chars[remainder - 1];
 // }
 
-export function validatePAN(pan) {
-    // Regular expression to match the PAN format
-    const panRegex = /^[A-Z]{3}[ABCFGHLJPT]{1}[A-Z]{1}[0-9]{4}[A-Z]{1}$/;
-    if (!panRegex.test(pan)) {
-      console.log("Invalid PAN!");
-      return {
-        isValid: false
-      }
-    }
-  
-    return {
-      isValid : true
-    }
-    // Verify the check digit
-    // const expectedCheckDigit = calculateCheckDigit(pan);
-    // console.log(expectedCheckDigit);
-    
-    // return pan[9] === expectedCheckDigit;
-  }
-  
-  // Example usage:
-  // const panNumber = 'CSFPJ3536D';
-  // if (validatePAN(panNumber)) {
-  //   console.log('Valid PAN number.');
-  // } else {
-  //   console.log('Invalid PAN number.');
-  // }
-  
+export function validatePAN(text) {
+  // Regular expression to match the PAN format
+  const panRegex = /[A-Z]{3}[ABCFGHLJPT]{1}[A-Z]{1}[0-9]{4}[A-Z]{1}/;
+  let panNumber = text.match(panRegex);
+
+  if (panNumber) console.log(panNumber[0]);
+
+  return panNumber ? { isValid: true, pan: panNumber[0] } : { isValid: false };
+  // Verify the check digit
+  // const expectedCheckDigit = calculateCheckDigit(pan);
+  // console.log(expectedCheckDigit);
+
+  // return pan[9] === expectedCheckDigit;
+}
+
+// Example usage:
+// const panNumber = 'CSFPJ3536D';
+// if (validatePAN(panNumber)) {
+//   console.log('Valid PAN number.');
+// } else {
+//   console.log('Invalid PAN number.');
+// }

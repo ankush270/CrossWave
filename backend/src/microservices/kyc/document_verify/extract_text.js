@@ -2,7 +2,6 @@ import { createCanvas, loadImage } from "canvas";
 import fs from "fs/promises";
 import { createWorker } from "tesseract.js";
 
-
 async function preprocessImage(imageBuffer) {
   const image = await loadImage(imageBuffer);
   const canvas = createCanvas(image.width, image.height);
@@ -29,7 +28,6 @@ async function preprocessImage(imageBuffer) {
   return canvas.toDataURL();
 }
 
-
 export async function extractText(imagePath) {
   try {
     // Read the image file from disk.
@@ -40,7 +38,6 @@ export async function extractText(imagePath) {
 
     // Create and configure the Tesseract worker.
     const worker = await createWorker("eng");
-
 
     // (Optional) Set parameters, e.g., to whitelist digits only.
     // await worker.setParameters({
@@ -63,7 +60,5 @@ export async function extractText(imagePath) {
   }
 }
 
-
-const text = await extractText("Test Docs/UAE/Identity.jpg");
-console.log("Extracted Text:", text);
-
+// const text = await extractText("Test Docs/UAE/Identity.jpg");
+// console.log("Extracted Text:", text);
