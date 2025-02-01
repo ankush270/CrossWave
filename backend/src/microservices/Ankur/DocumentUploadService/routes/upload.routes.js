@@ -39,31 +39,35 @@ const upload = multer({
 
 const router = express.Router();
 
-// Upload multiple documents
-router.post('/', auth, upload.array('files', 10), async (req, res) => {
+// Upload document
+router.post('/', auth, upload.array('files', 1), async (req, res) => {
   try {
-    const { title } = req.body;
+    const { documentType, documentNumber } = req.body;
     const files = req.files;
 
     if (!files || files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
+      return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const documents = await uploadService.uploadFiles(
+    if (!documentType || !documentNumber) {
+      return res.status(400).json({ error: 'Document type and number are required' });
+    }
+
+    const document = await uploadService.uploadFiles(
       files, 
       req.user._id,
       req.user.email,
-      title
+      { documentType, documentNumber }
     );
 
-    // Clean up uploaded files after successful upload to Cloudinary
+    // Clean up uploaded files
     files.forEach(file => {
       fs.unlink(file.path, err => {
         if (err) console.error('Error deleting temporary file:', err);
       });
     });
 
-    res.status(201).json(documents);
+    res.status(201).json(document);
   } catch (error) {
     // Clean up files if upload fails
     if (req.files) {
@@ -77,7 +81,7 @@ router.post('/', auth, upload.array('files', 10), async (req, res) => {
   }
 });
 
-// Get all documents for a specific user
+// Get all documents for a user
 router.get('/', auth, async (req, res) => {
   try {
     const documents = await uploadService.getAllDocumentsByUser(req.user._id);
@@ -87,11 +91,37 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Delete a document
-router.delete('/:id', auth, async (req, res) => {
+// Get document status
+router.get('/status', auth, async (req, res) => {
   try {
-    const result = await uploadService.deleteDocument(req.params.id, req.user._id);
+    const status = await uploadService.getDocumentStatus(req.user._id);
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a specific document type
+router.delete('/:documentType', auth, async (req, res) => {
+  try {
+    const result = await uploadService.deleteDocument(req.params.documentType, req.user._id);
     res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Verify document (admin only)
+router.post('/:documentType/verify', auth, async (req, res) => {
+  try {
+    const { status, comments } = req.body;
+    const document = await uploadService.verifyDocument(
+      req.params.userId,
+      req.params.documentType,
+      status,
+      comments
+    );
+    res.json(document);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

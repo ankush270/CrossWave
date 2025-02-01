@@ -6,14 +6,18 @@ const uploadRoutes = require('./routes/upload.routes');
 const serviceConfig = require('./config/service.config');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const path = require('path');
+const { findAvailablePort } = require('./config/service.config');
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false // This allows loading of resources
+}));
 
 // CORS configuration
 app.use(cors({
@@ -28,6 +32,9 @@ app.use(morgan('combined'));
 // Basic middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -66,7 +73,12 @@ app.get('/api-docs', (req, res) => {
 });
 
 // Routes
-app.use(serviceConfig.endpoints.base, uploadRoutes);
+app.use('/api/documents', uploadRoutes);
+
+// Serve index.html for the root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -84,8 +96,17 @@ const startServer = async () => {
     try {
         await connectDB();
         
-        const server = app.listen(PORT, () => {
-            console.log(`${serviceConfig.service.name} is running on port ${PORT}`);
+        const availablePort = await findAvailablePort(process.env.PORT || 3000);
+        
+        const server = app.listen(availablePort, () => {
+            console.log(`${serviceConfig.service.name} is running on port ${availablePort}`);
+        }).on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.log(`Port ${availablePort} is busy, trying ${availablePort + 1}`);
+                server.listen(availablePort + 1);
+            } else {
+                console.error('Server error:', err);
+            }
         });
 
         // Graceful shutdown
