@@ -5,7 +5,8 @@ import connectMongoDB from "./src/config/mongo_db.js";
 import userRouter from "./src/routes/auth.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
+import kycRouter from "./src/routes/kyc.js";
+import { extractText } from "./src/microservices/kyc/aadhaar.js";
 import {
   verifyProduct,
   upload,
@@ -29,9 +30,9 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); // Parse form data
 
 app.use("/user", userRouter);
-
+app.use("/kyc", kycRouter);
 app.post("/verify-product", upload.array("files", 10), verifyProduct);
-
+app.post("/extract-text", extractText);
 // Start server
 const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

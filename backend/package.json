@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "bash -c \"python3 -m pip install easyocr opencv-python ultralytics huggingface_hub && node .\\src\\microservices\\kyc\\aadhaar.js\""
   },
   "author": "",
   "license": "ISC",
@@ -18,6 +18,7 @@
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "canvas": "^3.1.0",
+    "child_process": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
