@@ -4,6 +4,7 @@ import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
 import userRouter from "./src/routes/auth.js";
 import profileRouter from "./src/routes/profile.js";
+import productRouter from "./src/routes/product.js"
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -34,7 +35,7 @@ app.use("/user", userRouter);
 app.post("/verify-product", upload.array("files", 10), verifyProduct);
 app.use('/user', userRouter)
 app.use('/profile', profileRouter)
-
+app.use('/product',productRouter)
 
 // Start server
 const server = app.listen(PORT, () => {
