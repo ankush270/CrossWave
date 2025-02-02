@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const shipmentRequestSchema = new Schema(
+const logisticsSchema = new Schema(
   {
     labelResponseOptions: {
       type: String,
@@ -125,4 +125,4 @@ const shipmentRequestSchema = new Schema(
   }
 );
 
-export const ShipmentRequest = mongoose.model("ShipmentRequest", shipmentRequestSchema);
+export const Logistics = mongoose.model("Logistics", logisticsSchema);
