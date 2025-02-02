@@ -1,4 +1,6 @@
 import prisma from "../config/prisma_db.js";
+import { createPaymentDoc } from "./Payment.js";
+import { createLogistics } from "./logistics.js";
 
 /**
  * Create a new order
@@ -13,8 +15,8 @@ export const createOrder = async (req, res) => {
         seller_id: data.seller_id,
         product_id: data.product_id,
         quote_id: data.quote_id,
-        logistics_id: data.logistics_id,
-        payment_id: data.payment_id,
+        // logistics_id: data.logistics_id,
+        // payment_id: data.payment_id,
         quantity: data.quantity,
         price: data.price,
         status: data.status || "PENDING",
@@ -24,6 +26,16 @@ export const createOrder = async (req, res) => {
         delivery_preferences: data.delivery_preferences,
       },
     });
+
+    // const payment_details = {//create payment details
+    //     }
+
+    // const payment = await createPayment(payment_details);
+
+    // const logistics_details = {//create logistics details
+    //     }
+
+    // const logistics = await createLogistics(logistics_details);
 
     res.status(201).json(order);
   } catch (error) {
