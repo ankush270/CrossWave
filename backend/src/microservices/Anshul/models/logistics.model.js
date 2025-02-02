@@ -2,123 +2,125 @@ import mongoose, { Schema } from "mongoose";
 
 const logisticsSchema = new Schema(
   {
-    labelResponseOptions: {
+    trackingNumber: {
       type: String,
       required: true,
-      enum: ["URL_ONLY", "LABEL"],
     },
-    requestedShipment: {
-      shipper: {
-        contact: {
-          personName: { type: String, required: true },
-          phoneNumber: { type: Number, required: true },
-        },
-        address: {
-          streetLines: [{ type: String }],
-          city: { type: String, required: true },
-          stateOrProvinceCode: { type: String },
-          postalCode: { type: String, required: true },
-          countryCode: { type: String, required: true },
-        },
-      },
-      recipients: [
-        {
-          contact: {
-            personName: { type: String, required: true },
-            phoneNumber: { type: Number, required: true },
-          },
-          address: {
-            streetLines: [{ type: String }],
-            city: { type: String, required: true },
-            stateOrProvinceCode: { type: String },
-            postalCode: { type: String, required: true },
-            countryCode: { type: String, required: true },
-          },
-        },
-      ],
-      shipDatestamp: { type: String },
-      serviceType: { type: String, required: true },
-      packagingType: { type: String, required: true },
-      pickupType: {
+    shipmentDocuments: {
+      type: [String],
+      required: true,
+    },
+    carrierCode: {
+      type: String,
+      required: true,
+    },
+    serviceId: {
+      type: String,
+      required: true,
+    },
+    serviceType: {
+      type: String,
+      required: true,
+    },
+    serviceCategory: {
+      type: String,
+      required: true,
+    },
+    totalBillingWeight: {
+      units: {
         type: String,
+        enum: ["LB", "KG"],
         required: true,
-        enum: [
-          "CONTACT_FEDEX_TO_SCHEDULE",
-          "DROPOFF_AT_FEDEX_LOCATION",
-          "USE_SCHEDULED_PICKUP",
-        ],
       },
-      blockInsightVisibility: { type: Boolean, default: false },
-      shippingChargesPayment: {
-        paymentType: {
+      value: {
+        type: Number,
+        required: true,
+      },
+    },
+    surcharges: [
+      {
+        surchargeType: {
           type: String,
           required: true,
-          enum: ["SENDER", "RECIPIENT", "THIRD_PARTY", "COLLECT"],
         },
-      },
-      labelSpecification: {
-        imageType: { type: String },
-        labelStockType: {
+        level: {
           type: String,
-          enum: [
-            "PAPER_85X11_TOP_HALF_LABEL",
-            "PAPER_4X6",
-            "STOCK_4X675",
-            "PAPER_4X675",
-            "PAPER_LETTER",
-          ],
+          required: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+        },
+        description: {
+          type: String,
+          // required: true,
         },
       },
-      customsClearanceDetail: {
-        dutiesPayment: {
-          paymentType: {
-            type: String,
-            enum: ["SENDER", "RECIPIENT", "THIRD_PARTY"],
-          },
-        },
-        isDocumentOnly: { type: Boolean },
-        commodities: [
-          {
-            description: { type: String },
-            countryOfManufacture: { type: String },
-            quantity: { type: Number },
-            quantityUnits: { type: String },
-            unitPrice: {
-              amount: { type: Number },
-              currency: { type: String },
-            },
-            customsValue: {
-              amount: { type: Number },
-              currency: { type: String },
-            },
-            weight: {
-              units: { type: String },
-              value: { type: Number },
-            },
-          },
-        ],
-      },
-      shippingDocumentSpecification: {
-        shippingDocumentTypes: [{ type: String }],
-        commercialInvoiceDetail: {
-          documentFormat: {
-            stockType: { type: String },
-            docType: { type: String },
-          },
-        },
-      },
-      requestedPackageLineItems: [
-        {
-          weight: {
-            units: { type: String },
-            value: { type: Number },
-          },
-        },
-      ],
+    ],
+    totalBaseCharge: {
+      type: Number,
+      required: true,
     },
-    accountNumber: {
-      value: { type: String, required: true },
+    totalFreightDiscounts: {
+      type: Number,
+      required: true,
     },
+    totalNetFreight: {
+      type: Number,
+      required: true,
+    },
+    totalSurcharges: {
+      type: Number,
+      required: true,
+    },
+    totalNetFedExCharge: {
+      type: Number,
+      required: true,
+    },
+    totalTaxes: {
+      type: Number,
+      required: true,
+    },
+    totalNetCharge: {
+      type: Number,
+      required: true,
+    },
+    totalRebates: {
+      type: Number,
+      required: true,
+    },
+    totalDutiesAndTaxes: {
+      type: Number,
+      required: true,
+    },
+    totalAncillaryFeesAndTaxes: {
+      type: Number,
+      required: true,
+    },
+    totalDutiesTaxesAndFees: {
+      type: Number,
+      required: true,
+    },
+    totalNetChargeWithDutiesAndTaxes: {
+      type: Number,
+      required: true,
+    },
+    trackingIds: [
+      {
+        trackingIdType: {
+          type: String,
+          required: true,
+        },
+        formId: {
+          type: String,
+          required: true,
+        },
+        trackingNumber: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
