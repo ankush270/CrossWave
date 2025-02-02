@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Logistics } from "../models/logistics.model.js";
 
 export const createShipment = async (req, res, next) => {
   try {
@@ -20,19 +21,72 @@ export const createShipment = async (req, res, next) => {
       }
     );
 
-    // console.log(shipment.data.output);
+    const data = shipment?.data?.output?.transactionShipments[0];
+    if (!data) {
+      throw new Error("Failed to create shipment");
+    }
 
-    // const shipment = await ShipmentRequest.create(body);
+    console.log(data.completedPackageDetails);
+    
 
-    // res.status(201).json({
-    //   success: true,
-    //   data: shipment,
-    //   fedexToken: accessToken
-    // });
+    const newShipment = await new Logistics({
+      trackingNumber: data.masterTrackingNumber,
+
+      carrierCode: data?.completedShipmentDetail?.carrierCode,
+
+      serviceId: data.completedShipmentDetail?.serviceDescription?.serviceId,
+
+      serviceType: data.serviceType,
+
+      serviceCategory: data.serviceCategory,
+
+      totalBillingWeight:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalBillingWeight,
+
+      surcharges: data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.surcharges,
+
+      totalBaseCharge:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalBaseCharge,
+
+      totalNetCharge: data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalNetCharge,
+
+      totalFreightDiscounts:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalFreightDiscounts,
+
+      totalNetFreight:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalNetFreight,
+
+      totalSurcharges:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalSurcharges,
+
+      totalNetFedExCharge:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalNetFedExCharge,
+
+      totalTaxes: data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalTaxes,
+
+      totalRebates: data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalRebates,
+
+      totalDutiesAndTaxes:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalDutiesAndTaxes,
+
+      totalAncillaryFeesAndTaxes:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalAncillaryFeesAndTaxes,
+
+      totalDutiesTaxesAndFees:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]?.totalDutiesTaxesAndFees,
+
+      totalNetChargeWithDutiesAndTaxes:
+        data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
+          ?.totalNetChargeWithDutiesAndTaxes,
+
+      trackingIds: data.completedShipmentDetail?.completedPackageDetails[0]?.trackingIds,
+    });
+
+    const result = await newShipment.save();
 
     res.status(201).json({
       success: true,
-      data: shipment.data.output,
+      result,
     });
   } catch (error) {
     next(error);
