@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload Service</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --text-color: #2c3e50;
+            --border-color: #dfe6e9;
+            --bg-color: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .upload-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .file-input-container {
+            border: 2px dashed var(--primary-color);
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-container:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        .file-input-container input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #357abd;
+        }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .documents {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .documents h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .document-item {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .document-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .document-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .document-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-preview {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-download {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .no-documents {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .document-info {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .document-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+        }
+
+        .status-card.PENDING { border-left-color: #f39c12; }
+        .status-card.VERIFIED { border-left-color: #2ecc71; }
+        .status-card.REJECTED { border-left-color: #e74c3c; }
+        .status-card.NOT_UPLOADED { border-left-color: #95a5a6; }
+
+        .status-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .status-badge.PENDING { background: #fff3cd; color: #856404; }
+        .status-badge.VERIFIED { background: #d4edda; color: #155724; }
+        .status-badge.REJECTED { background: #f8d7da; color: #721c24; }
+        .status-badge.NOT_UPLOADED { background: #e9ecef; color: #495057; }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Document Upload Service</h1>
+            <p>Upload, manage, and share your documents securely</p>
+        </div>
+        
+        <div class="upload-form">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="documentType">Document Type</label>
+                    <select id="documentType" name="documentType" required>
+                        <option value="">Select Document Type</option>
+                        <option value="PARTNERSHIP_REGISTRATION">Partnership Registration</option>
+                        <option value="INCORPORATION_CERTIFICATE">Certificate of Incorporation (CIN)</option>
+                        <option value="GST">GST Number</option>
+                        <option value="PAN">PAN Number</option>
+                        <option value="IEC">IEC Number</option>
+                        <option value="MSME">MSME Number</option>
+                        <option value="DPIIT">DPIIT Number</option>
+                        <option value="AD_CODE">AD Code</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="documentNumber">Document Number</label>
+                    <input type="text" id="documentNumber" name="documentNumber" required placeholder="Enter document number">
+                </div>
+
+                <div class="form-group">
+                    <div class="file-input-container" onclick="document.getElementById('files').click()">
+                        <div class="upload-icon">📁</div>
+                        <p>Click to select file or drag and drop</p>
+                        <input type="file" id="files" name="files" required>
+                        <p id="selected-files">No file selected</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Upload Document</button>
+            </form>
+        </div>
+
+        <div class="documents">
+            <h2>Your Documents</h2>
+            <div class="document-status"></div>
+            <div id="documentsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test user credentials
+        const TEST_USER = {
+            id: '123',
+            email: 'test@example.com'
+        };
+
+        // File input handling
+        const fileInput = document.getElementById('files');
+        const selectedFilesText = document.getElementById('selected-files');
+        const progressBar = document.querySelector('.progress-bar');
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                selectedFilesText.textContent = `Selected ${files.length} file(s): ${files.map(f => f.name).join(', ')}`;
+            } else {
+                selectedFilesText.textContent = 'No files selected';
+            }
+        });
+
+        // Drag and drop functionality
+        const dropZone = document.querySelector('.file-input-container');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.style.backgroundColor = 'rgba(74, 144, 226, 0.1)';
+            dropZone.style.borderColor = '#4a90e2';
+        }
+
+        function unhighlight(e) {
+            dropZone.style.backgroundColor = '';
+            dropZone.style.borderColor = '';
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            selectedFilesText.textContent = `Selected ${files.length} file(s): ${Array.from(files).map(f => f.name).join(', ')}`;
+        }
+
+        // Upload functionality
+        async function uploadFiles(event) {
+            event.preventDefault();
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Uploading...';
+            progressBar.style.display = 'block';
+            
+            const formData = new FormData(event.target);
+            
+            try {
+                const response = await fetch('/api/documents', {
+                    method: 'POST',
+                    headers: {
+                        'X-User-Id': TEST_USER.id,
+                        'X-User-Email': TEST_USER.email
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const result = await response.json();
+                showNotification('Upload successful!', 'success');
+                fetchDocuments();
+                event.target.reset();
+                selectedFilesText.textContent = 'No files selected';
+            } catch (error) {
+                showNotification('Error uploading files: ' + error.message, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Upload Documents';
+                progressBar.style.display = 'none';
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        async function fetchDocuments() {
+            try {
+                const [documents, status] = await Promise.all([
+                    fetch('/api/documents', {
+                        headers: {
+                            'X-User-Id': TEST_USER.id,
+                            'X-User-Email': TEST_USER.email
+                        }
+                    }).then(res => res.json()),
+                    fetch('/api/documents/status', {
+                        headers: {
+                            'X-User-Id': TEST_USER.id,
+                            'X-User-Email': TEST_USER.email
+                        }
+                    }).then(res => res.json())
+                ]);
+
+                displayDocumentStatus(status);
+                displayDocuments(documents);
+            } catch (error) {
+                console.error('Error fetching documents:', error);
+            }
+        }
+
+        function displayDocumentStatus(statusList) {
+            const statusContainer = document.querySelector('.document-status');
+            statusContainer.innerHTML = statusList.map(doc => `
+                <div class="status-card ${doc.status}">
+                    <h3>${formatDocumentType(doc.documentType)}</h3>
+                    <span class="status-badge ${doc.status}">${doc.status}</span>
+                    ${doc.documentNumber ? `<p>Number: ${doc.documentNumber}</p>` : ''}
+                    ${doc.comments ? `<p>Comments: ${doc.comments}</p>` : ''}
+                    ${doc.uploadedAt ? `<p>Uploaded: ${new Date(doc.uploadedAt).toLocaleDateString()}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function displayDocuments(data) {
+            const documentsList = document.getElementById('documentsList');
+            const docs = data.documents;
+            
+            if (!docs || Object.keys(docs).length === 0) {
+                documentsList.innerHTML = `
+                    <div class="no-documents">
+                        <h3>No documents uploaded</h3>
+                        <p>Upload your first document to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            documentsList.innerHTML = Object.entries(docs)
+                .filter(([_, doc]) => doc.status !== 'NOT_UPLOADED')
+                .map(([type, doc]) => `
+                    <div class="document-item">
+                        <h3>${formatDocumentType(type)}</h3>
+                        <div class="document-info">
+                            <span>Number: ${doc.documentNumber}</span>
+                            <span>Type: ${doc.fileType}</span>
+                            <span>Size: ${formatFileSize(doc.size)}</span>
+                            <span>Status: <span class="status-badge ${doc.status}">${doc.status}</span></span>
+                            <span>Uploaded: ${new Date(doc.uploadedAt).toLocaleString()}</span>
+                        </div>
+                        <div class="action-buttons">
+                            ${getActionButtons(type, doc)}
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function formatDocumentType(type) {
+            return type.split('_').map(word => 
+                word.charAt(0) + word.slice(1).toLowerCase()
+            ).join(' ');
+        }
+
+        function getActionButtons(type, doc) {
+            const buttons = [];
+            
+            if (doc.fileType.startsWith('image/')) {
+                buttons.push(`
+                    <button class="btn btn-preview" onclick="window.open('${doc.fileUrl}', '_blank')">
+                        <span>👁️ View Image</span>
+                    </button>
+                `);
+            }
+            
+            if (doc.fileType === 'application/pdf') {
+                buttons.push(`
+                    <button class="btn btn-preview" onclick="window.open('${doc.fileUrl}', '_blank')">
+                        <span>👁️ View PDF</span>
+                    </button>
+                `);
+            }
+            
+            buttons.push(`
+                <a class="btn btn-download" href="${doc.fileUrl}" download>
+                    <span>⬇️ Download</span>
+                </a>
+            `);
+            
+            buttons.push(`
+                <button class="btn btn-delete" onclick="deleteDocument('${type}')">
+                    <span>🗑️ Delete</span>
+                </button>
+            `);
+            
+            return buttons.join('');
+        }
+
+        async function deleteDocument(documentType) {
+            if (!confirm('Are you sure you want to delete this document?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/documents/${documentType}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-User-Id': TEST_USER.id,
+                        'X-User-Email': TEST_USER.email
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Delete failed');
+                }
+                
+                showNotification('Document deleted successfully', 'success');
+                fetchDocuments();
+            } catch (error) {
+                showNotification('Error deleting document: ' + error.message, 'error');
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', uploadFiles);
+        fetchDocuments();
+    </script>
+</body>
+</html>
