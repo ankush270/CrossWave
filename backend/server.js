@@ -7,7 +7,7 @@ import profileRouter from "./src/routes/profile.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import kycRouter from "./src/routes/kyc.js";
-import { extractText } from "./src/microservices/kyc/aadhaar.js";
+// import { extractText } from "./src/microservices/kyc/aadhaar.js";
 // payment routes
 import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 
