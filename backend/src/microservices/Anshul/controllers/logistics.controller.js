@@ -1,4 +1,3 @@
-import { ShipmentRequest } from "../models/shipmentRequest.model.js";
 import axios from "axios";
 
 export const createShipment = async (req, res, next) => {

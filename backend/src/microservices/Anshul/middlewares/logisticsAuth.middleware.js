@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const shipmentAuth = async (req, res, next) => {
+export const logisticsAuth = async (req, res, next) => {
   try {
     const fedexResponse = await axios.post(
       "https://apis-sandbox.fedex.com/oauth/token",
