@@ -1,15 +1,15 @@
 import {Router} from 'express';
 import { cancelPickup, cancelShipment, createPickup, createShipment, getAsyncShipment, returnShipment, varifyShipment } from '../controllers/logistics.controller.js';
-import { shipmentAuth } from '../middlewares/shipmentAuth.middleware.js';
+import { logisticsAuth } from '../middlewares/logisticsAuth.middleware.js';
 
 const router = Router();
 
-router.route('/create-shipment').post(shipmentAuth,createShipment)
-router.route('/cancel-shipment').put(shipmentAuth,cancelShipment)
-router.route('/get-async-ship').post(shipmentAuth,getAsyncShipment)
-router.route('/varify-shipment').post(shipmentAuth,varifyShipment)
-router.route('/return-shipment').post(shipmentAuth,returnShipment)
-router.route('/create-pickup').post(shipmentAuth,createPickup)
-router.route('/cancel-pickup').put(shipmentAuth,cancelPickup)
+router.route('/create-shipment').post(logisticsAuth,createShipment)
+router.route('/cancel-shipment').put(logisticsAuth,cancelShipment)
+router.route('/get-async-ship').post(logisticsAuth,getAsyncShipment)
+router.route('/varify-shipment').post(logisticsAuth,varifyShipment)
+router.route('/return-shipment').post(logisticsAuth,returnShipment)
+router.route('/create-pickup').post(logisticsAuth,createPickup)
+router.route('/cancel-pickup').put(logisticsAuth,cancelPickup)
 
 export default router;
