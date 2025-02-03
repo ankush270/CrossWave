@@ -1,4 +1,4 @@
-// import 'dotenv/config';
+import "dotenv/config";
 import express from "express";
 import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
@@ -7,6 +7,10 @@ import profileRouter from "./src/routes/profile.js";
 import productRouter from "./src/routes/product.js"
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import kycRouter from "./src/routes/kyc.js";
+// import { extractText } from "./src/microservices/kyc/aadhaar.js";
+// payment routes
+import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 
 import {
   verifyProduct,
@@ -15,6 +19,10 @@ import {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// config .env
+import dotenv from "dotenv";
+dotenv.config();
 
 //Connect with MongoDB
 connectMongoDB();
@@ -31,11 +39,12 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); // Parse form data
 
 app.use("/user", userRouter);
-
+app.use("/kyc", kycRouter);
 app.post("/verify-product", upload.array("files", 10), verifyProduct);
 app.use('/user', userRouter)
 app.use('/profile', profileRouter)
 app.use('/product',productRouter)
+
 
 // Start server
 const server = app.listen(PORT, () => {
