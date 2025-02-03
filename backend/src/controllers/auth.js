@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try{
-
     const {email, password, role} = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const is_buyer = role === "buyer"
@@ -115,8 +114,9 @@ export const getCurrentUser = async (req, res) => {
     where: { id: id },
     select: {
       id: true,
-      name: true,
-      email: true
+      email: true,
+      is_buyer : true,
+      is_seller : true,
     }
   })
 

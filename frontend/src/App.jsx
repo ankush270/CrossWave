@@ -29,6 +29,9 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import BuyNow from "./pages/BuyNow";
 import {AuthProvider} from "./contexts/AuthContext.jsx";
 import Kyc from "./components/kyc/Kyc";
+import PayNow from "./pages/PayNow.jsx";
+import PaymentSuccess from "./pages/PaymentSuccess.jsx";
+import PaymentFailure from "./pages/PaymentFailure.jsx";
 
 
 const App = () => {
@@ -46,6 +49,9 @@ const App = () => {
     "/help",
     "/admin",
     "/kyc",
+    "/pay-now",
+    "/paymet-success",
+    "/paymet-failure"
   ];
 
   return (
@@ -90,7 +96,9 @@ const App = () => {
             {/* <Route path="/buyer/payments" element={<BuyerPayments />} />
             <Route path="/buyer/analytics" element={<BuyerAnalytics />} />
             <Route path="/buyer/compliance" element={<ComplianceManager />} />
-            <Route path="/buyer/profile" element={<BuyerProfile />} /> */}
+             */}
+
+            <Route path="/buyer/profile" element={<BuyerProfile />} />  
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Seller />} />
@@ -99,12 +107,16 @@ const App = () => {
             <Route path="/seller/logistics" element={<SellerLogistics />} />
             <Route path="/seller/analytics" element={<SellerAnalytics />} />
             <Route path="/seller/compliance" element={<ComplianceManager />} />
-            <Route path="/seller/profile" element={<SellerProfile />} />
+            
              */}
+             <Route path="/seller/profile" element={<SellerProfile />} />
             {/* Shared Routes */}
             {/* <Route path="/logistics" element={<Logistics />} /> */}
             <Route path="/feedback" element={<FeedbackForm />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/pay-now" element={<PayNow/>}></Route>
+            <Route path="/payment-success" element={<PaymentSuccess/>}></Route>
+            <Route path="/pay-failure" element={<PaymentFailure/>}></Route>
 
             {/* Add Help Center Route */}
             <Route path="/help" element={<HelpCenter />} />

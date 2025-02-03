@@ -1,0 +1,2 @@
+log in as buyer/seller
+no option to select quantity while making order

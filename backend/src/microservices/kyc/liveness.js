@@ -37,7 +37,7 @@ function generateRandomString(length) {
   return result;
 }
 
-const createFaceLivenessSession = async () => {
+export const createFaceLivenessSession = async () => {
   const input = {
     // CreateFaceLivenessSessionRequest
     KmsKeyId: "e14f75b0-2c67-4b8b-9225-f1bf16623f1a",
@@ -58,7 +58,7 @@ const createFaceLivenessSession = async () => {
   return response;
 };
 
-const getFaceLivenessSessionResults = async (sessionId) => {
+export const getFaceLivenessSessionResults = async (sessionId) => {
   const input = {
     // GetFaceLivenessSessionResultsRequest
     SessionId: sessionId, // required
@@ -69,16 +69,16 @@ const getFaceLivenessSessionResults = async (sessionId) => {
   return response;
 };
 
-app.get("/session/create", async (req, res) => {
+export const createSession = async (req, res) => {
   try {
     const response = await createFaceLivenessSession();
     res.status(200).json({ sessionId: response.SessionId });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
-app.post("/session/get", async (req, res) => {
+export const getResults = async (req, res) => {
   const { sessionId } = req.body;
   console.log(sessionId);
 
@@ -91,6 +91,6 @@ app.post("/session/get", async (req, res) => {
 
     res.status(500).json({ error: error.message });
   }
-});
+};
 
-app.listen(3001, () => console.log("Server running on port 3001"));
+// app.listen(3001, () => console.log("Server running on port 3001"));

@@ -7,7 +7,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
 import { fileURLToPath } from "url";
-import { log } from "console";
+// import { log } from "console";
 
 // Create __dirname equivalent for ES Modules
 const __filename = fileURLToPath(import.meta.url);

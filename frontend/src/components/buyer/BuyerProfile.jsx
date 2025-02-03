@@ -1,27 +1,18 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaUser, FaBuilding, FaEnvelope, FaPhone, FaMapMarkerAlt,
   FaGlobe, FaLock, FaCreditCard, FaBell, FaShieldAlt,
   FaEdit, FaSave, FaCamera
 } from 'react-icons/fa';
+import {profileAPI} from "../../api/api.js";
 
 const BuyerProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [profile, setProfile] = useState({
-    companyName: "John's Electronics",
-    contactPerson: "John Doe",
-    email: "john@electronics.com",
-    phone: "+91 98765 43210",
-    address: "123 Tech Park, Mumbai, India",
-    website: "www.johnselectronics.com",
-    businessType: "Electronics Manufacturing",
-    gstNumber: "29ABCDE1234F1Z5",
-    yearEstablished: "2015",
-    annualPurchaseVolume: "₹50M - ₹100M"
-  });
+  const [profile, setProfile] = useState();
 
   const [notifications, setNotifications] = useState({
     orderUpdates: true,
@@ -31,9 +22,29 @@ const BuyerProfile = () => {
     securityAlerts: true
   });
 
-  const handleProfileUpdate = (e) => {
+  useEffect(()=>{
+    const fetchProfile = async () => {
+      const {data} = await profileAPI.getProfile();
+      console.log(data);
+      data.profile.email = data.email
+      setProfile(data.profile);
+    }
+    fetchProfile().then(()=>{
+      setLoading(false);
+    });
+  }, [])
+
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsEditing(false);
+    // console.log(profile);
+    
+    try{
+      const { data } = await profileAPI.updateProfile(profile);
+      console.log(data);
+    }catch (e) {
+      console.log("An error occurred while editing profile: ", e);
+    }
     // Handle profile update logic
   };
 
@@ -43,6 +54,8 @@ const BuyerProfile = () => {
       [key]: !prev[key]
     }));
   };
+
+  if(loading) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -63,7 +76,7 @@ const BuyerProfile = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">{profile.companyName}</h2>
-            <p className="text-gray-600">{profile.businessType}</p>
+            <p className="text-gray-600">{"profile.businessType"}</p>
             <div className="flex items-center gap-2 mt-2">
               <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm">
                 Premium Buyer
@@ -130,8 +143,8 @@ const BuyerProfile = () => {
                     <input
                       type="text"
                       disabled={!isEditing}
-                      value={profile.contactPerson}
-                      onChange={(e) => setProfile({ ...profile, contactPerson: e.target.value })}
+                      value={profile.name}
+                      onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                       className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
@@ -162,8 +175,8 @@ const BuyerProfile = () => {
                     <input
                       type="tel"
                       disabled={!isEditing}
-                      value={profile.phone}
-                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                      value={profile.phoneNo}
+                      onChange={(e) => setProfile({ ...profile, phoneNo: e.target.value })}
                       className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
@@ -185,21 +198,6 @@ const BuyerProfile = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Website
-                  </label>
-                  <div className="relative">
-                    <FaGlobe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="url"
-                      disabled={!isEditing}
-                      value={profile.website}
-                      onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
-                    />
-                  </div>
-                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -210,7 +208,7 @@ const BuyerProfile = () => {
                     <input
                       type="text"
                       disabled={!isEditing}
-                      value={profile.gstNumber}
+                      value={profile.GST}
                       onChange={(e) => setProfile({ ...profile, gstNumber: e.target.value })}
                       className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
                     />
