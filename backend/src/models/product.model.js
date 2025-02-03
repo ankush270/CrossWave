@@ -5,7 +5,7 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  id: {
+  seller_id: {
     type: String,
     required: true,
   },
