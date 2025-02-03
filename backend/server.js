@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true })); // Parse form data
 app.use("/user", userRouter);
 app.use("/kyc", kycRouter);
 app.post("/verify-product", upload.array("files", 10), verifyProduct);
-app.post("/extract-text", extractText);
+// app.post("/extract-text", extractText);
 app.use("/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/payment", PaymentRoutes);
