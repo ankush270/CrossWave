@@ -13,6 +13,9 @@ import {
 import { productsData } from '../data/productsData';
 import RequestQuote from '../components/RequestQuote';
 import Chat from '../components/Chat';
+import { getUserCurrency, formatPrice, currencies } from '../utils/currencyUtils';
+import CurrencySelector from '../components/CurrencySelector';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Product = () => {
   const { id } = useParams();
@@ -23,6 +26,7 @@ const Product = () => {
   const [selectedPricing, setPricingTier] = useState('standard');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const { currencyInfo } = useCurrency();
 
   useEffect(() => {
     const foundProduct = productsData.find(p => p.id === parseInt(id));
@@ -41,23 +45,21 @@ const Product = () => {
     );
   }
 
-  // Add this function at the top of your component to calculate all fees
   const calculatePriceBreakdown = (basePrice, quantity) => {
-    const unitPrice = parseFloat(basePrice.replace(/[^0-9.]/g, ''));
-    const subtotal = unitPrice * quantity;
+    const numericPrice = parseFloat(basePrice.toString().replace(/[^0-9.-]+/g, ""));
+    const subtotal = numericPrice * quantity;
     
     return {
-      unitPrice: unitPrice,
-      subtotal: subtotal,
-      platformFee: 20 * quantity, // 20 rupees per unit
-      customDuty: subtotal * 0.05, // 5% of subtotal
-      gst: subtotal * 0.05, // 5% of subtotal
-      insurance: subtotal * 0.03, // 3% of subtotal
-      total: subtotal + (20 * quantity) + (subtotal * 0.13) // Total including all fees
+      unitPrice: formatPrice(numericPrice, currencyInfo),
+      subtotal: formatPrice(subtotal, currencyInfo),
+      platformFee: formatPrice(20 * quantity, currencyInfo),
+      customDuty: formatPrice(subtotal * 0.05, currencyInfo),
+      gst: formatPrice(subtotal * 0.05, currencyInfo),
+      insurance: formatPrice(subtotal * 0.03, currencyInfo),
+      total: formatPrice(subtotal + (20 * quantity) + (subtotal * 0.13), currencyInfo)
     };
   };
 
-  // Add this after the pricing tiers section
   const PriceBreakdown = ({ pricing, selectedPricing }) => {
     const quantity = parseInt(pricing[selectedPricing].moq);
     const breakdown = calculatePriceBreakdown(pricing[selectedPricing].price, quantity);
@@ -72,7 +74,7 @@ const Product = () => {
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Base Price (per unit)</span>
-            <span className="font-medium">₹{breakdown.unitPrice.toFixed(2)}</span>
+            <span className="font-medium">{breakdown.unitPrice}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Quantity</span>
@@ -80,29 +82,29 @@ const Product = () => {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">₹{breakdown.subtotal.toFixed(2)}</span>
+            <span className="font-medium">{breakdown.subtotal}</span>
           </div>
           <div className="h-px bg-gray-200 my-2"></div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Platform Fee (₹20/unit)</span>
-            <span className="font-medium">₹{breakdown.platformFee.toFixed(2)}</span>
+            <span className="font-medium">{breakdown.platformFee}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Custom Duty (5%)</span>
-            <span className="font-medium">₹{breakdown.customDuty.toFixed(2)}</span>
+            <span className="font-medium">{breakdown.customDuty}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">GST (5%)</span>
-            <span className="font-medium">₹{breakdown.gst.toFixed(2)}</span>
+            <span className="font-medium">{breakdown.gst}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Insurance (3%)</span>
-            <span className="font-medium">₹{breakdown.insurance.toFixed(2)}</span>
+            <span className="font-medium">{breakdown.insurance}</span>
           </div>
           <div className="h-px bg-gray-200 my-2"></div>
           <div className="flex justify-between font-semibold">
             <span>Total Amount</span>
-            <span className="text-blue-600">₹{breakdown.total.toFixed(2)}</span>
+            <span className="text-blue-600">{breakdown.total}</span>
           </div>
           <div className="text-xs text-gray-500 mt-2">
             * All prices are inclusive of taxes and fees
@@ -112,7 +114,6 @@ const Product = () => {
     );
   };
 
-  // Add this check for the image gallery
   const renderImageGallery = () => {
     if (!product.images || product.images.length === 0) {
       return (
@@ -155,7 +156,6 @@ const Product = () => {
     );
   };
 
-  // Add this helper function to safely handle arrays
   const renderArrayValue = (value) => {
     if (Array.isArray(value)) {
       return value.join(', ');
@@ -163,7 +163,6 @@ const Product = () => {
     return value.toString();
   };
 
-  // In the specifications section, update the rendering:
   const renderSpecifications = (specs, title) => {
     if (!specs) return null;
     
@@ -184,18 +183,14 @@ const Product = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20 pb-24 relative overflow-hidden">
-      {/* Animated Background Elements - Similar to Products.jsx */}
       <div className="fixed inset-0 z-0">
-        {/* Circuit Pattern */}
         <div className="absolute inset-0 bg-repeat opacity-5" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80h-80z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M30 30h40v40h-40z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M20 10v80M40 10v80M60 10v80M80 10v80' stroke='%234B5563' stroke-width='0.5'/%3E%3Cpath d='M10 20h80M10 40h80M10 60h80M10 80h80' stroke='%234B5563' stroke-width='0.5'/%3E%3C/svg%3E")`
         }} />
 
-        {/* Animated Gradient Orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
 
-        {/* Animated Lines */}
         <div className="absolute inset-0">
           <div className="absolute left-0 top-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
           <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
@@ -204,9 +199,7 @@ const Product = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb with enhanced design */}
         <motion.nav 
           className="mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm"
           initial={{ opacity: 0, y: -10 }}
@@ -221,9 +214,7 @@ const Product = () => {
           </ol>
         </motion.nav>
 
-        {/* Order Overview with Glass Effect */}
         <div className="grid lg:grid-cols-2 gap-12 mb-12">
-          {/* Image Gallery with Enhanced Design */}
           <motion.div 
             className="space-y-4 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
             initial={{ opacity: 0, x: -20 }}
@@ -232,7 +223,6 @@ const Product = () => {
             {renderImageGallery()}
           </motion.div>
 
-          {/* Order Info with Glass Effect */}
           <motion.div 
             className="space-y-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg"
             initial={{ opacity: 0, x: 20 }}
@@ -279,7 +269,6 @@ const Product = () => {
               </div>
             </div>
 
-            {/* Pricing Tiers */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Select Pricing Tier</h3>
               <div className="grid grid-cols-3 gap-4">
@@ -295,17 +284,17 @@ const Product = () => {
                     onClick={() => setPricingTier(tier)}
                   >
                     <div className="font-semibold capitalize mb-2">{tier}</div>
-                    <div className="text-2xl font-bold text-blue-600 mb-2">{details.price}</div>
+                    <div className="text-2xl font-bold text-blue-600 mb-2">
+                      {formatPrice(details.price, currencyInfo)}
+                    </div>
                     <div className="text-sm text-gray-600">MOQ: {details.moq}</div>
                   </motion.button>
                 ))}
               </div>
               
-              {/* Add the Price Breakdown component here */}
               <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-4 mt-6">
               <motion.button
                 className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-green-700"
@@ -340,13 +329,11 @@ const Product = () => {
           </motion.div>
         </div>
 
-        {/* Detailed Information Tabs with Glass Effect */}
         <motion.div 
           className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Enhanced Tab Navigation */}
           <div className="flex gap-8 border-b border-gray-200/50 mb-6">
             {['overview', 'specifications', 'market-insights', 'documentation'].map((tab) => (
               <motion.button
@@ -370,7 +357,6 @@ const Product = () => {
             ))}
           </div>
 
-          {/* Tab Content with Animation */}
           <motion.div
             key={selectedTab}
             initial={{ opacity: 0, y: 20 }}
@@ -465,7 +451,6 @@ const Product = () => {
           </motion.div>
         </motion.div>
 
-        {/* Price Breakdown Section */}
         <motion.div 
           className="mt-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8"
           initial={{ opacity: 0, y: 20 }}
@@ -475,11 +460,9 @@ const Product = () => {
           <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
         </motion.div>
 
-        {/* Bottom Gradient */}
         <div className="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
       </div>
 
-      {/* Add Modals */}
       <RequestQuote 
         product={product}
         isOpen={showQuoteModal}

@@ -32,6 +32,7 @@ import Kyc from "./components/kyc/Kyc";
 import PayNow from "./pages/PayNow.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import PaymentFailure from "./pages/PaymentFailure.jsx";
+import { CurrencyProvider } from './context/CurrencyContext';
 
 
 const App = () => {
@@ -56,99 +57,100 @@ const App = () => {
 
   return (
     <Router>
-      <AuthProvider>
-      <div className="min-h-screen flex flex-col">
-        {/* Navbar will show on all pages except specified routes */}
-        <Routes>
-          {hiddenNavbarRoutes.map((path) => (
-            <Route key={path} path={path} element={null} />
-          ))}
-          <Route path="*" element={<Navbar />} />
-        </Routes>
+      <CurrencyProvider>
+        <AuthProvider>
+          <div className="min-h-screen flex flex-col">
+            {/* Navbar will show on all pages except specified routes */}
+            <Routes>
+              {hiddenNavbarRoutes.map((path) => (
+                <Route key={path} path={path} element={null} />
+              ))}
+              <Route path="*" element={<Navbar />} />
+            </Routes>
 
-        {/* Main Content */}
-        <main className="flex-grow">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/kyc" element={<Kyc />} />
-            <Route
-              path="/product/:id"
-              element={
-                <ErrorBoundary>
-                  <Product />
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <ErrorBoundary>
-                  <Products />
-                </ErrorBoundary>
-              }
-            />
+            {/* Main Content */}
+            <main className="flex-grow">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/kyc" element={<Kyc />} />
+                <Route
+                  path="/product/:id"
+                  element={
+                    <ErrorBoundary>
+                      <Product />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/products"
+                  element={
+                    <ErrorBoundary>
+                      <Products />
+                    </ErrorBoundary>
+                  }
+                />
 
-            {/* Buyer Routes */}
-            <Route path="/buyer/dashboard" element={<Buyer />} />
-            {/* <Route path="/buyer/payments" element={<BuyerPayments />} />
-            <Route path="/buyer/analytics" element={<BuyerAnalytics />} />
-            <Route path="/buyer/compliance" element={<ComplianceManager />} />
-             */}
+                {/* Buyer Routes */}
+                <Route path="/buyer/dashboard" element={<Buyer />} />
+                {/* <Route path="/buyer/payments" element={<BuyerPayments />} />
+                <Route path="/buyer/analytics" element={<BuyerAnalytics />} />
+                <Route path="/buyer/compliance" element={<ComplianceManager />} />
+                 */}
 
-            <Route path="/buyer/profile" element={<BuyerProfile />} />  
+                <Route path="/buyer/profile" element={<BuyerProfile />} />  
 
-            {/* Seller Routes */}
-            <Route path="/seller/dashboard" element={<Seller />} />
-            {/* <Route path="/seller/products" element={<SellerProducts />} />
-            <Route path="/seller/payments" element={<Payments />} />
-            <Route path="/seller/logistics" element={<SellerLogistics />} />
-            <Route path="/seller/analytics" element={<SellerAnalytics />} />
-            <Route path="/seller/compliance" element={<ComplianceManager />} />
-            
-             */}
-             <Route path="/seller/profile" element={<SellerProfile />} />
-            {/* Shared Routes */}
-            {/* <Route path="/logistics" element={<Logistics />} /> */}
-            <Route path="/feedback" element={<FeedbackForm />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/pay-now" element={<PayNow/>}></Route>
-            <Route path="/payment-success" element={<PaymentSuccess/>}></Route>
-            <Route path="/pay-failure" element={<PaymentFailure/>}></Route>
+                {/* Seller Routes */}
+                <Route path="/seller/dashboard" element={<Seller />} />
+                {/* <Route path="/seller/products" element={<SellerProducts />} />
+                <Route path="/seller/payments" element={<Payments />} />
+                <Route path="/seller/logistics" element={<SellerLogistics />} />
+                <Route path="/seller/analytics" element={<SellerAnalytics />} />
+                <Route path="/seller/compliance" element={<ComplianceManager />} />
+                 */}
+                <Route path="/seller/profile" element={<SellerProfile />} />
+                {/* Shared Routes */}
+                {/* <Route path="/logistics" element={<Logistics />} /> */}
+                <Route path="/feedback" element={<FeedbackForm />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/pay-now" element={<PayNow/>}></Route>
+                <Route path="/payment-success" element={<PaymentSuccess/>}></Route>
+                <Route path="/pay-failure" element={<PaymentFailure/>}></Route>
 
-            {/* Add Help Center Route */}
-            <Route path="/help" element={<HelpCenter />} />
+                {/* Add Help Center Route */}
+                <Route path="/help" element={<HelpCenter />} />
 
-            {/* Admin Route */}
-            <Route path="/admin" element={<AdminPanel />} />
+                {/* Admin Route */}
+                <Route path="/admin" element={<AdminPanel />} />
 
-            {/* Error Pages */}
-            <Route path="/access-denied" element={<AccessDenied />} />
-            <Route
-              path="/product/:id/buy"
-              element={
-                <ErrorBoundary>
-                  <BuyNow />
-                </ErrorBoundary>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
+                {/* Error Pages */}
+                <Route path="/access-denied" element={<AccessDenied />} />
+                <Route
+                  path="/product/:id/buy"
+                  element={
+                    <ErrorBoundary>
+                      <BuyNow />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
 
-            {/* Add more routes here */}
-          </Routes>
-        </main>
+                {/* Add more routes here */}
+              </Routes>
+            </main>
 
-        {/* Footer will show on all pages except specified routes */}
-        <Routes>
-          {hiddenNavbarRoutes.map((path) => (
-            <Route key={path} path={path} element={null} />
-          ))}
-          <Route path="*" element={<Footer />} />
-        </Routes>
-      </div>
-      </AuthProvider>
+            {/* Footer will show on all pages except specified routes */}
+            <Routes>
+              {hiddenNavbarRoutes.map((path) => (
+                <Route key={path} path={path} element={null} />
+              ))}
+              <Route path="*" element={<Footer />} />
+            </Routes>
+          </div>
+        </AuthProvider>
+      </CurrencyProvider>
     </Router>
   );
 };

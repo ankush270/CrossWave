@@ -12,8 +12,8 @@ export const productsData = [
       image: p1,
       images: [p1, p2, p3, p4],
       price: {
-        sample: "$899/unit",
-        bulk: "$799/unit",
+        sample: "₹30000",
+        bulk: "₹25000",
       },
       moq: 10,
       origin: "South Korea",
@@ -61,6 +61,10 @@ export const productsData = [
         marketShare: "15%",
         yearOverYear: "+25%",
       },
+      verifiedSeller: true,
+      inStock: true,
+      bulkDiscount: true,
+      brand: "Samsung",
     },
     {
       id: 2,

@@ -5,11 +5,17 @@ import {
   FaFilter, FaSearch, FaSort, FaMicrochip, FaMemory, FaServer,
   FaLaptop, FaMobile, FaNetworkWired, FaStar, FaGlobe, FaBox,
   FaShoppingCart, FaHeart, FaChartLine, FaDollarSign, FaCertificate,
-  FaHome, FaTv, FaBlender, FaFan, FaCamera, FaTimes
+  FaHome, FaTv, FaBlender, FaFan, FaCamera, FaTimes, FaShieldAlt,
+  FaBoxes, FaUserCheck, FaTags, FaPercentage
 } from 'react-icons/fa'
 import { productsData } from '../data/productsData'
+import { getUserCurrency, formatPrice, currencies } from '../utils/currencyUtils'
+import CurrencySelector from '../components/CurrencySelector'
+import { useCurrency } from '../context/CurrencyContext'
 
 const Products = () => {
+  const { currencyInfo, setCurrencyInfo } = useCurrency();
+  
   // State management
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState('popular')
@@ -20,6 +26,11 @@ const Products = () => {
   const [priceRange, setPriceRange] = useState('all')
   const [selectedOrigin, setSelectedOrigin] = useState('all')
   const [selectedCertification, setSelectedCertification] = useState('all')
+  const [showBulkDiscount, setShowBulkDiscount] = useState(false);
+  const [verifiedSellers, setVerifiedSellers] = useState(false);
+  const [inStock, setInStock] = useState(false);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [deliveryTime, setDeliveryTime] = useState('any');
 
   // Enhanced categories with more electronics items
   const categories = {
@@ -83,25 +94,33 @@ const Products = () => {
 
   // Use productsData instead of inline products array
   const filteredProducts = productsData.filter(product => {
+    // Basic category and search filtering
     const matchesCategory = selectedCategory === 'all' || 
-                          product.category === selectedCategory ||
-                          product.subcategory === selectedCategory
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.specifications?.size?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.specifications?.capacity?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesOrigin = selectedOrigin === 'all' || product.origin === selectedOrigin
-    const matchesCertification = selectedCertification === 'all' || 
-                                product.certifications.includes(selectedCertification)
-    const matchesMOQ = minOrder === 'any' || product.moq >= parseInt(minOrder)
-    const matchesPriceRange = priceRange === 'all' || 
-                             (priceRange === 'low' && parseFloat(product.price.bulk.replace(/[^0-9.]/g, '')) <= 500) ||
-                             (priceRange === 'medium' && parseFloat(product.price.bulk.replace(/[^0-9.]/g, '')) > 500 && parseFloat(product.price.bulk.replace(/[^0-9.]/g, '')) <= 1000) ||
-                             (priceRange === 'high' && parseFloat(product.price.bulk.replace(/[^0-9.]/g, '')) > 1000)
+                          product.category === selectedCategory;
     
-    return matchesCategory && matchesSearch && matchesOrigin && 
-           matchesCertification && matchesMOQ && matchesPriceRange
-  })
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.category.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Price range filtering (assuming prices are in INR)
+    const productPrice = parseFloat(product.price.bulk.toString().replace(/[^0-9.-]+/g, ""));
+    const matchesPriceRange = priceRange === 'all' || 
+                             (priceRange === 'low' && productPrice <= 25000) ||
+                             (priceRange === 'medium' && productPrice > 25000 && productPrice <= 50000) ||
+                             (priceRange === 'high' && productPrice > 50000);
+
+    // Additional filters
+    const matchesOrigin = selectedOrigin === 'all' || product.origin === selectedOrigin;
+    const matchesCertification = selectedCertification === 'all' || 
+                                (product.certifications && product.certifications.includes(selectedCertification));
+    const matchesMOQ = minOrder === 'any' || (product.moq >= parseInt(minOrder));
+    const matchesVerified = !verifiedSellers || product.verifiedSeller;
+    const matchesStock = !inStock || product.inStock;
+    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
+
+    return matchesCategory && matchesSearch && matchesPriceRange && 
+           matchesOrigin && matchesCertification && matchesMOQ &&
+           matchesVerified && matchesStock && matchesBrand;
+  });
 
   // Sort products
   const sortProducts = (products) => {
@@ -133,9 +152,9 @@ const Products = () => {
         className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
       >
         <option value="all">All Prices</option>
-        <option value="low">Under $500</option>
-        <option value="medium">$500 - $1000</option>
-        <option value="high">Above $1000</option>
+        <option value="low">Under ₹25,000</option>
+        <option value="medium">₹25,000 - ₹50,000</option>
+        <option value="high">Above ₹50,000</option>
       </select>
     </div>
   )
@@ -162,6 +181,248 @@ const Products = () => {
       }
     }
   }
+
+  useEffect(() => {
+    const initCurrency = async () => {
+      try {
+        const userCurrency = await getUserCurrency();
+        setCurrencyInfo(userCurrency);
+      } catch (error) {
+        console.error('Error initializing currency:', error);
+        setCurrencyInfo({ currency: 'INR', symbol: '₹' });
+      }
+    };
+    
+    initCurrency();
+  }, [setCurrencyInfo]);
+
+  // Update the currency selector in the filters section
+  const currencySelector = (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Select Currency</label>
+      <select
+        value={currencyInfo.currency}
+        onChange={(e) => {
+          setCurrencyInfo({
+            currency: e.target.value,
+            symbol: currencies[e.target.value].symbol
+          });
+        }}
+        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-300 transition-colors"
+      >
+        {Object.entries(currencies).map(([code, { name, symbol }]) => (
+          <option key={code} value={code}>
+            {code} ({symbol}) - {name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  // Add popular brands list
+  const popularBrands = [
+    'Samsung', 'LG', 'Sony', 'Panasonic', 'Bosch', 
+    'Siemens', 'Philips', 'Hitachi', 'Toshiba', 'Mitsubishi'
+  ];
+
+  // Add bulk discount tiers
+  const bulkDiscountTiers = {
+    tier1: { minQty: 100, discount: 5 },
+    tier2: { minQty: 500, discount: 10 },
+    tier3: { minQty: 1000, discount: 15 }
+  };
+
+  // Update the filters section with new filters
+  const additionalFilters = (
+    <>
+      {/* Verified Sellers Filter */}
+      <div className="col-span-1">
+        <label className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={verifiedSellers}
+            onChange={(e) => setVerifiedSellers(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-blue-600 rounded"
+          />
+          <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <FaUserCheck className="text-blue-500" />
+            Verified Sellers Only
+          </span>
+        </label>
+      </div>
+
+      {/* In Stock Filter */}
+      <div className="col-span-1">
+        <label className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={inStock}
+            onChange={(e) => setInStock(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-blue-600 rounded"
+          />
+          <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <FaBoxes className="text-blue-500" />
+            In Stock Only
+          </span>
+        </label>
+      </div>
+
+      {/* Delivery Time Filter */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Delivery Time
+        </label>
+        <select
+          value={deliveryTime}
+          onChange={(e) => setDeliveryTime(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="any">Any Time</option>
+          <option value="express">Express (1-3 days)</option>
+          <option value="standard">Standard (4-7 days)</option>
+          <option value="economy">Economy (7-14 days)</option>
+        </select>
+      </div>
+
+      {/* Brands Filter */}
+      <div className="col-span-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Popular Brands
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {popularBrands.map(brand => (
+            <button
+              key={brand}
+              onClick={() => {
+                setSelectedBrands(prev => 
+                  prev.includes(brand) 
+                    ? prev.filter(b => b !== brand)
+                    : [...prev, brand]
+                )
+              }}
+              className={`px-3 py-1 rounded-full text-sm ${
+                selectedBrands.includes(brand)
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {brand}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  // Add bulk discount info component
+  const BulkDiscountInfo = () => (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-green-50 p-4 rounded-lg mb-4"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-green-700 flex items-center gap-2">
+          <FaPercentage />
+          Bulk Order Discounts
+        </h3>
+        <button
+          onClick={() => setShowBulkDiscount(false)}
+          className="text-green-700 hover:text-green-800"
+        >
+          ×
+        </button>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {Object.entries(bulkDiscountTiers).map(([tier, { minQty, discount }]) => (
+          <div key={tier} className="text-center p-3 bg-white rounded-lg shadow-sm">
+            <div className="text-2xl font-bold text-green-600">{discount}%</div>
+            <div className="text-sm text-green-700">Min. {minQty} units</div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+
+  // Update the product card to show more info
+  const ProductCard = ({ product }) => (
+    <motion.div
+      variants={itemVariants}
+      layout
+      whileHover={{ y: -10 }}
+      className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+    >
+      <Link to={`/product/${product.id}`}>
+        <div className="relative overflow-hidden rounded-t-xl">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-56 object-cover transform group-hover:scale-110 transition-transform duration-300"
+          />
+          
+          {/* Badges */}
+          <div className="absolute top-2 left-2 flex flex-col gap-2">
+            {product.verifiedSeller && (
+              <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full flex items-center gap-1">
+                <FaShieldAlt className="text-xs" /> Verified
+              </span>
+            )}
+            {product.inStock && (
+              <span className="px-2 py-1 bg-green-100 text-green-600 text-xs rounded-full">
+                In Stock
+              </span>
+            )}
+          </div>
+
+          {product.bulkDiscount && (
+            <div className="absolute top-2 right-2 px-3 py-1 bg-green-600 text-white text-sm rounded-full flex items-center gap-1">
+              <FaTags className="text-xs" />
+              Bulk Discount
+            </div>
+          )}
+        </div>
+
+        <div className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+            {product.name}
+          </h3>
+
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-1">
+              <FaGlobe className="text-gray-400" />
+              <span className="text-sm text-gray-600">{product.origin}</span>
+            </div>
+            <div className="flex items-center text-yellow-400">
+              <FaStar />
+              <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="text-sm text-gray-500">Sample Price</div>
+              <div className="text-xl font-bold text-blue-600">
+                {formatPrice(product.price.sample, currencyInfo)}
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                Bulk: {formatPrice(product.price.bulk, currencyInfo)}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {product.certifications && product.certifications.map((cert, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full"
+                >
+                  {cert}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20 pb-24 relative overflow-hidden">
@@ -203,6 +464,9 @@ const Products = () => {
 
       {/* Main Content with relative positioning and higher z-index */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Show bulk discount info if enabled */}
+        {showBulkDiscount && <BulkDiscountInfo />}
+
         {/* Hero Section with enhanced design */}
         <motion.div 
           className="text-center mb-12 relative"
@@ -224,32 +488,67 @@ const Products = () => {
           </div>
         </motion.div>
 
-        {/* Enhanced Search Bar with floating effect */}
+        {/* Update the search bar section */}
         <motion.div 
-          className="relative max-w-3xl mx-auto mb-12"
+          className="relative max-w-3xl mx-auto mb-12 px-4 sm:px-6 lg:px-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-xl transform -rotate-1" />
-          <div className="relative">
-            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+          {/* Enhanced search bar container */}
+          <div className="relative flex items-center">
+            {/* Search icon */}
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <FaSearch className="text-xl" />
+            </div>
+
+            {/* Search input */}
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products, brands, specifications..."
-              className="w-full pl-12 pr-12 py-4 bg-white/90 backdrop-blur-sm border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-lg shadow-lg"
+              className="w-full pl-12 pr-12 py-4 bg-white/90 backdrop-blur-sm border-2 
+                         border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 
+                         focus:ring-blue-200 transition-all duration-300 text-lg shadow-lg
+                         placeholder-gray-400"
             />
+
+            {/* Clear button */}
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 
+                           text-gray-400 hover:text-gray-600 transition-colors duration-200"
               >
-                <FaTimes />
+                <FaTimes className="text-xl" />
               </button>
             )}
           </div>
+
+          {/* Optional: Add search suggestions */}
+          {searchQuery && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-lg 
+                         border border-gray-100 overflow-hidden z-50"
+            >
+              <div className="p-2">
+                <div className="text-xs text-gray-500 px-3 py-1">Popular Searches</div>
+                {['Samsung TV', 'iPhone', 'Laptop', 'Headphones'].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setSearchQuery(suggestion)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg
+                               text-gray-700 text-sm transition-colors duration-200"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Filter Toggle Button */}
@@ -350,6 +649,12 @@ const Products = () => {
 
                 {/* Price Range Filter */}
                 {priceRangeFilter}
+
+                {/* Currency Selector */}
+                {currencySelector}
+
+                {/* Additional Filters */}
+                {additionalFilters}
               </div>
             </motion.div>
           )}
@@ -420,105 +725,7 @@ const Products = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence>
                 {sortedProducts.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    variants={itemVariants}
-                    layout
-                    whileHover={{ y: -10 }}
-                    className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    <Link to={`/product/${product.id}`}>
-                      <div className="relative overflow-hidden rounded-t-xl">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-56 object-cover transform group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <div className="absolute top-2 right-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
-                          MOQ: {product.moq}
-                        </div>
-                        
-                        {hoveredProduct === product.id && (
-                          <motion.div 
-                            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <div className="flex justify-between items-center">
-                              <span className="text-white">View Details</span>
-                              <div className="flex gap-2">
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className="p-2 bg-white/20 rounded-full text-white backdrop-blur-sm"
-                                >
-                                  <FaHeart />
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className="p-2 bg-white/20 rounded-full text-white backdrop-blur-sm"
-                                >
-                                  <FaShoppingCart />
-                                </motion.button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </div>
-
-                      <div className="p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          {product.name}
-                        </h3>
-
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="flex items-center gap-1">
-                            <FaGlobe className="text-gray-400" />
-                            <span className="text-sm text-gray-600">{product.origin}</span>
-                          </div>
-                          <div className="flex items-center text-yellow-400">
-                            <FaStar />
-                            <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <div className="text-sm text-gray-500">Sample Price</div>
-                            <div className="text-xl font-bold text-blue-600">
-                              {product.price.sample}
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Bulk: {product.price.bulk}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {product.certifications.map((cert, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full"
-                              >
-                                {cert}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Add specifications */}
-                        <div className="mt-4 text-sm text-gray-600">
-                          {product.specifications && product.specifications.technical && (
-                            Object.entries(product.specifications.technical).map(([key, value]) => (
-                              <div key={key} className="flex justify-between items-center">
-                                <span className="capitalize">{key}:</span>
-                                <span className="font-medium">{value.toString()}</span>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.div>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </AnimatePresence>
             </div>
