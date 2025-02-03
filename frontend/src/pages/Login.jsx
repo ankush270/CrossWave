@@ -2,18 +2,20 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
-  FaEnvelope, FaLock, FaGoogle, FaGithub, 
-  FaLinkedin, FaEye, FaEyeSlash 
+  FaEnvelope, FaLock,FaShoppingBag, FaStore, FaEye, FaEyeSlash 
 } from 'react-icons/fa'
 import {useAuth} from "../contexts/AuthContext.jsx";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
+  
+  const [selectedRole, setSelectedRole] = useState('');
+const [formData, setFormData] = useState({
+  email: '',
+  password: '',
+  role: '', 
+});
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -25,12 +27,20 @@ const Login = () => {
     }))
   }
 
+  const handleRoleClick = (id) => {
+    setSelectedRole(id);
+    setFormData(prev => ({
+      ...prev,
+      role: id, 
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('Form submitted:', formData)
 
     try{
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.password, formData.role);
       navigate('/');
     }catch (e) {
       setError(error.response?.data?.error || 'Failed to login');
@@ -327,8 +337,41 @@ const Login = () => {
               <p className="text-gray-300">Welcome back! Please enter your details</p>
             </motion.div>
 
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Input Fields */}
+               <div className="grid grid-cols-2 gap-3">
+                              {[
+                                { id: 'seller', icon: FaStore, label: 'Seller' },
+                                { id: 'buyer', icon: FaShoppingBag, label: 'Buyer' }
+                              ].map(({ id, icon: Icon, label }) => (
+                                <motion.button
+                                  key={id}
+                                  type="button"
+                                  onClick={() => handleRoleClick(id)}
+                                  whileHover={{ y: -2 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${
+                                    selectedRole === id
+                                      ? 'border-blue-400 bg-blue-500/20 backdrop-blur-sm'
+                                      : 'border-white/10 hover:border-white/30 bg-white/5 backdrop-blur-sm'
+                                  }`}
+                                >
+                                  <div className="flex flex-col items-center gap-2">
+                                    <div className={`p-2 rounded-lg ${
+                                      selectedRole === id ? 'bg-blue-500 text-white' : 'bg-white/10 text-gray-300'
+                                    }`}>
+                                      <Icon className="text-xl" />
+                                    </div>
+                                    <span className={`font-medium ${
+                                      selectedRole === id ? 'text-blue-400' : 'text-gray-300'
+                                    }`}>
+                                      {label}
+                                    </span>
+                                  </div>
+                                </motion.button>
+                              ))}
+                            </div>
               <motion.div className="space-y-4">
                 {/* Email Input */}
                 <div>
@@ -404,7 +447,7 @@ const Login = () => {
               </motion.button>
 
               {/* Social Sign In */}
-              <div className="relative my-8">
+              {/* <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-white/10" />
                 </div>
@@ -413,9 +456,9 @@ const Login = () => {
                     Or continue with
                   </span>
                 </div>
-              </div>
+              </div> */}
 
-              {/* Social Buttons */}
+              {/* Social Buttons
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { icon: FaGoogle, color: 'hover:bg-red-500/20 hover:border-red-500/50' },
@@ -433,7 +476,7 @@ const Login = () => {
                     <Icon className="mx-auto text-xl" />
                   </motion.button>
                 ))}
-              </div>
+              </div> */}
 
               {/* Sign Up Link */}
               <p className="text-center text-gray-400 mt-8">
