@@ -5,6 +5,10 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
+  id: {
+    type: String,
+    required: true,
+  },
   description: {
     type: String,
     required: true,
@@ -22,18 +26,13 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  seller: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
   seller_name: {
     type: String,
-    required: true,
+   //required: true,
   },
   seller_country: {
     type: String,
-    required: true,
+   // required: true,
   },
   features: [
     {

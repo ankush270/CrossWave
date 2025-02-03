@@ -1,28 +1,19 @@
-import { Product } from "../models/product.model.js";
+import { Product } from "../../models/product.model.js";
 
 export const addProduct = async (req, res, next) => {
+  const {name,stock,category,description,features,specifications,
+  weight_per_unit_in_gm,buy_options,height_in_cm,width_in_cm,} = req.body;
+
   try {
-    const {
-      name,
-      stock,
-      category,
-      description,
-      features,
-      specifications,
-      weight_per_unit_in_gm,
-      buy_options,
-      height_in_cm,
-      width_in_cm,
-    } = req.body;
-    const seller = "60d3b41abdacab002f4e6c27";
+    const id=req.id
 
     if (
       [
         name,
+        id,
         category,
         description,
         stock,
-        category,
         features,
         specifications,
         weight_per_unit_in_gm,
@@ -34,13 +25,15 @@ export const addProduct = async (req, res, next) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const images = req.files?.map((file) => file.path);
-    if (!images || images.length === 0) {
-      return res.status(400).json({ error: "No product images provided" });
-    }
+    // const images = req.files?.map((file) => file.path);
+    // if (!images || images.length === 0) {
+    //   return res.status(400).json({ error: "No product images provided" });
+    // }
 
+  
     const product = new Product({
       name,
+      id,
       stock,
       category,
       description,
@@ -50,22 +43,18 @@ export const addProduct = async (req, res, next) => {
       buy_options,
       height_in_cm,
       width_in_cm,
-      images,
-      seller,
-      seller_name: "req.user.fullname",
-      seller_country: "req.user.country",
+      //images,
+      //seller_name: "req.user.fullname",
+      //seller_country: "req.user.country",
     });
 
     const savedProduct = await product.save();
-    res
-      .status(201)
-      .json({ message: "Product added successfully", product: savedProduct });
+    res.status(201).json({ message: "Product added successfully", product: savedProduct });
   } catch (error) {
     console.error("Error adding product:", error);
-
     res.status(500).json({
-      error: "Failed to add product",
-      message: error.message,
+      success:false,
+      error: "Failed to add product"+  error.message
     });
   }
 };

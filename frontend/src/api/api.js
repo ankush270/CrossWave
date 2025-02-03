@@ -35,3 +35,10 @@ export const profileAPI = {
     return api.post('profile/update', profileData)
   }
 }
+
+export const productAPI = {
+  addProduct: (productData)=>{
+    return api.post('/product/add',productData)
+  }
+
+}
