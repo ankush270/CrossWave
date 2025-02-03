@@ -52,6 +52,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try{
     const {email, password} = req.body;
+    console.log(email,password);
 
     const user = await prisma.user.findUnique({
       where: { email }
@@ -118,7 +119,9 @@ export const getCurrentUser = async (req, res) => {
     where: { id: id },
     select: {
       id: true,
-      email: true
+      email: true,
+      is_buyer : true,
+      is_seller : true,
     }
   })
 
