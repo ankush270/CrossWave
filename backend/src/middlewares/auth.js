@@ -14,6 +14,7 @@ const authMiddleware = async (req, res, next) => {
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     console.log(decoded);
     req.id = decoded.id;
+    req.role = decoded.role;
     next();
   }catch (e) {
     return res.status(500).json({

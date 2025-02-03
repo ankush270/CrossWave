@@ -24,6 +24,7 @@ export const register = async (req, res) => {
 
     const token = jwt.sign({
       id: user.id,
+      role: is_buyer ? "buyer" : "seller",
     }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     })
@@ -81,8 +82,11 @@ export const login = async (req, res) => {
   user.logged_in_as = role;
   console.log(user);
   
+    const is_buyer = user.role === "buyer"
+
     const token = jwt.sign({
       id: user.id,
+      // role: is_buyer ? "buyer" : "seller",
     }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     })
