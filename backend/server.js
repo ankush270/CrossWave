@@ -1,4 +1,4 @@
-// import 'dotenv/config';
+import 'dotenv/config';
 import express from "express";
 import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
