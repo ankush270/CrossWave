@@ -7,11 +7,12 @@ import {
   FaShoppingCart, FaHeart, FaChartLine, FaDollarSign, FaCertificate,
   FaHome, FaTv, FaBlender, FaFan, FaCamera, FaTimes
 } from 'react-icons/fa'
-import { productsData } from '../data/productsData'
+// import { productsData } from '../data/productsData'
 import ProductCard from '../components/products/ProductCard'
 import ProductFilters from '../components/products/ProductFilters'
 import CategorySidebar from '../components/products/CategorySidebar'
 import { categories } from '../data/categories'
+import {productAPI} from "../api/api.js";
 
 const Products = () => {
   // State management
@@ -26,11 +27,21 @@ const Products = () => {
   const [selectedCertification, setSelectedCertification] = useState('all')
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [productsData, setProductsData] = useState([]);
 
   useEffect(() => {
-    // Simulate API call with the local data
-    setProducts(productsData)
-    setLoading(false)
+    const fetchProducts = async () => {
+      try{
+        const { data } = await productAPI.getProducts();
+        console.log(data);
+        setProductsData(data);
+      }catch (e) {
+        console.log("An error occurred while fetching: " + e.message);
+      }finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
   }, [])
 
   // Use productsData instead of inline products array

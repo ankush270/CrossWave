@@ -10,7 +10,7 @@ const ProductCard = ({ product, hoveredProduct, setHoveredProduct }) => {
       whileHover={{ y: -10 }}
       className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
     >
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product._id}`}>
         <div className="relative overflow-hidden rounded-t-xl">
           <img
             src={product.images?.[0] || '/placeholder-image.jpg'}
@@ -88,7 +88,7 @@ const ProductCard = ({ product, hoveredProduct, setHoveredProduct }) => {
           {product.specifications?.technical && product.specifications.technical.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="text-sm text-gray-600 grid gap-2">
-                {product.specifications.technical.slice(0, 2).map((spec, index) => (
+                {product.specifications.technical.map((spec, index) => (
                   <div key={index} className="flex justify-between">
                     <span className="text-gray-500">{spec.key}:</span>
                     <span className="font-medium">{spec.value}</span>
