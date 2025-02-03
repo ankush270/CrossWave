@@ -179,30 +179,9 @@ const Product = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20 pb-24 relative overflow-hidden">
-      {/* Animated Background Elements - Similar to Products.jsx */}
-      <div className="fixed inset-0 z-0">
-        {/* Circuit Pattern */}
-        <div className="absolute inset-0 bg-repeat opacity-5" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80h-80z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M30 30h40v40h-40z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M20 10v80M40 10v80M60 10v80M80 10v80' stroke='%234B5563' stroke-width='0.5'/%3E%3Cpath d='M10 20h80M10 40h80M10 60h80M10 80h80' stroke='%234B5563' stroke-width='0.5'/%3E%3C/svg%3E")`
-        }} />
-
-        {/* Animated Gradient Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-
-        {/* Animated Lines */}
-        <div className="absolute inset-0">
-          <div className="absolute left-0 top-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
-          <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
-          <div className="absolute left-0 bottom-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
-          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb with enhanced design */}
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb Navigation */}
         <motion.nav 
           className="mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm"
           initial={{ opacity: 0, y: -10 }}
@@ -217,18 +196,22 @@ const Product = () => {
           </ol>
         </motion.nav>
 
-        {/* Order Overview with Glass Effect */}
+        {/* Product Overview with Glass Effect */}
         <div className="grid lg:grid-cols-2 gap-12 mb-12">
-          {/* Image Gallery with Enhanced Design */}
+          {/* Image Gallery */}
           <motion.div 
             className="space-y-4 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <ProductGallery product={product} selectedImage={selectedImage} setSelectedImage={setSelectedImage} />
+            <ProductGallery 
+              product={product} 
+              selectedImage={selectedImage} 
+              setSelectedImage={setSelectedImage} 
+            />
           </motion.div>
 
-          {/* Order Info with Glass Effect */}
+          {/* Product Info */}
           <motion.div 
             className="space-y-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg"
             initial={{ opacity: 0, x: 20 }}
@@ -237,7 +220,11 @@ const Product = () => {
             <ProductInfo product={product} />
 
             {/* Pricing Tiers */}
-            <PricingTiers product={product} selectedPricing={selectedPricing} setPricingTier={setPricingTier} />
+            <PricingTiers 
+              product={product} 
+              selectedPricing={selectedPricing} 
+              setPricingTier={setPricingTier} 
+            />
 
             {/* Action Buttons */}
             <div className="flex gap-4 mt-6">
@@ -274,8 +261,12 @@ const Product = () => {
           </motion.div>
         </div>
 
-        {/* Detailed Information Tabs with Glass Effect */}
-        <ProductTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} product={product} />
+        {/* Product Tabs */}
+        <ProductTabs 
+          selectedTab={selectedTab} 
+          setSelectedTab={setSelectedTab} 
+          product={product} 
+        />
 
         {/* Price Breakdown Section */}
         <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
@@ -284,7 +275,7 @@ const Product = () => {
         <div className="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
       </div>
 
-      {/* Add Modals */}
+      {/* Modals */}
       <RequestQuote 
         product={product}
         isOpen={showQuoteModal}
