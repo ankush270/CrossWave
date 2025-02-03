@@ -1,16 +1,23 @@
-import { Product } from "../../models/product.model.js";
+import { Product } from "../models/product.model.js";
 
 export const addProduct = async (req, res, next) => {
   const {name,stock,category,description,features,specifications,
   weight_per_unit_in_gm,buy_options,height_in_cm,width_in_cm,} = req.body;
 
   try {
-    const id=req.id
+    const seller_id=req.id
+
+    if(req.role !== "seller"){
+      return res.status(401).json({
+        success: false,
+        error: "You're not a seller"
+      })
+    }
 
     if (
       [
         name,
-        id,
+        seller_id,
         category,
         description,
         stock,
@@ -33,7 +40,7 @@ export const addProduct = async (req, res, next) => {
   
     const product = new Product({
       name,
-      id,
+      seller_id,
       stock,
       category,
       description,
@@ -71,7 +78,7 @@ export const getProducts = async (req, res, next) => {
   }
 };
 
-export const removeProduct = async (req, res, next) => {
+export const removeProduct = async (req, res) => {
   try {
     console.log(req.params);
 
@@ -95,8 +102,8 @@ export const removeProduct = async (req, res, next) => {
 
 export const getUserProduct = async (req, res, next) => {
   try {
-    const { seller } = req.params;
-    const products = await Product.find({ seller });
+    const { sellerId } = req.params;
+    const products = await Product.find({ seller_id : sellerId });
     if (!products || products.length === 0) {
       return res.status(404).json({ error: "No products found" });
     }
@@ -113,6 +120,9 @@ export const updateProduct = async (req, res, next) => {
       return res.status(400).json({ error: "Product ID is required" });
     }
     const {
+      name,
+      category,
+      description,
       stock,
       features,
       specifications,
@@ -120,11 +130,14 @@ export const updateProduct = async (req, res, next) => {
       buy_options,
       height_in_cm,
       width_in_cm,
-      category,
     } = req.body;
+
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       {
+        name,
+        category,
+        description,
         stock,
         features,
         specifications,
@@ -132,7 +145,6 @@ export const updateProduct = async (req, res, next) => {
         buy_options,
         height_in_cm,
         width_in_cm,
-        category,
       },
       { new: true }
     );
