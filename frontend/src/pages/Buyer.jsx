@@ -1,27 +1,15 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
-  FaShoppingBag,
-  FaTruck,
-  FaWallet,
+import {FaTruck,
   FaBell,
   FaChartLine,
-  FaBox,
-  FaMapMarkerAlt,
-  FaSearch,
-  FaFilter,
-  FaClock,
-  FaArrowRight,
   FaShoppingCart,
-  FaStar,
-  FaHistory,
   FaHeart,
   FaComments,
   FaFileContract,
   FaUserCog,
   FaTachometerAlt,
-  FaCog,
   FaSignOutAlt,
   FaGlobe,
   FaBoxOpen,
@@ -43,7 +31,7 @@ import {
   Filler,
   ArcElement,
 } from "chart.js";
-import { Line, Doughnut } from "react-chartjs-2";
+
 
 // Register ChartJS components
 ChartJS.register(
@@ -67,6 +55,7 @@ import BuyerMessages from "../components/buyer/BuyerMessages";
 import BuyerContracts from "../components/buyer/BuyerContracts";
 import BuyerProfile from "../components/buyer/BuyerProfile";
 import BuyerCompliance from "../components/buyer/BuyerCompliance";
+import EKYC from "./EKYC";
 
 // Add this CSS at the beginning of your component
 const scrollbarHiddenStyles = {
@@ -79,7 +68,6 @@ const scrollbarHiddenStyles = {
 
 const Buyer = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -87,15 +75,15 @@ const Buyer = () => {
 
   const menuItems = [
     {
-      id: 'profile',
-      title: 'Profile & Settings',
+      id: "profile",
+      title: "Profile & Settings",
       icon: <FaUserCog />,
       component: BuyerProfile,
-      badge: null
+      badge: null,
     },
     {
-      id: 'dashboard',
-      title: 'Dashboard',
+      id: "dashboard",
+      title: "Dashboard",
       icon: <FaTachometerAlt />,
       component: BuyerDashboard,
       badge: null,
@@ -112,6 +100,13 @@ const Buyer = () => {
       title: "Wishlist & RFQs",
       icon: <FaHeart />,
       component: BuyerWishlist,
+      badge: "8",
+    },
+    {
+      id: "E-KYC",
+      title: "E-KYC",
+      icon: <FaChartLine />,
+      component: EKYC,
       badge: "8",
     },
     {
@@ -140,10 +135,9 @@ const Buyer = () => {
       title: "Compliance",
       icon: <FaShieldAlt />,
       component: BuyerCompliance,
-      badge: '2'
-    } 
-  ]
-
+      badge: "2",
+    },
+  ];
 
   const notifications = [
     {
