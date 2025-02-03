@@ -55,47 +55,81 @@ const BuyerCompliance = () => {
     }
   ];
 
-  const requiredDocuments = [
+  const requiredDocumentsIndia = [
     {
-      id: 'business_reg',
-      name: 'Business Registration',
-      description: 'Company Registration or Proprietorship Document',
+      id: 'cic',
+      name: 'Company Incorporation Certificate',
+      description: 'Incorporation Certificate or Partnership Deed',
       required: true
     },
     {
-      id: 'import_license',
-      name: 'Import License',
-      description: 'Valid Import-Export Code (IEC)',
+      id: 'iec',
+      name: 'Import Export Code',
+      description: 'Import Export Code Certificate',
       required: true
     },
     {
-      id: 'gst',
-      name: 'GST Registration',
-      description: 'GST Registration Certificate',
+      id: 'bis',
+      name: 'BIS Certificate',
+      description: 'Bureau of Indian Standards Certification',
       required: true
     },
     {
-      id: 'pan',
-      name: 'PAN Card',
-      description: 'Permanent Account Number Card',
-      required: true
-    },
-    {
-      id: 'bank_details',
-      name: 'Bank Details',
-      description: 'Bank Account Verification Letter',
-      required: true
-    },
-    {
-      id: 'trade_license',
-      name: 'Trade License',
-      description: 'Local Trade License if applicable',
+      id: 'shipping',
+      name: 'Shipping Bill',
+      description: 'Shipping Bill',
       required: false
     },
     {
-      id: 'msme',
-      name: 'MSME Registration',
-      description: 'MSME Registration Certificate if applicable',
+      id: 'tradeLicense',
+      name: 'Trade License',
+      description: 'Trade License',
+      required: true
+    },
+    {
+      id: 'gstin',
+      name: 'GST Registration Certificate',
+      description: 'Goods and Services Tax Certificate',
+      required: true
+    },
+    {
+      id: 'aadhaar',
+      name: 'Aadhaar Card',
+      description: 'Aadhaar Card',
+      required: true
+    },
+    
+    {
+      id: 'pan',
+      name: 'PAN Card',
+      description: 'PAN Card',
+      required: true
+    }
+  ];
+
+  const requiredDocumentsUAE = [
+    {
+      id: 'UAEid',
+      name: 'UAE ID Card',
+      description: 'Identity Card',
+      required: true
+    },
+    {
+      id: 'UAEvat',
+      name: 'UAE VAT Certificate',
+      description: 'UAE VAT Certificate',
+      required: true
+    },
+    {
+      id: 'UAEesma',
+      name: 'UAE ESMA Certificate',
+      description: 'UAE ESMA Certificate',
+      required: true
+    },
+    {
+      id: 'UAEcoo',
+      name: 'UAE Certificate Of Origin',
+      description: 'UAE Certificate Of Origin',
       required: false
     }
   ];
@@ -195,7 +229,7 @@ const BuyerCompliance = () => {
             </motion.button>
           </div>
           <div className="space-y-4">
-            {requiredDocuments.map((doc) => {
+            {requiredDocumentsIndia.map((doc) => {
               const isUploaded = uploadedDocuments.some(
                 uploaded => uploaded.name === doc.name
               );

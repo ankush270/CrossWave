@@ -7,6 +7,7 @@ import {
   FaCloudUploadAlt
 } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
+import {requiredDocumentsIndia, requiredDocumentsUAE} from "../../constants/documents.js"
 
 const SellerCompliance = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -14,6 +15,10 @@ const SellerCompliance = () => {
   const [selectedDocType, setSelectedDocType] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
+
+  const [selectedCountry, setSelectedCountry] = useState("india");
+
+  const documentList = selectedCountry === "india" ? requiredDocumentsIndia : requiredDocumentsUAE;
 
   const complianceStats = [
     {
@@ -57,50 +62,8 @@ const SellerCompliance = () => {
     // Add more documents...
   ];
 
-  const requiredDocuments = [
-    {
-      id: 'company_reg',
-      name: 'Company Registration Certificate',
-      description: 'Incorporation Certificate or Partnership Deed',
-      required: true
-    },
-    {
-      id: 'export_import',
-      name: 'Export-Import Certificate',
-      description: 'Valid EXIM license',
-      required: true
-    },
-    {
-      id: 'bis',
-      name: 'BIS Certificate',
-      description: 'Bureau of Indian Standards Certification',
-      required: true
-    },
-    {
-      id: 'startup',
-      name: 'Start-up Certificate',
-      description: 'Start-up Recognition Certificate',
-      required: false
-    },
-    {
-      id: 'dpiit',
-      name: 'DPIIT Registration',
-      description: 'Department of Promotion of Industry and Internal Trade',
-      required: true
-    },
-    {
-      id: 'customs',
-      name: 'Customs Registration',
-      description: 'Customs Trade Documentation',
-      required: true
-    },
-    {
-      id: 'gst',
-      name: 'GST Registration',
-      description: 'Goods and Services Tax Certificate',
-      required: true
-    }
-  ];
+
+
 
   const handleUploadClick = () => {
     setSelectedDocType('');
@@ -215,8 +178,18 @@ const SellerCompliance = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-gray-100">
             <h3 className="text-lg font-semibold mb-4">Required Documents</h3>
+
+            <select
+              className="mb-4 p-2 border rounded-lg"
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+            >
+              <option value="india">India</option>
+              <option value="uae">UAE</option>
+            </select>
+
             <div className="space-y-4">
-              {requiredDocuments.map((doc) => {
+              {documentList.map((doc) => {
                 const isUploaded = uploadedDocuments.some(
                   uploaded => uploaded.name === doc.name
                 );

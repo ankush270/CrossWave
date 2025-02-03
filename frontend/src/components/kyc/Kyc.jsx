@@ -7,6 +7,7 @@ import { Loader, ThemeProvider } from "@aws-amplify/ui-react";
 import { Amplify } from "aws-amplify";
 import "@aws-amplify/ui-react/styles.css";
 import awsexports from "../../aws-exports";
+import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 Amplify.configure(awsexports);
@@ -15,6 +16,7 @@ const BASE_URL = "http://localhost:3000";
 
 export default function LivenessCheck() {
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [loading, setLoading] = useState(true);
   const [sessionId, setSessionId] = useState(null);
   const [faceLivenessAlalysis, setFaceLivenessAlalysis] = useState(null);
@@ -55,7 +57,7 @@ export default function LivenessCheck() {
 
     if (data.results.Confidence > 50) {
       alert("Verified!!!");
-      navigate("/");
+      navigate(`/${role}/profile`);
     } else {
       alert("We could not verify you. Please verify again!");
       window.location.reload(); // Reloads the whole page
