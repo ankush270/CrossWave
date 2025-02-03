@@ -78,6 +78,13 @@ const Buyer = () => {
 
   const menuItems = [
     {
+      id: 'profile',
+      title: 'Profile & Settings',
+      icon: <FaUserCog />,
+      component: BuyerProfile,
+      badge: null
+    },
+    {
       id: 'dashboard',
       title: 'Dashboard',
       icon: <FaTachometerAlt />,
@@ -125,14 +132,7 @@ const Buyer = () => {
       icon: <FaShieldAlt />,
       component: BuyerCompliance,
       badge: '2'
-    },
-    {
-      id: 'profile',
-      title: 'Profile & Settings',
-      icon: <FaUserCog />,
-      component: BuyerProfile,
-      badge: null
-    }
+    } 
   ]
 
   const notifications = [
