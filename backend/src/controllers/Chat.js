@@ -82,6 +82,29 @@ export const getAllChats = async (req, res) => {
     }
 };
 
+export const getChat = async (req, res) => {
+    const  {chatId}  = req.params;  // Extract chatId from query parameters
+
+    console.log("Chat ID is:", chatId);
+
+    if (!chatId) {
+        return res.status(400).json({ success: false, message: "Chat ID is required" });
+    }
+
+    try {
+        // ✅ Fetch chat by `chatId`
+        const chat = await Chat.findById(chatId);
+
+        if (!chat) {
+            return res.status(404).json({ success: false, message: "Chat not found" });
+        }
+
+        res.status(200).json({ success: true, chat });
+    } catch (error) {
+        console.error("Error fetching chat:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
 
 
 export const sendMessage =  async (req, res) => {
