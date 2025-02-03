@@ -29,6 +29,7 @@ export const getProfile = async (req, res) => {
 }
 
 export const updateProfile = async (req,res) =>{
+    console.log(req.body);
     const {companyName, address, GST, phoneNo,name}= req.body;
     try{
         const id= req.id
@@ -65,9 +66,10 @@ export const updateProfile = async (req,res) =>{
             updatedUser
         })
     }catch(e){
+        console.log(e);
         res.status(500).json({
             success: false,
-            error: 'Some error occurred: ' + error.message
+            error: 'Some error occurred: ' + e.message
         })
     }
 }
