@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 const authMiddleware = async (req, res, next) => {
   try{
     const {token} = req.cookies;
+    console.log(token);
     if (!token) {
       return res.status(401).json({
         isAuthenticated: false,
@@ -11,6 +12,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decoded);
     req.id = decoded.id;
     next();
   }catch (e) {

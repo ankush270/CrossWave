@@ -17,6 +17,7 @@ export const register = async (req, res) => {
         is_seller,
       }
     })
+    user.logged_in_as = role;
 
     console.log(user);
 
@@ -50,16 +51,35 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try{
+    console.log(req.body);
     const {email, password} = req.body;
 
+    // const role = req.body.role ? req.body.role : "buyer";
+    const role = "buyer";
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },include:{
+        profile: true
+    }
     })
-
+    // console.log(user);
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    // console.log(user);
 
+  //   const profileData = await prisma.user.findUnique({
+  //     where: {
+  //         id: user.id
+  //     },
+  //     include:{
+  //         profile: true
+  //     }
+  // })
+  // destructure profile data to user doc itself
+  // user = {...user, ...profileData};
+  user.logged_in_as = role;
+  console.log(user);
+  
     const token = jwt.sign({
       id: user.id,
     }, process.env.JWT_SECRET, {
@@ -71,10 +91,12 @@ export const login = async (req, res) => {
       httpOnly: true,
     }
 
+    console.log(token);
     res.status(201).cookie('token', token, options).json({
       success: true,
       msg: 'User logged in',
       user,
+      // logged_in_as : role,
       token
     });
 
