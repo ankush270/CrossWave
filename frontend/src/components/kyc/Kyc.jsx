@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 Amplify.configure(awsexports);
 
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = "http://localhost:3000";
 
 export default function LivenessCheck() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function LivenessCheck() {
   const fetchCreateLiveness = async () => {
     console.log("Creating session...");
 
-    const res = await fetch(`${BASE_URL}/session/create`);
+    const res = await fetch(`${BASE_URL}/kyc/liveness/session/create`);
     const data = await res.json();
     setSessionId(data.sessionId);
     console.log(data.sessionId);
@@ -39,7 +39,7 @@ export default function LivenessCheck() {
   const handleAnalysisComplete = async () => {
     console.log("Getting results...");
 
-    const res = await fetch(`${BASE_URL}/session/get`, {
+    const res = await fetch(`${BASE_URL}/kyc/liveness/session/get`, {
       method: "POST",
       headers: {
         Accept: "application/json",
