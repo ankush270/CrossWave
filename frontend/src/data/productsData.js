@@ -10,11 +10,8 @@ export const productsData = [
     overview: "Premium 4K Smart TV with QLED technology and advanced features",
     category: "entertainment",
     stock: 100,
-    images: [
-      "/images/products/tv1.jpg",
-      "/images/products/tv2.jpg",
-      "/images/products/tv3.jpg"
-    ],
+    image: p3,
+    images: [p2, p1, p3],
     origin: "South Korea",
     moq: 10,
     pricing: {
@@ -74,11 +71,8 @@ export const productsData = [
     overview: "High-performance laptop with 4K display and latest Intel processor",
     category: "computers",
     stock: 50,
-    images: [
-      "/images/products/laptop1.jpg",
-      "/images/products/laptop2.jpg",
-      "/images/products/laptop3.jpg"
-    ],
+    image: p4,
+    images: [p4, p1, p2],
     origin: "USA",
     moq: 5,
     pricing: {
