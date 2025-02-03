@@ -55,8 +55,8 @@ export const login = async (req, res) => {
     const {email, password} = req.body;
     console.log(email,password);
 
-    // const role = req.body.role ? req.body.role : "buyer";
-    const role = "buyer";
+    const role = req.body.role ? req.body.role : "buyer";
+    // const role = "buyer";
     const user = await prisma.user.findUnique({
       where: { email },include:{
         profile: true

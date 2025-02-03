@@ -9,8 +9,8 @@ const api = axios.create({
 })
 
 export const authAPI = {
-  login: (email, password) => {
-    return api.post('/user/login', { email, password })
+  login: (email, password, role) => {
+    return api.post('/user/login', { email, password, role })
   },
 
   logout: () => {

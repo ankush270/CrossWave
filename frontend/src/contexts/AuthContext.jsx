@@ -34,9 +34,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, [location.pathname])
 
-  const login = async(email, password) => {
+  const login = async(email, password, role) => {
     try{
-      const {data} = await authAPI.login(email, password);
+      const {data} = await authAPI.login(email, password, role);
       console.log(data);
       setUser(data.user);
       setRole(data.logged_in_as);
