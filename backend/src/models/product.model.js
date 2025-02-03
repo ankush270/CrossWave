@@ -28,6 +28,9 @@ const productSchema = new Schema({
     type: Number,
     required: true,
   },
+  subcategory: {
+    type: String,
+  },
   pricing: {
     sample: {
       price: {
@@ -41,9 +44,6 @@ const productSchema = new Schema({
       features: [{
         type: String,
       }],
-    },
-    subcategory: {
-      type: String,
     },
     standard: {
       price: {

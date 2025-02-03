@@ -43,6 +43,10 @@ export const productAPI = {
 
   getProducts: ()=>{
     return api.get('/product/get')
+  },
+
+  getProductById:(id)=>{
+    return api.get('/product/getId/'+id);
   }
 
 }

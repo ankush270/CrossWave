@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaFileContract, FaHandshake } from 'react-icons/fa';
-import { productsData } from '../data/productsData';
+// import { productsData } from '../data/productsData';
 import ProductGallery from '../components/product/ProductGallery';
 import ProductInfo from '../components/product/ProductInfo';
 import PricingTiers from '../components/product/PricingTiers';
 import ProductTabs from '../components/product/ProductTabs';
 import RequestQuote from '../components/RequestQuote';
 import Chat from '../components/Chat';
+import {productAPI} from "../api/api.js";
+import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
 
 const Product = () => {
   const { id } = useParams();
@@ -19,15 +21,27 @@ const Product = () => {
   const [selectedPricing, setPricingTier] = useState('standard');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  console.log(JSON.stringify(product))
 
   useEffect(() => {
-    const foundProduct = productsData.find(p => p.id === parseInt(id));
-    if (foundProduct) {
-      setProduct(foundProduct);
-    } else {
-      navigate('/products');
+    const fetchCurrentProduct = async () => {
+      try{
+        const { data } = await productAPI.getProductById(id);
+        console.log("data: ", data);
+        setProduct(data);
+      }catch (e) {
+        console.log("An error occurred while fetching: " + e.message);
+        navigate('/products');
+      }finally {
+        setLoading(false);
+      }
     }
-  }, [id, navigate]);
+
+    fetchCurrentProduct();
+  }, [])
+
 
   if (!product) {
     return (
@@ -54,59 +68,6 @@ const Product = () => {
   };
 
   // Add this after the pricing tiers section
-  const PriceBreakdown = ({ pricing, selectedPricing }) => {
-    const quantity = parseInt(pricing[selectedPricing].moq);
-    const breakdown = calculatePriceBreakdown(pricing[selectedPricing].price, quantity);
-
-    return (
-      <motion.div 
-        className="mt-6 bg-gray-50 rounded-lg p-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h4 className="font-semibold mb-4">Price Breakdown</h4>
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Base Price (per unit)</span>
-            <span className="font-medium">₹{breakdown.unitPrice.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Quantity</span>
-            <span className="font-medium">{quantity} units</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">₹{breakdown.subtotal.toFixed(2)}</span>
-          </div>
-          <div className="h-px bg-gray-200 my-2"></div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Platform Fee (₹20/unit)</span>
-            <span className="font-medium">₹{breakdown.platformFee.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Custom Duty (5%)</span>
-            <span className="font-medium">₹{breakdown.customDuty.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">GST (5%)</span>
-            <span className="font-medium">₹{breakdown.gst.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Insurance (3%)</span>
-            <span className="font-medium">₹{breakdown.insurance.toFixed(2)}</span>
-          </div>
-          <div className="h-px bg-gray-200 my-2"></div>
-          <div className="flex justify-between font-semibold">
-            <span>Total Amount</span>
-            <span className="text-blue-600">₹{breakdown.total.toFixed(2)}</span>
-          </div>
-          <div className="text-xs text-gray-500 mt-2">
-            * All prices are inclusive of taxes and fees
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
 
   // Add this check for the image gallery
   const renderImageGallery = () => {
@@ -267,7 +228,6 @@ const Product = () => {
           setSelectedTab={setSelectedTab} 
           product={product} 
         />
-
         {/* Price Breakdown Section */}
         <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
 
@@ -281,11 +241,11 @@ const Product = () => {
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
       />
-      <Chat 
-        product={product}
-        isOpen={showChatModal}
-        onClose={() => setShowChatModal(false)}
-      />
+      {/*<Chat */}
+      {/*  product={product}*/}
+      {/*  isOpen={showChatModal}*/}
+      {/*  onClose={() => setShowChatModal(false)}*/}
+      {/*/>*/}
     </div>
   );
 };
