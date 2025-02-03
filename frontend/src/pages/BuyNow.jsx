@@ -1,124 +1,163 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import { FaArrowLeft, FaTruck, FaCreditCard, FaShieldAlt, FaCheckCircle, FaBuilding, FaUser, FaShippingFast, FaFileInvoice } from 'react-icons/fa';
-import { productsData } from '../data/productsData';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
+import {
+  FaArrowLeft,
+  FaTruck,
+  FaCreditCard,
+  FaShieldAlt,
+  FaCheckCircle,
+  FaBuilding,
+  FaUser,
+  FaShippingFast,
+  FaFileInvoice,
+} from "react-icons/fa";
+import { productsData } from "../data/productsData";
+import axios from "axios";
 
 const BuyNow = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const location = useLocation();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { selectedPricing = 'standard' } = location.state || {};
+  const [amount, setAmount] = useState(null);
+
+  const { selectedPricing = "standard" } = location.state || {};
+
   const [formData, setFormData] = useState({
-    // Company Information
-    companyName: '',
-    gstin: '',
-    businessType: 'manufacturer',
-    
-    // Contact Information
-    contactName: '',
-    email: '',
-    phone: '',
-    
-    // Shipping Information
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    pincode: '',
-    country: 'India',
-    
-    // Delivery Preferences
-    deliveryType: 'standard',
-    specialInstructions: '',
-    
-    // Payment Information
-    paymentMethod: 'bank_transfer',
-    currency: 'INR',
+    companyName: "",
+    gstin: "",
+    businessType: "manufacturer",
+    contactName: "",
+    email: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    pincode: "",
+    country: "India",
+    deliveryType: "standard",
+    specialInstructions: "",
+    paymentMethod: "bank_transfer",
+    currency: "INR",
   });
 
   useEffect(() => {
-    const foundProduct = productsData.find(p => p.id === parseInt(id));
+    const foundProduct = productsData.find((p) => p.id === Number(id)); // Ensure ID comparison works
     if (foundProduct) {
       setProduct(foundProduct);
     }
     setLoading(false);
-  }, [id]);
+  }, [id, productsData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    setAmount(calculateTotal());
+  }, [formData, product]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    console.log("Form submitted:", formData);
+
+    try {
+      const { data } = await axios.post(
+        "http://localhost:3000/payment/create-payment",
+        { amount }
+      );
+      console.log("Payment request response:", data);
+
+      if (data.id) {
+        navigate("/pay-now", {
+          state: {
+            order_id: data.id,
+            amount,
+            currency: data.currency,
+            product,
+            product_id: product.id,
+            seller_id: product.seller_id,
+            // order_details: details of order
+          },
+        });
+      } else {
+        console.error("Payment request did not return an ID.");
+      }
+    } catch (e) {
+      console.error("Error during payment request:", e);
+    }
   };
 
-  const formSections = [
-    {
-      id: 'company',
-      title: 'Company Information',
-      icon: <FaBuilding className="text-blue-500" />,
-      description: 'Enter your business details for billing and compliance'
-    },
-    {
-      id: 'contact',
-      title: 'Contact Information',
-      icon: <FaUser className="text-green-500" />,
-      description: 'How can we reach you regarding this order?'
-    },
-    {
-      id: 'shipping',
-      title: 'Shipping Information',
-      icon: <FaShippingFast className="text-purple-500" />,
-      description: 'Where should we deliver your order?'
-    },
-    {
-      id: 'delivery',
-      title: 'Delivery Preferences',
-      icon: <FaTruck className="text-orange-500" />,
-      description: 'Choose how you want your order delivered'
-    }
-  ];
-
   const calculateSubtotal = () => {
-    if (!product || !product.pricing || !product.pricing[selectedPricing]) return 0;
-    
-    const price = parseFloat(product.pricing[selectedPricing].price.replace(/[^0-9.]/g, ''));
+    if (!product?.pricing?.[selectedPricing]) return 0;
+
+    const price = parseFloat(
+      product.pricing[selectedPricing].price.replace(/[^0-9.]/g, "")
+    );
     const quantity = parseInt(product.pricing[selectedPricing].moq);
     return (price * quantity).toFixed(2);
   };
 
   const calculateShipping = () => {
     const subtotal = parseFloat(calculateSubtotal());
-    // Calculate shipping based on delivery type
-    switch(formData.deliveryType) {
-      case 'express':
-        return (subtotal * 0.1).toFixed(2); // 10% of subtotal
-      case 'priority':
-        return (subtotal * 0.15).toFixed(2); // 15% of subtotal
+
+    switch (formData.deliveryType) {
+      case "express":
+        return (subtotal * 0.1).toFixed(2);
+      case "priority":
+        return (subtotal * 0.15).toFixed(2);
       default:
-        return (subtotal * 0.05).toFixed(2); // 5% of subtotal for standard
+        return (subtotal * 0.05).toFixed(2);
     }
   };
 
   const calculateTax = () => {
     const subtotal = parseFloat(calculateSubtotal());
-    return (subtotal * 0.18).toFixed(2); // 18% GST
+    return (subtotal * 0.18).toFixed(2);
   };
 
   const calculateTotal = () => {
     const subtotal = parseFloat(calculateSubtotal());
     const shipping = parseFloat(calculateShipping());
     const tax = parseFloat(calculateTax());
-    return (subtotal + shipping + tax).toFixed(2);
+    const total = (subtotal + shipping + tax).toFixed(2);
+    return total;
   };
+
+  const formSections = [
+    {
+      id: "company",
+      title: "Company Information",
+      icon: <FaBuilding className="text-blue-500" />,
+      description: "Enter your business details for billing and compliance",
+    },
+    {
+      id: "contact",
+      title: "Contact Information",
+      icon: <FaUser className="text-green-500" />,
+      description: "How can we reach you regarding this order?",
+    },
+    {
+      id: "shipping",
+      title: "Shipping Information",
+      icon: <FaShippingFast className="text-purple-500" />,
+      description: "Where should we deliver your order?",
+    },
+    {
+      id: "delivery",
+      title: "Delivery Preferences",
+      icon: <FaTruck className="text-orange-500" />,
+      description: "Choose how you want your order delivered",
+    },
+  ];
 
   if (loading || !product) {
     return (
@@ -133,10 +172,13 @@ const BuyNow = () => {
       {/* Enhanced Background Elements */}
       <div className="fixed inset-0 z-0">
         {/* Circuit Pattern */}
-        <div className="absolute inset-0 bg-repeat opacity-5" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80h-80z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M30 30h40v40h-40z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M20 10v80M40 10v80M60 10v80M80 10v80' stroke='%234B5563' stroke-width='0.5'/%3E%3Cpath d='M10 20h80M10 40h80M10 60h80M10 80h80' stroke='%234B5563' stroke-width='0.5'/%3E%3C/svg%3E")`
-        }} />
-        
+        <div
+          className="absolute inset-0 bg-repeat opacity-5"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80h-80z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M30 30h40v40h-40z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M20 10v80M40 10v80M60 10v80M80 10v80' stroke='%234B5563' stroke-width='0.5'/%3E%3Cpath d='M10 20h80M10 40h80M10 60h80M10 80h80' stroke='%234B5563' stroke-width='0.5'/%3E%3C/svg%3E")`,
+          }}
+        />
+
         {/* Animated Gradient Orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
@@ -144,44 +186,49 @@ const BuyNow = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Enhanced Breadcrumb */}
-        <motion.nav 
+        <motion.nav
           className="mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex justify-between items-center">
-            <Link to={`/product/${id}`} className="flex items-center text-blue-600 hover:text-blue-700">
+            <Link
+              to={`/product/${id}`}
+              className="flex items-center text-blue-600 hover:text-blue-700"
+            >
               <FaArrowLeft className="mr-2" /> Back to Product
             </Link>
-            <div className="text-sm text-gray-500">
-              Step: Order Details
-            </div>
+            <div className="text-sm text-gray-500">Step: Order Details</div>
           </div>
         </motion.nav>
 
         {/* Progress Steps */}
-        <motion.div 
+        <motion.div
           className="mb-12 bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex justify-between">
-            {['Order Details', 'Shipping', 'Payment', 'Confirmation'].map((step, index) => (
-              <div key={step} className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  index === 0 ? 'bg-blue-600 text-white' : 'bg-gray-200'
-                }`}>
-                  {index + 1}
+            {["Order Details", "Shipping", "Payment", "Confirmation"].map(
+              (step, index) => (
+                <div key={step} className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      index === 0 ? "bg-blue-600 text-white" : "bg-gray-200"
+                    }`}
+                  >
+                    {index + 1}
+                  </div>
+                  <div className="text-sm mt-2">{step}</div>
                 </div>
-                <div className="text-sm mt-2">{step}</div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </motion.div>
 
         <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Form Sections */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-2 space-y-8"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -196,14 +243,16 @@ const BuyNow = () => {
                 </div>
               </div>
               <div className="flex items-start gap-4 border-b border-gray-100 pb-6">
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
+                <img
+                  src={product.image}
+                  alt={product.name}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg">{product.name}</h3>
-                  <p className="text-gray-600">{product.specifications.technical.size}</p>
+                  <p className="text-gray-600">
+                    {product.specifications.technical.size}
+                  </p>
                   <div className="mt-2 text-sm text-gray-500">
                     Quantity: {product.pricing[selectedPricing].moq} units
                   </div>
@@ -230,11 +279,13 @@ const BuyNow = () => {
                   </div>
                 </div>
                 {/* Render form fields based on section.id */}
-                {section.id === 'company' && (
+                {section.id === "company" && (
                   <div className="grid gap-6">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Company Name *
+                        </label>
                         <input
                           type="text"
                           name="companyName"
@@ -245,7 +296,9 @@ const BuyNow = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">GSTIN *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          GSTIN *
+                        </label>
                         <input
                           type="text"
                           name="gstin"
@@ -257,7 +310,9 @@ const BuyNow = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Business Type
+                      </label>
                       <select
                         name="businessType"
                         value={formData.businessType}
@@ -272,11 +327,13 @@ const BuyNow = () => {
                     </div>
                   </div>
                 )}
-                {section.id === 'contact' && (
+                {section.id === "contact" && (
                   <div className="grid gap-6">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Contact Name *
+                        </label>
                         <input
                           type="text"
                           name="contactName"
@@ -287,7 +344,9 @@ const BuyNow = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email *
+                        </label>
                         <input
                           type="email"
                           name="email"
@@ -299,7 +358,9 @@ const BuyNow = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number *
+                      </label>
                       <input
                         type="tel"
                         name="phone"
@@ -311,10 +372,12 @@ const BuyNow = () => {
                     </div>
                   </div>
                 )}
-                {section.id === 'shipping' && (
+                {section.id === "shipping" && (
                   <div className="grid gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 1 *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Address Line 1 *
+                      </label>
                       <input
                         type="text"
                         name="addressLine1"
@@ -325,7 +388,9 @@ const BuyNow = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Address Line 2
+                      </label>
                       <input
                         type="text"
                         name="addressLine2"
@@ -336,7 +401,9 @@ const BuyNow = () => {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          City *
+                        </label>
                         <input
                           type="text"
                           name="city"
@@ -347,7 +414,9 @@ const BuyNow = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          State *
+                        </label>
                         <input
                           type="text"
                           name="state"
@@ -360,7 +429,9 @@ const BuyNow = () => {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          PIN Code *
+                        </label>
                         <input
                           type="text"
                           name="pincode"
@@ -371,7 +442,9 @@ const BuyNow = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Country *
+                        </label>
                         <select
                           name="country"
                           value={formData.country}
@@ -386,10 +459,12 @@ const BuyNow = () => {
                     </div>
                   </div>
                 )}
-                {section.id === 'delivery' && (
+                {section.id === "delivery" && (
                   <div className="grid gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Delivery Type
+                      </label>
                       <select
                         name="deliveryType"
                         value={formData.deliveryType}
@@ -402,7 +477,9 @@ const BuyNow = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Special Instructions
+                      </label>
                       <textarea
                         name="specialInstructions"
                         value={formData.specialInstructions}
@@ -419,7 +496,7 @@ const BuyNow = () => {
           </motion.div>
 
           {/* Right Column - Enhanced Order Summary */}
-          <motion.div 
+          <motion.div
             className="lg:col-span-1 space-y-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -437,7 +514,9 @@ const BuyNow = () => {
                     <span className="font-medium">₹{calculateSubtotal()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping ({formData.deliveryType})</span>
+                    <span className="text-gray-600">
+                      Shipping ({formData.deliveryType})
+                    </span>
                     <span className="font-medium">₹{calculateShipping()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -456,7 +535,7 @@ const BuyNow = () => {
                 </div>
 
                 {/* Enhanced Payment Method Selection */}
-                <div className="space-y-4">
+                {/* <div className="space-y-4">
                   <label className="block text-sm font-medium text-gray-700">Payment Method</label>
                   <div className="space-y-2">
                     {['bank_transfer', 'letter_of_credit', 'advance_payment'].map((method) => (
@@ -483,7 +562,7 @@ const BuyNow = () => {
                       </motion.button>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Place Order Button */}
                 <motion.button
@@ -503,4 +582,4 @@ const BuyNow = () => {
   );
 };
 
-export default BuyNow; 
+export default BuyNow;

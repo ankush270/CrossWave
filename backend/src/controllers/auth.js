@@ -114,7 +114,9 @@ export const getCurrentUser = async (req, res) => {
     where: { id: id },
     select: {
       id: true,
-      email: true
+      email: true,
+      is_buyer : true,
+      is_seller : true,
     }
   })
 
