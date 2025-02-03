@@ -5,6 +5,7 @@ import connectMongoDB from "./src/config/mongo_db.js";
 import userRouter from "./src/routes/auth.js";
 import profileRouter from "./src/routes/profile.js";
 import productRouter from "./src/routes/product.js"
+import reviewRouter from "./src/routes/user_review.js"
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -36,6 +37,7 @@ app.post("/verify-product", upload.array("files", 10), verifyProduct);
 app.use('/user', userRouter)
 app.use('/profile', profileRouter)
 app.use('/product',productRouter)
+app.use('/user-review',reviewRouter)
 
 // Start server
 const server = app.listen(PORT, () => {
