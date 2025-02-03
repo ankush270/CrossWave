@@ -128,70 +128,70 @@ export const cancelShipment = async (req, res, next) => {
   }
 };
 
-export const getAsyncShipment = async (req, res, next) => {
-  try {
-    const accessToken = req.shipmentAuthToken;
-    if (!accessToken) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+// export const getAsyncShipment = async (req, res, next) => {
+//   try {
+//     const accessToken = req.shipmentAuthToken;
+//     if (!accessToken) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
 
-    const { accountNumber, jobId } = req.body;
+//     const { accountNumber, jobId } = req.body;
 
-    if (!accountNumber || !jobId) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+//     if (!accountNumber || !jobId) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
 
-    const shipment = await axios.post(
-      `https://apis-sandbox.fedex.com/ship/v1/shipments/results`,
-      {
-        accountNumber,
-        jobId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+//     const shipment = await axios.post(
+//       `https://apis-sandbox.fedex.com/ship/v1/shipments/results`,
+//       {
+//         accountNumber,
+//         jobId,
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
 
-    res.status(200).json({
-      success: true,
-      data: shipment.data.output,
-    });
-  } catch (err) {
-    console.log(err);
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       data: shipment.data.output,
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 
-export const varifyShipment = async (req, res, next) => {
-  try {
-    const accessToken = req.shipmentAuthToken;
-    if (!accessToken) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+// export const verifyShipment = async (req, res, next) => {
+//   try {
+//     const accessToken = req.shipmentAuthToken;
+//     if (!accessToken) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
 
-    const { body } = req;
+//     const { body } = req;
 
-    const shipment = await axios.post(
-      "https://apis-sandbox.fedex.com/ship/v1/shipments/packages/validate",
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+//     const shipment = await axios.post(
+//       "https://apis-sandbox.fedex.com/ship/v1/shipments/packages/validate",
+//       body,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
 
-    res.status(200).json({
-      success: true,
-      data: shipment.data.output,
-    });
-  } catch (err) {
-    console.log(err);
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       data: shipment.data.output,
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 
 export const returnShipment = async (req, res) => {
   const accessToken = req.shipmentAuthToken;
@@ -237,9 +237,12 @@ export const createPickup = async (req, res) => {
       }
     );
 
+    const confirmationCode = pickup.data.output.pickupConfirmationCode;
+
     res.status(200).json({
       success: true,
       data: pickup.data.output,
+      confirmationCode,
     });
   } catch (error) {
     console.log(error);

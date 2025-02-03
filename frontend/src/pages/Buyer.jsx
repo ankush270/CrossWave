@@ -68,6 +68,15 @@ import BuyerContracts from '../components/buyer/BuyerContracts'
 import BuyerProfile from '../components/buyer/BuyerProfile'
 import BuyerCompliance from '../components/buyer/BuyerCompliance'
 
+// Add this CSS at the beginning of your component
+const scrollbarHiddenStyles = {
+  scrollbarWidth: 'none', /* Firefox */
+  msOverflowStyle: 'none',  /* IE and Edge */
+  '&::-webkit-scrollbar': { 
+    display: 'none'  /* Chrome, Safari and Opera */
+  }
+}
+
 const Buyer = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -224,25 +233,26 @@ const Buyer = () => {
               isDarkMode 
                 ? 'bg-gray-800/50 border-gray-700/50' 
                 : 'bg-white/50 border-gray-200/50'
-            } backdrop-blur-lg`}
+            } backdrop-blur-lg relative`}
           >
-            {/* Logo/Brand Section */}
-            <div className={`h-16 flex items-center justify-center border-b ${
-              isDarkMode 
-                ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-900/50' 
-                : 'border-white/30 bg-white/10'
-            }`}>
-              <motion.h1 
-                className={`text-2xl font-bold ${
-                  isDarkMode
-                    ? 'bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent'
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent'
-                }`}
-                whileHover={{ scale: 1.05 }}
-              >
-                CrossWave
-              </motion.h1>
-            </div>
+              <motion.div className="overflow-y-auto custom-scrollbar h-full pb-10" style={scrollbarHiddenStyles}> 
+                {/* Logo/Brand Section */}
+              <div className={`h-16 flex items-center justify-center border-b ${
+                isDarkMode 
+                  ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-900/50' 
+                  : 'border-white/30 bg-white/10'
+              }`}>
+                <motion.h1 
+                  className={`text-2xl font-bold ${
+                    isDarkMode
+                      ? 'bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent'
+                      : 'bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  CrossWave
+                </motion.h1>
+              </div>
 
             {/* Profile Quick View */}
             <div className={`p-4 border-b ${
@@ -321,7 +331,7 @@ const Buyer = () => {
             </nav>
 
             {/* Quick Actions */}
-            <div className={`p-4 border-t ${
+            <div className={`-mt-2 p-4 border-t ${
               isDarkMode 
                 ? 'border-gray-700/50 bg-gradient-to-b from-gray-800/30 to-gray-900/30' 
                 : 'border-white/30 bg-white/10'
@@ -358,9 +368,10 @@ const Buyer = () => {
                 ))}
               </div>
             </div>
+              </motion.div>
 
             {/* Bottom Actions */}
-            <div className={`absolute bottom-0 w-72 border-t ${
+            <div className={`fixed bottom-0 w-[21vw] border-t ${
               isDarkMode 
                 ? 'border-gray-700/50 bg-gradient-to-t from-gray-900/90 to-gray-800/80' 
                 : 'border-white/30 bg-gradient-to-b from-white/30 to-white/20'
@@ -498,4 +509,4 @@ const Buyer = () => {
   )
 }
 
-export default Buyer 
+export default Buyer
