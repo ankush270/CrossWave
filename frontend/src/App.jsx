@@ -96,7 +96,9 @@ const App = () => {
             {/* <Route path="/buyer/payments" element={<BuyerPayments />} />
             <Route path="/buyer/analytics" element={<BuyerAnalytics />} />
             <Route path="/buyer/compliance" element={<ComplianceManager />} />
-            <Route path="/buyer/profile" element={<BuyerProfile />} /> */}
+             */}
+
+            <Route path="/buyer/profile" element={<BuyerProfile />} />  
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Seller />} />
@@ -105,8 +107,9 @@ const App = () => {
             <Route path="/seller/logistics" element={<SellerLogistics />} />
             <Route path="/seller/analytics" element={<SellerAnalytics />} />
             <Route path="/seller/compliance" element={<ComplianceManager />} />
-            <Route path="/seller/profile" element={<SellerProfile />} />
+            
              */}
+             <Route path="/seller/profile" element={<SellerProfile />} />
             {/* Shared Routes */}
             {/* <Route path="/logistics" element={<Logistics />} /> */}
             <Route path="/feedback" element={<FeedbackForm />} />
