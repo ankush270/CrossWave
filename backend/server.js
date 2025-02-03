@@ -1,5 +1,4 @@
 import 'dotenv/config';
-
 import express from "express";
 import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
@@ -11,6 +10,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import kycRouter from "./src/routes/kyc.js";
 // import { extractText } from "./src/microservices/kyc/aadhaar.js";
+
 // payment routes
 import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 // chat routes
@@ -48,6 +48,8 @@ app.use(
     origin: ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['set-cookie']
   })
 );
 

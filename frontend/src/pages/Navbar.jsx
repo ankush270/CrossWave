@@ -157,7 +157,7 @@ const Navbar = () => {
                  </motion.button>
                </Link>}
 
-            {user ? <Link to="/profile">
+            {user ? <Link to={`/${user.logged_in_as}/profile`}>
               <motion.button
                  whileHover={{scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"}}
                  whileTap={{scale: 0.95}}
