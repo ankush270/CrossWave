@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  FaCog, FaUser, FaBell, FaLock, FaMoon, FaSun,
-  FaGlobe, FaLanguage, FaQrcode, FaHistory,
-  FaCheck, FaTimes, FaCamera, FaEye, FaEyeSlash,
+  FaUser, FaBell, FaLock, FaMoon, FaSun,
+  FaCheck,  FaCamera, FaEye, FaEyeSlash,
   FaExchangeAlt
 } from 'react-icons/fa'
 
@@ -11,7 +10,7 @@ const Settings = () => {
   // State management
   const [activeSection, setActiveSection] = useState('general')
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  
   const [userData, setUserData] = useState({
     name: 'John Doe',
     email: 'john@example.com',
@@ -143,7 +142,8 @@ const Settings = () => {
         isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
       }`}
     >
-      <AnimatePresence mode="wait">
+      {/* <AnimatePresence mode="wait"> */}
+      <AnimatePresence mode="popLayout">
         {isDarkMode ? (
           <motion.div
             key="moon"

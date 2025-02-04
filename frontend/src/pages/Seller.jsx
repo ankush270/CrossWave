@@ -4,21 +4,13 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaBox,
   FaChartLine,
-  FaDollarSign,
-  FaUsers,
   FaPlus,
-  FaFileAlt,
   FaComments,
-  FaCog,
   FaTruck,
   FaSearch,
   FaBell,
-  FaEllipsisV,
-  FaStore,
-  FaShoppingCart,
   FaFileInvoiceDollar,
   FaShieldAlt,
-  FaUser,
   FaSignOutAlt,
   FaTachometerAlt,
   FaAngleDown,
@@ -31,6 +23,7 @@ import {
   FaGlobe,
   FaHandshake,
   FaQuestionCircle,
+  FaUserCheck,
 } from "react-icons/fa";
 import {
   Chart as ChartJS,
@@ -53,9 +46,6 @@ import SellerLogistics from "../components/seller/SellerLogistics";
 import SellerCompliance from "../components/seller/SellerCompliance";
 import SellerMessages from "../components/seller/SellerMessages";
 import SellerProfile from "../components/seller/SellerProfile";
-import MenuItem from "../components/ui/MenuItem";
-import QuickActions from "../components/ui/QuickActions";
-import Header from "../components/ui/Header";
 import NotificationsPanel from "../components/ui/NotificationsPanel";
 import FloatingActions from "../components/ui/FloatingActions";
 import EKYC from "./EKYC";
@@ -84,20 +74,12 @@ const scrollbarHiddenStyles = {
 
 const Seller = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const navigate = useNavigate();
 
   const menuItems = [
-    {
-      id: "E-KYC",
-      title: "E-KYC",
-      icon: <FaChartLine />,
-      component: EKYC,
-      badge: "8",
-    },
     {
       id: "dashboard",
       title: "Dashboard",
@@ -110,6 +92,13 @@ const Seller = () => {
       icon: <FaBox />,
       component: SellerProducts,
       badge: "24",
+    },
+    {
+      id: "E-KYC",
+      title: "E-KYC",
+      icon: <FaUserCheck />,
+      component: EKYC,
+      badge: null,
     },
     {
       id: "orders",
@@ -486,7 +475,8 @@ const Seller = () => {
         <div className="flex-1 ml-72">
           {/* Page Content */}
           <main className="p-8">
-            <AnimatePresence mode="wait">
+            {/* <AnimatePresence mode="wait"> */}
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeSection}
                 initial={{ opacity: 0, y: 20 }}

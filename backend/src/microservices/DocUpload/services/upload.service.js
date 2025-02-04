@@ -7,7 +7,7 @@ class UploadService {
   async uploadFiles(files, userId, documentDetails) {
     try {
       // First, find or create user document record
-      // console.log("Yayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+      console.log("Yayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
       let userDocs = await Document.findOne({ userId });
 
       if (!userDocs) {
@@ -27,7 +27,7 @@ class UploadService {
       });
 
       const file = files[0]; // Since we're only handling one file at a time
-      // console.log("FILEPATH : ", file.path);
+      console.log("FILEPATH : ", file.path);
 
       const verificationResult = await verifyDocument(
         file.path,

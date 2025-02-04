@@ -85,6 +85,7 @@ async function checkUploadedDocuments(userId) {
 
 export const uploadDocument = async (req, res) => {
   try {
+    // console.log("Worlddddddddddddddddddddddddddddddd");
     const { documentType } = req.body;
     const files = req.files;
     const user = await prisma.user.findUnique({

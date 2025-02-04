@@ -101,7 +101,7 @@ const BuyerCompliance = () => {
         formData.append("files", file); // Ensure "files" is the key name
         formData.append("documentType", selectedDocType || file.name);
         // formData.append("expiryDate", "2025-12-31"); // Adjust as needed
-
+        console.log(formData);
         // API call
         fetch(`http://localhost:3000/docs/upload/${user.id}`, {
           method: "POST",
