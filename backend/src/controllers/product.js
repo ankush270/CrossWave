@@ -1,65 +1,65 @@
-import { Product } from "../../models/product.model.js";
+import { Product } from "../models/product.model.js";
 
 export const addProduct = async (req, res, next) => {
-  const {name,stock,category,description,features,specifications,
-  weight_per_unit_in_gm,buy_options,height_in_cm,width_in_cm,} = req.body;
+  const {
+    name,
+    overview,
+    category,
+    stock,
+    images,
+    origin,
+    moq,
+    pricing,
+    specifications,
+  } = req.body;
 
   try {
-    const id=req.id
+    const seller_id = req.id;
+
+    if (req.role !== "seller") {
+      return res.status(401).json({
+        success: false,
+        error: "You're not a seller",
+      });
+    }
 
     if (
-      [
-        name,
-        id,
-        category,
-        description,
-        stock,
-        features,
-        specifications,
-        weight_per_unit_in_gm,
-        buy_options,
-        height_in_cm,
-        width_in_cm,
-      ].some((field) => field?.trim === "")
+       [
+         name,
+         overview,
+         category,
+         stock,
+         origin,
+         moq,
+         pricing,
+         specifications,
+       ].some((field) => !field)
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // const images = req.files?.map((file) => file.path);
-    // if (!images || images.length === 0) {
-    //   return res.status(400).json({ error: "No product images provided" });
-    // }
-
-  
     const product = new Product({
       name,
-      id,
-      stock,
+      overview,
       category,
-      description,
-      features,
+      stock,
+      images,
+      origin,
+      moq,
+      pricing,
       specifications,
-      weight_per_unit_in_gm,
-      buy_options,
-      height_in_cm,
-      width_in_cm,
-      //images,
-      //seller_name: "req.user.fullname",
-      //seller_country: "req.user.country",
+      seller_id,
     });
 
     const savedProduct = await product.save();
     res.status(201).json({ message: "Product added successfully", product: savedProduct });
   } catch (error) {
     console.error("Error adding product:", error);
-    res.status(500).json({
-      success:false,
-      error: "Failed to add product"+  error.message
-    });
+    res.status(500).json({ success: false, error: "Failed to add product: " + error.message });
   }
 };
 
-export const getProducts = async (req, res, next) => {
+export const getProducts = async (req, res) => {
   try {
     const products = await Product.find({});
     if (!products || products.length === 0) {
@@ -68,13 +68,12 @@ export const getProducts = async (req, res, next) => {
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 };
 
-export const removeProduct = async (req, res, next) => {
+export const removeProduct = async (req, res) => {
   try {
-    console.log(req.params);
-
     const { productId } = req.params;
     if (!productId) {
       return res.status(400).json({ error: "Product ID is required" });
@@ -86,23 +85,21 @@ export const removeProduct = async (req, res, next) => {
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
-    res.status(500).json({
-      error: "Failed to delete product",
-      message: error.message,
-    });
+    res.status(500).json({ error: "Failed to delete product" });
   }
 };
 
 export const getUserProduct = async (req, res, next) => {
   try {
-    const { seller } = req.params;
-    const products = await Product.find({ seller });
+    const { sellerId } = req.params;
+    const products = await Product.find({ seller: sellerId });
     if (!products || products.length === 0) {
       return res.status(404).json({ error: "No products found" });
     }
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch user products" });
   }
 };
 
@@ -113,28 +110,32 @@ export const updateProduct = async (req, res, next) => {
       return res.status(400).json({ error: "Product ID is required" });
     }
     const {
-      stock,
-      features,
-      specifications,
-      weight_per_unit_in_gm,
-      buy_options,
-      height_in_cm,
-      width_in_cm,
+      name,
+      overview,
       category,
+      stock,
+      images,
+      origin,
+      moq,
+      pricing,
+      specifications,
     } = req.body;
+
     const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      {
-        stock,
-        features,
-        specifications,
-        weight_per_unit_in_gm,
-        buy_options,
-        height_in_cm,
-        width_in_cm,
-        category,
-      },
-      { new: true }
+       productId,
+       {
+         name,
+         overview,
+         category,
+         stock,
+         images,
+         origin,
+         moq,
+         pricing,
+         specifications,
+         updatedAt: Date.now(),
+       },
+       { new: true }
     );
 
     if (!updatedProduct) {
@@ -143,5 +144,6 @@ export const updateProduct = async (req, res, next) => {
     res.json({ message: "Product updated successfully", product: updatedProduct });
   } catch (error) {
     console.error("Error updating product:", error);
+    res.status(500).json({ error: "Failed to update product" });
   }
 };

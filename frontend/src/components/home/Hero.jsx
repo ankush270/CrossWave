@@ -176,7 +176,7 @@ const Hero = () => {
               </motion.button>
             </motion.div>
 
-            {/* Enhanced Stats */}
+            {/* Static Stats Section */}
             <motion.div
               variants={itemVariants}
               className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-700"
@@ -186,26 +186,23 @@ const Hero = () => {
                 { icon: <FaShieldAlt />, value: '99.9%', label: 'Secure Transactions' },
                 { icon: <FaChartLine />, value: '$500M+', label: 'Trade Volume' }
               ].map((stat, index) => (
-                <motion.div
+                <div
                   key={index}
-                  className="text-center"
-                  whileHover={{ y: -5 }}
+                  className="text-center flex flex-col items-center"
                 >
-                  <motion.div
-                    className="text-blue-400 text-2xl mb-2"
-                    animate={{ rotateY: 360 }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
+                  {/* Static icon with proper alignment */}
+                  <div className="text-blue-400 text-3xl mb-3 flex justify-center">
                     {stat.icon}
-                  </motion.div>
-                  <motion.div
-                    className="text-2xl font-bold"
-                    whileHover={{ scale: 1.1 }}
-                  >
+                  </div>
+                  
+                  {/* Value and label */}
+                  <div className="text-2xl font-bold text-white mb-1">
                     {stat.value}
-                  </motion.div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
-                </motion.div>
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {stat.label}
+                  </div>
+                </div>
               ))}
             </motion.div>
           </div>

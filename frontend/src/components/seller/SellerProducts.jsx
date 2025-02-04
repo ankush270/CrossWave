@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaPlus, FaSearch, FaFilter, FaEdit, FaTrash, 
-  FaEllipsisV, FaImage, FaTags, FaBox, FaUpload 
+  FaEllipsisV, FaImage, FaTags, FaBox, FaUpload, FaTimes 
 } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
+import axios from 'axios';
 
 const SellerProducts = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +38,45 @@ const SellerProducts = () => {
     'Tools'
   ];
 
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    overview: '',
+    category: '',
+    stock: '',
+    images: [],
+    origin: '',
+    moq: '',
+    pricing: {
+      sample: {
+        quantity: '',
+        price: '',
+        moq: '',
+        features: []
+      },
+      standard: {
+        quantity: '',
+        price: '',
+        moq: '',
+        features: []
+      },
+      premium: {
+        quantity: '',
+        price: '',
+        moq: '',
+        features: []
+      }
+    },
+    specifications: {
+      technical: {},
+      physical: {}
+    }
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
   const handleEdit = (product) => {
     setSelectedProduct(product);
     setShowAddModal(true);
@@ -53,33 +93,69 @@ const SellerProducts = () => {
     setProductToDelete(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePricingChange = (tier, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      pricing: {
+        ...prev.pricing,
+        [tier]: {
+          ...prev.pricing[tier],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const handleSpecificationChange = (type, key, value) => {
+    setFormData(prev => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [type]: {
+          ...prev.specifications[type],
+          [key]: value
+        }
+      }
+    }));
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    // Handle image upload logic here
+    // You might want to use FormData to upload images to your server
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const productData = {
-      id: selectedProduct ? selectedProduct.id : Date.now(),
-      name: formData.get('name'),
-      category: formData.get('category'),
-      price: Number(formData.get('price')),
-      stock: Number(formData.get('stock')),
-      description: formData.get('description'),
-      status: 'active',
-      image: 'https://placehold.co/300x300', // Replace with actual image upload
-      sales: 0
-    };
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
-    if (selectedProduct) {
-      // Update existing product
-      setProducts(products.map(p => 
-        p.id === selectedProduct.id ? { ...p, ...productData } : p
-      ));
-    } else {
-      // Add new product
-      setProducts([...products, productData]);
+    try {
+      const response = await axios.post('/api/products/add', formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add your authentication token here
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      setSuccess('Product added successfully!');
+      setShowForm(false);
+      // Reset form or handle success
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to add product');
+    } finally {
+      setLoading(false);
     }
-
-    setShowAddModal(false);
-    setSelectedProduct(null);
   };
 
   return (
@@ -94,7 +170,7 @@ const SellerProducts = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAddModal(true)}
+            onClick={() => setShowForm(true)}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2"
           >
             <FaPlus />
@@ -462,6 +538,234 @@ const SellerProducts = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Add Product Form Modal */}
+        {showForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Add New Product</h2>
+                <button 
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Basic Information */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Product Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category
+                    </label>
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      <option value="entertainment">Entertainment</option>
+                      <option value="computing">Computing</option>
+                      <option value="mobile">Mobile Devices</option>
+                      {/* Add more categories */}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Overview */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Product Overview
+                  </label>
+                  <textarea
+                    name="overview"
+                    value={formData.overview}
+                    onChange={handleInputChange}
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                {/* Stock and MOQ */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      name="stock"
+                      value={formData.stock}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Minimum Order Quantity
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="moq"
+                      value={formData.moq}
+                      onChange={(e) => {
+                        // Prevent negative values
+                        const value = Math.max(0, parseInt(e.target.value) || 0);
+                        setFormData(prev => ({
+                          ...prev,
+                          moq: value
+                        }));
+                      }}
+                      min="1" // Set minimum value to 1
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      required
+                      onKeyPress={(e) => {
+                        // Prevent negative sign and decimal point
+                        if (e.key === '-' || e.key === '.') {
+                          e.preventDefault();
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Minimum order quantity must be at least 1
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pricing Tiers */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Pricing Tiers</h3>
+                  {['sample', 'standard', 'premium'].map((tier) => (
+                    <div key={tier} className="border border-gray-200 rounded-lg p-4">
+                      <h4 className="text-md font-medium capitalize mb-4">{tier} Pricing</h4>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">Quantity Range</label>
+                          <input
+                            type="text"
+                            value={formData.pricing[tier].quantity}
+                            onChange={(e) => handlePricingChange(tier, 'quantity', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            placeholder="e.g., 1-10 units"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">Price per Unit</label>
+                          <input
+                            type="text"
+                            value={formData.pricing[tier].price}
+                            onChange={(e) => handlePricingChange(tier, 'price', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            placeholder="e.g., $99.99"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">MOQ for Tier</label>
+                          <input
+                            type="number"
+                            value={formData.pricing[tier].moq}
+                            onChange={(e) => {
+                              // Prevent negative values
+                              const value = Math.max(1, parseInt(e.target.value) || 1);
+                              handlePricingChange(tier, 'moq', value);
+                            }}
+                            min="1"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            onKeyPress={(e) => {
+                              // Prevent negative sign and decimal point
+                              if (e.key === '-' || e.key === '.') {
+                                e.preventDefault();
+                              }
+                            }}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Minimum value: 1
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Product Images
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="cursor-pointer flex flex-col items-center"
+                    >
+                      <FaUpload className="text-3xl text-gray-400 mb-2" />
+                      <span className="text-gray-600">Click to upload images</span>
+                      <span className="text-sm text-gray-500">or drag and drop</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {loading ? 'Adding Product...' : 'Add Product'}
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="text-red-500 text-sm mt-2">{error}</div>
+                )}
+                {success && (
+                  <div className="text-green-500 text-sm mt-2">{success}</div>
+                )}
+              </form>
+            </motion.div>
+          </div>
+        )}
       </div>
     </div>
   );
