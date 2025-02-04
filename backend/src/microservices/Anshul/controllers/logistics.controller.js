@@ -29,9 +29,8 @@ export const createShipment = async (req, res, next) => {
     console.log(shipment.data.transactionId);
     
 
-    const newShipment = await new Logistics({
-      // transactionId: shipment.data.transactionId,
-      transactionId: "shipment.data.transactionId",
+    const newShipment = new Logistics({
+      transactionId: shipment.data.transactionId,
 
       trackingNumber: data.masterTrackingNumber,
 
