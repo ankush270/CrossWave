@@ -59,8 +59,8 @@ const SellerProducts = () => {
       },
     },
     specifications: {
-      technical: [],
-      physical: [],
+      technical: [{ key: "", value: "" }],
+      physical: [{ key: "", value: "" }],
     },
   });
 
@@ -102,7 +102,7 @@ const SellerProducts = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Anshul");
+    console.log(data);
 
     const productData = {
       // id: selectedProduct ? selectedProduct.id : Date.now(),
@@ -157,6 +157,38 @@ const SellerProducts = () => {
     const file = Array.from(e.target.files);
     setData((prev) => ({
       images: [...prev.images, ...file],
+    }));
+  };
+
+  const handleSpecificationChange = (type, index, field, value) => {
+    setData((prev) => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [type]: prev.specifications[type].map((spec, i) =>
+          i === index ? { ...spec, [field]: value } : spec
+        ),
+      },
+    }));
+  };
+
+  const addNewSpecification = (type) => {
+    setData((prev) => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [type]: [...prev.specifications[type], { key: "", value: "" }],
+      },
+    }));
+  };
+
+  const removeSpecification = (type, index) => {
+    setData((prev) => ({
+      ...prev,
+      specifications: {
+        ...prev.specifications,
+        [type]: prev.specifications[type].filter((_, i) => i !== index),
+      },
     }));
   };
 
@@ -706,49 +738,131 @@ const SellerProducts = () => {
                         </h4>
 
                         {/* Technical Specs */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Technical Specifications
-                          </label>
-                          <textarea
-                            value={data.specifications.technical.join("\n")}
-                            required
-                            onChange={(e) =>
-                              setData((prev) => ({
-                                ...prev,
-                                specifications: {
-                                  ...prev.specifications,
-                                  technical: e.target.value.split("\n"),
-                                },
-                              }))
-                            }
-                            placeholder="Enter each specification on a new line"
-                            rows={4}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Technical Specifications
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => addNewSpecification("technical")}
+                              className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                            >
+                              Add New
+                            </button>
+                          </div>
+                          {data.specifications.technical.map((spec, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-4 items-center"
+                            >
+                              <div className="flex gap-4 items-center w-[90%]">
+                                <input
+                                  type="text"
+                                  placeholder="Specification Name"
+                                  value={spec.key}
+                                  onChange={(e) =>
+                                    handleSpecificationChange(
+                                      "technical",
+                                      index,
+                                      "key",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Value"
+                                  value={spec.value}
+                                  onChange={(e) =>
+                                    handleSpecificationChange(
+                                      "technical",
+                                      index,
+                                      "value",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                              </div>
+                              {index > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeSpecification("technical", index)
+                                  }
+                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                >
+                                  <FaTrash />
+                                </button>
+                              )}
+                            </div>
+                          ))}
                         </div>
 
                         {/* Physical Specs */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Physical Specifications
-                          </label>
-                          <textarea
-                            value={data.specifications.physical.join("\n")}
-                            required
-                            onChange={(e) =>
-                              setData((prev) => ({
-                                ...prev,
-                                specifications: {
-                                  ...prev.specifications,
-                                  physical: e.target.value.split("\n"),
-                                },
-                              }))
-                            }
-                            placeholder="Enter each specification on a new line"
-                            rows={4}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          />
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Physical Specifications
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => addNewSpecification("physical")}
+                              className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                            >
+                              Add New
+                            </button>
+                          </div>
+                          {data.specifications.physical.map((spec, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-4 items-center"
+                            >
+                              <div className="flex gap-4 items-center w-[90%]">
+                                <input
+                                  type="text"
+                                  placeholder="Specification Name"
+                                  value={spec.key}
+                                  onChange={(e) =>
+                                    handleSpecificationChange(
+                                      "physical",
+                                      index,
+                                      "key",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Value"
+                                  value={spec.value}
+                                  onChange={(e) =>
+                                    handleSpecificationChange(
+                                      "physical",
+                                      index,
+                                      "value",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                              </div>
+                              {index > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeSpecification("physical", index)
+                                  }
+                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                                >
+                                  <FaTrash />
+                                </button>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
 

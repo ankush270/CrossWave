@@ -45,7 +45,7 @@ const Chat = ({ product, isOpen, onClose }) => {
     socket.emit("sendMessage", newMessage);
 
     try {
-      const response = await axios.post("http://localhost:3000/chat/send-message", newMessage);
+      const response = axios.post("http://localhost:3000/chat/send-message", newMessage);
       if (response.data.success) {
         // setMessages((prev) => [...prev, response.data.newMessage]);
       } else {
