@@ -16,8 +16,12 @@ import {
   requiredDocumentsIndia,
   requiredDocumentsUAE,
 } from "../../constants/documents.js";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
+// import prisma from "../../../../backend/src/config/prisma_db.js";
 
 const BuyerCompliance = () => {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("overview");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState("");
@@ -99,7 +103,7 @@ const BuyerCompliance = () => {
         // formData.append("expiryDate", "2025-12-31"); // Adjust as needed
 
         // API call
-        fetch("http://localhost:3000/docs/upload/17", {
+        fetch(`http://localhost:3000/docs/upload/${user.id}`, {
           method: "POST",
           body: formData,
         })
@@ -108,7 +112,7 @@ const BuyerCompliance = () => {
             response = response.json();
             return response;
           })
-          .then((data) => {
+          .then(async (data) => {
             if (data.error) {
               console.log("Error Verifyinig document!!");
               alert(

@@ -3,6 +3,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import uploadService from "../services/upload.service.js";
+import prisma from "../../../config/prisma_db.js";
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -41,10 +42,53 @@ export const upload = multer({
   },
 });
 
+const requiredDocuments = {
+  indian: [
+    "iec",
+    "cic",
+    "bis",
+    "cic",
+    "shipping",
+    "tradeLicense",
+    "gstin",
+    "cic",
+  ],
+  uae: ["UAEid", "UAEvat", "UAEesma", "UAEcoo"],
+  personal: ["aadhaar", "pan"],
+};
+
+async function checkUploadedDocuments(userId) {
+  try {
+    const userDocs = await Document.findOne({ userId });
+
+    if (!userDocs || !userDocs.documents) {
+      return { indian: false, uae: false, personal: false }; // No documents uploaded
+    }
+
+    const uploadedStatus = {};
+
+    for (const category in requiredDocuments) {
+      uploadedStatus[category] = requiredDocuments[category].every(
+        (doc) =>
+          userDocs.documents[doc] &&
+          userDocs.documents[doc].status !== "NOT_UPLOADED"
+      );
+    }
+
+    return uploadedStatus;
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return { indian: false, uae: false, personal: false };
+  }
+}
+
 export const uploadDocument = async (req, res) => {
   try {
     const { documentType } = req.body;
     const files = req.files;
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+    });
 
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -76,6 +120,34 @@ export const uploadDocument = async (req, res) => {
     //     if (err) console.error('Error deleting temporary file:', err);
     //   });
     // });
+
+    // check if all required documents are uploaded
+    const userDocsStatus = await checkUploadedDocuments(req.params.userId);
+    if (
+      userDocsStatus.indian ||
+      userDocsStatus.uae ||
+      userDocsStatus.personal
+    ) {
+      const updates = {};
+      if (
+        (userDocsStatus.indian || userDocsStatus.uae) &&
+        !user.is_company_docs_done
+      ) {
+        updates.is_company_docs_done = true;
+      }
+
+      if (userDocsStatus.personal && !user.is_personal_docs_done) {
+        updates.personal = true;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const updatedUser = await prisma.user.update({
+          where: { id: user.id },
+          data: updates,
+        });
+        console.log("User updated:", updatedUser);
+      }
+    }
 
     res.status(201).json(document);
   } catch (error) {

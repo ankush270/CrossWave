@@ -2,7 +2,7 @@ import cloudinary from "../config/cloudinary.config.js";
 import Document from "../models/document.model.js";
 import fs from "fs";
 import { verifyDocument } from "../../kyc/document_verify/main.js";
-
+import prisma from "../../../config/prisma_db.js";
 class UploadService {
   async uploadFiles(files, userId, documentDetails) {
     try {
@@ -17,6 +17,14 @@ class UploadService {
           documents: {},
         });
       }
+
+      // add to user document record
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          documentDocId: userDocs._id,
+        },
+      });
 
       const file = files[0]; // Since we're only handling one file at a time
       // console.log("FILEPATH : ", file.path);
