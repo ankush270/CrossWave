@@ -102,7 +102,7 @@ const SellerAnalytics = () => {
             ))}
           </div>
 
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
               initial={{ opacity: 0, y: 20 }}

@@ -105,6 +105,7 @@ export async function LLMverifyDocument(filePath, documentType) {
   });
 
   // One-shot prompting: pass a text instruction along with the file data.
+  console.log(process.env.GEMINI_API_KEY)
   const result = await docModel.generateContent({
     contents: [
       {

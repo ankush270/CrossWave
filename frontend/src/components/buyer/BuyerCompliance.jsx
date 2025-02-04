@@ -16,8 +16,12 @@ import {
   requiredDocumentsIndia,
   requiredDocumentsUAE,
 } from "../../constants/documents.js";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
+// import prisma from "../../../../backend/src/config/prisma_db.js";
 
 const BuyerCompliance = () => {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("overview");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState("");
@@ -84,7 +88,7 @@ const BuyerCompliance = () => {
   //   }, 300);
   // };
 
-  const handleFileUpload = (file) => {
+  const handleFileUpload = async (file) => {
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -97,18 +101,19 @@ const BuyerCompliance = () => {
         formData.append("files", file); // Ensure "files" is the key name
         formData.append("documentType", selectedDocType || file.name);
         // formData.append("expiryDate", "2025-12-31"); // Adjust as needed
-
+        console.log(formData);
         // API call
-        fetch("http://localhost:3000/docs/upload/17", {
+        fetch(`http://localhost:3000/docs/upload/${user.id}`, {
           method: "POST",
           body: formData,
         })
           .then((response) => {
             console.log(response);
-            response = response.json();
-            return response;
+            return response.json();
           })
-          .then((data) => {
+          .then(async (data) => {
+            console.log(data);
+
             if (data.error) {
               console.log("Error Verifyinig document!!");
               alert(

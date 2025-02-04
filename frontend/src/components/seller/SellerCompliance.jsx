@@ -166,6 +166,21 @@ const SellerCompliance = () => {
   });
 
   return (
+// conflicts
+    // <div className="relative min-h-screen">
+    //   <DashboardBackground />
+      
+    //   {/* Main Content */}
+    //   <div className="relative z-10 space-y-6 p-6">
+    //     {/* Header */}
+    //     <div className="flex justify-between items-center">
+    //       <h2 className="text-2xl font-bold text-black">Compliance Management</h2>
+    //       <motion.button
+    //         whileHover={{ scale: 1.05 }}
+    //         whileTap={{ scale: 0.95 }}
+    //         onClick={handleUploadClick}
+    //         className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2"
+// conflicts end
     <div className="space-y-6">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -174,6 +189,7 @@ const SellerCompliance = () => {
             key={index}
             whileHover={{ scale: 1.02, translateY: -5 }}
             className={`bg-white rounded-xl shadow-sm border border-${stat.color}-100 p-6`}
+
           >
             <div className="flex items-center justify-between">
               <div>

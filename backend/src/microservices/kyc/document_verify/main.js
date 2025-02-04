@@ -49,7 +49,7 @@ export async function verifyDocument(filePath, docType) {
     } catch (e) {
       console.log(e);
     }
-    // console.log("OCR Extracted Text:", extractedText);
+    console.log("OCR Extracted Text:", extractedText);
 
     // 2. Retrieve the expected regex patterns for this document type.
     const checks = getFuncForDocType(docType);
@@ -72,6 +72,7 @@ export async function verifyDocument(filePath, docType) {
     //   verified: false,
     //   method: "ocr",
     // };
+    console.log("Calling LLM")
     // 3. Call the LLM API for further verification if OCR failed.
     const fullDocTypeName = docTypeDetails[docType] || docType;
     const llmResult = await LLMverifyDocument(filePath, fullDocTypeName);
