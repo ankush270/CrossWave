@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
 
@@ -12,6 +12,17 @@ const Chat = ({ product, isOpen, onClose }) => {
       timestamp: new Date()
     }
   ]);
+
+  // auto scroll to bottom
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -84,6 +95,7 @@ const Chat = ({ product, isOpen, onClose }) => {
                 </div>
               </motion.div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Message Input */}
@@ -110,4 +122,4 @@ const Chat = ({ product, isOpen, onClose }) => {
   );
 };
 
-export default Chat; 
+export default Chat;

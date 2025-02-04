@@ -6,6 +6,15 @@ import {
 } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
 
+// Add this CSS at the beginning of your component
+const scrollbarHiddenStyles = {
+  scrollbarWidth: 'none', /* Firefox */
+  msOverflowStyle: 'none',  /* IE and Edge */
+  '&::-webkit-scrollbar': { 
+    display: 'none'  /* Chrome, Safari and Opera */
+  }
+}
+
 const SellerMessages = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,7 +57,7 @@ const SellerMessages = () => {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative h-screen">
       <DashboardBackground />
       
       {/* Main Content */}
@@ -72,7 +81,7 @@ const SellerMessages = () => {
               </div>
 
               {/* Chats List */}
-              <div className="overflow-y-auto h-[calc(100%-73px)]">
+              <div className="overflow-y-auto h-[calc(100%-73px)] overflow-y-auto " style={scrollbarHiddenStyles}>
                 {chats.map((chat) => (
                   <motion.div
                     key={chat.id}
