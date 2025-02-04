@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import p1 from '../assets/p1.jpg';
-import p2 from '../assets/p2.jpg';
-import p3 from '../assets/p3.jpg';
-import p4 from '../assets/p4.jpg';
-import {
-  FaShoppingCart, FaHeart, FaShare, FaStar, FaTruck, FaShieldAlt,
-  FaUndo, FaInfoCircle, FaBox, FaGlobe, FaFileContract, FaHandshake,
-  FaCertificate, FaWarehouse, FaChartLine, FaDownload, FaCheckCircle
-} from 'react-icons/fa';
-import { productsData } from '../data/productsData';
+import { FaShoppingCart, FaFileContract, FaHandshake } from 'react-icons/fa';
+// import { productsData } from '../data/productsData';
+import ProductGallery from '../components/product/ProductGallery';
+import ProductInfo from '../components/product/ProductInfo';
+import PricingTiers from '../components/product/PricingTiers';
+import ProductTabs from '../components/product/ProductTabs';
 import RequestQuote from '../components/RequestQuote';
 import Chat from '../components/Chat';
+import {productAPI} from "../api/api.js";
+import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
 
 const Product = () => {
   const { id } = useParams();
@@ -23,15 +21,27 @@ const Product = () => {
   const [selectedPricing, setPricingTier] = useState('standard');
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  console.log(JSON.stringify(product))
 
   useEffect(() => {
-    const foundProduct = productsData.find(p => p.id === parseInt(id));
-    if (foundProduct) {
-      setProduct(foundProduct);
-    } else {
-      navigate('/products');
+    const fetchCurrentProduct = async () => {
+      try{
+        const { data } = await productAPI.getProductById(id);
+        console.log("data: ", data);
+        setProduct(data);
+      }catch (e) {
+        console.log("An error occurred while fetching: " + e.message);
+        navigate('/products');
+      }finally {
+        setLoading(false);
+      }
     }
-  }, [id, navigate]);
+
+    fetchCurrentProduct();
+  }, [])
+
 
   if (!product) {
     return (
@@ -58,59 +68,6 @@ const Product = () => {
   };
 
   // Add this after the pricing tiers section
-  const PriceBreakdown = ({ pricing, selectedPricing }) => {
-    const quantity = parseInt(pricing[selectedPricing].moq);
-    const breakdown = calculatePriceBreakdown(pricing[selectedPricing].price, quantity);
-
-    return (
-      <motion.div 
-        className="mt-6 bg-gray-50 rounded-lg p-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h4 className="font-semibold mb-4">Price Breakdown</h4>
-        <div className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Base Price (per unit)</span>
-            <span className="font-medium">₹{breakdown.unitPrice.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Quantity</span>
-            <span className="font-medium">{quantity} units</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">₹{breakdown.subtotal.toFixed(2)}</span>
-          </div>
-          <div className="h-px bg-gray-200 my-2"></div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Platform Fee (₹20/unit)</span>
-            <span className="font-medium">₹{breakdown.platformFee.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Custom Duty (5%)</span>
-            <span className="font-medium">₹{breakdown.customDuty.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">GST (5%)</span>
-            <span className="font-medium">₹{breakdown.gst.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Insurance (3%)</span>
-            <span className="font-medium">₹{breakdown.insurance.toFixed(2)}</span>
-          </div>
-          <div className="h-px bg-gray-200 my-2"></div>
-          <div className="flex justify-between font-semibold">
-            <span>Total Amount</span>
-            <span className="text-blue-600">₹{breakdown.total.toFixed(2)}</span>
-          </div>
-          <div className="text-xs text-gray-500 mt-2">
-            * All prices are inclusive of taxes and fees
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
 
   // Add this check for the image gallery
   const renderImageGallery = () => {
@@ -183,30 +140,9 @@ const Product = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20 pb-24 relative overflow-hidden">
-      {/* Animated Background Elements - Similar to Products.jsx */}
-      <div className="fixed inset-0 z-0">
-        {/* Circuit Pattern */}
-        <div className="absolute inset-0 bg-repeat opacity-5" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80h-80z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M30 30h40v40h-40z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M20 10v80M40 10v80M60 10v80M80 10v80' stroke='%234B5563' stroke-width='0.5'/%3E%3Cpath d='M10 20h80M10 40h80M10 60h80M10 80h80' stroke='%234B5563' stroke-width='0.5'/%3E%3C/svg%3E")`
-        }} />
-
-        {/* Animated Gradient Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-
-        {/* Animated Lines */}
-        <div className="absolute inset-0">
-          <div className="absolute left-0 top-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
-          <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
-          <div className="absolute left-0 bottom-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
-          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb with enhanced design */}
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb Navigation */}
         <motion.nav 
           className="mb-8 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm"
           initial={{ opacity: 0, y: -10 }}
@@ -221,89 +157,35 @@ const Product = () => {
           </ol>
         </motion.nav>
 
-        {/* Order Overview with Glass Effect */}
+        {/* Product Overview with Glass Effect */}
         <div className="grid lg:grid-cols-2 gap-12 mb-12">
-          {/* Image Gallery with Enhanced Design */}
+          {/* Image Gallery */}
           <motion.div 
             className="space-y-4 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            {renderImageGallery()}
+            <ProductGallery 
+              product={product} 
+              selectedImage={selectedImage} 
+              setSelectedImage={setSelectedImage} 
+            />
           </motion.div>
 
-          {/* Order Info with Glass Effect */}
+          {/* Product Info */}
           <motion.div 
             className="space-y-6 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <div>
-              <motion.div className="flex items-center gap-4 mb-2">
-                <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
-                  {product.category}
-                </span>
-                <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-sm font-medium">
-                  In Stock
-                </span>
-              </motion.div>
-              
-              <motion.h1 
-                className="text-3xl font-bold text-gray-900"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                {product.name}
-              </motion.h1>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <FaGlobe />
-                  <span>Made in {product.origin}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FaBox />
-                  <span>MOQ: {product.moq} units</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FaTruck />
-                  <span>Lead Time: {product.leadTime}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FaCertificate />
-                  <span>
-                    {product.certifications ? product.certifications.join(", ") : "N/A"}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <ProductInfo product={product} />
 
             {/* Pricing Tiers */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Select Pricing Tier</h3>
-              <div className="grid grid-cols-3 gap-4">
-                {Object.entries(product.pricing).map(([tier, details]) => (
-                  <motion.button
-                    key={tier}
-                    className={`p-4 rounded-lg border-2 text-left ${
-                      selectedPricing === tier 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 hover:border-blue-200'
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => setPricingTier(tier)}
-                  >
-                    <div className="font-semibold capitalize mb-2">{tier}</div>
-                    <div className="text-2xl font-bold text-blue-600 mb-2">{details.price}</div>
-                    <div className="text-sm text-gray-600">MOQ: {details.moq}</div>
-                  </motion.button>
-                ))}
-              </div>
-              
-              {/* Add the Price Breakdown component here */}
-              <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
-            </div>
+            <PricingTiers 
+              product={product} 
+              selectedPricing={selectedPricing} 
+              setPricingTier={setPricingTier} 
+            />
 
             {/* Action Buttons */}
             <div className="flex gap-4 mt-6">
@@ -340,156 +222,30 @@ const Product = () => {
           </motion.div>
         </div>
 
-        {/* Detailed Information Tabs with Glass Effect */}
-        <motion.div 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {/* Enhanced Tab Navigation */}
-          <div className="flex gap-8 border-b border-gray-200/50 mb-6">
-            {['overview', 'specifications', 'market-insights', 'documentation'].map((tab) => (
-              <motion.button
-                key={tab}
-                className={`px-4 py-2 capitalize relative ${
-                  selectedTab === tab 
-                    ? 'text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                onClick={() => setSelectedTab(tab)}
-                whileHover={{ y: -2 }}
-              >
-                {tab.replace('-', ' ')}
-                {selectedTab === tab && (
-                  <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
-                    layoutId="activeTab"
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Tab Content with Animation */}
-          <motion.div
-            key={selectedTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="prose prose-blue max-w-none"
-          >
-            {selectedTab === 'overview' && (
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Product Features</h3>
-                  <ul className="space-y-2">
-                    {product.pricing[selectedPricing].features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <FaCheckCircle className="text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Certifications</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {(product.certifications || []).map((cert, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <FaCertificate className="text-blue-500" />
-                        {cert}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {selectedTab === 'specifications' && (
-              <div className="grid md:grid-cols-2 gap-8">
-                {product.specifications && (
-                  <>
-                    {renderSpecifications(product.specifications.technical, 'Technical Specifications')}
-                    {renderSpecifications(product.specifications.physical, 'Physical Specifications')}
-                  </>
-                )}
-              </div>
-            )}
-
-            {selectedTab === 'market-insights' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold mb-4">Market Analysis</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {Object.entries(product.marketInsights).map(([key, value]) => (
-                    <div key={key} className="bg-gray-50 p-4 rounded-lg">
-                      <div className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</div>
-                      <div className="text-2xl font-bold text-blue-600">{value}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-8">
-                  <h4 className="font-semibold mb-4">Market Trend Analysis</h4>
-                  {/* Add your market trend chart here */}
-                </div>
-              </div>
-            )}
-
-            {selectedTab === 'documentation' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold mb-4">Available Documents</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { name: "Technical Datasheet", size: "2.5 MB" },
-                    { name: "Compliance Certificate", size: "1.2 MB" },
-                    { name: "User Manual", size: "3.8 MB" },
-                    { name: "Integration Guide", size: "1.7 MB" }
-                  ].map((doc, index) => (
-                    <motion.button
-                      key={index}
-                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-500"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <FaDownload className="text-blue-500" />
-                        <div className="text-left">
-                          <div className="font-medium">{doc.name}</div>
-                          <div className="text-sm text-gray-500">{doc.size}</div>
-                        </div>
-                      </div>
-                      <span className="text-blue-600">Download</span>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-
+        {/* Product Tabs */}
+        <ProductTabs 
+          selectedTab={selectedTab} 
+          setSelectedTab={setSelectedTab} 
+          product={product} 
+        />
         {/* Price Breakdown Section */}
-        <motion.div 
-          className="mt-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
-        </motion.div>
+        <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
 
         {/* Bottom Gradient */}
         <div className="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />
       </div>
 
-      {/* Add Modals */}
+      {/* Modals */}
       <RequestQuote 
         product={product}
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
       />
-      <Chat 
-        product={product}
-        isOpen={showChatModal}
-        onClose={() => setShowChatModal(false)}
-      />
+      {/*<Chat */}
+      {/*  product={product}*/}
+      {/*  isOpen={showChatModal}*/}
+      {/*  onClose={() => setShowChatModal(false)}*/}
+      {/*/>*/}
     </div>
   );
 };

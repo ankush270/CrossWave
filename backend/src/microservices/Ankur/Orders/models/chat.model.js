@@ -9,6 +9,10 @@ const negotiationSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    requirements: {
+        type: String,
+        required: true
+    },
     proposedBy: {
         userId: {
             type: String,
@@ -55,6 +59,7 @@ const chatSchema = new mongoose.Schema({
     negotiations: [negotiationSchema],
     finalPrice: Number,
     finalQuantity: Number,
+    finalRequirements: String,
     updatedAt: {
         type: Date,
         default: Date.now
