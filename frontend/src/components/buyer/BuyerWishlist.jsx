@@ -147,7 +147,7 @@ const BuyerWishlist = () => {
       </div>
 
       {/* Content Area */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {activeTab === 'wishlist' ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
