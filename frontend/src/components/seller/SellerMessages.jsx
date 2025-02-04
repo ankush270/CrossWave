@@ -6,17 +6,6 @@ import {
 } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
 
-import axios from "axios";
-import { io } from "socket.io-client";
-import {useAuth} from '../../contexts/AuthContext';
-const socket = io("http://localhost:3000" ,  {
-  transports: ["websocket"], // ✅ Enforce WebSocket transport
-  withCredentials: true,
-}); // Connect to backend
-
-
-
-
 const SellerMessages = () => {
   const [selectedChat, setSelectedChat] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,7 +152,7 @@ const SellerMessages = () => {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative h-screen">
       <DashboardBackground />
       
       {/* Main Content */}
@@ -187,7 +176,7 @@ const SellerMessages = () => {
               </div>
 
               {/* Chats List */}
-              <div className="overflow-y-auto h-[calc(100%-73px)]">
+              <div className="overflow-y-auto h-[calc(100%-73px)] overflow-y-auto " style={scrollbarHiddenStyles}>
                 {chats.map((chat) => (
                   <motion.div
                     key={chat._id}

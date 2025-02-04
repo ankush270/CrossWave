@@ -16,8 +16,12 @@ import {
   requiredDocumentsIndia,
   requiredDocumentsUAE,
 } from "../../constants/documents.js";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
+// import prisma from "../../../../backend/src/config/prisma_db.js";
 
 const BuyerCompliance = () => {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("overview");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState("");
@@ -53,23 +57,6 @@ const BuyerCompliance = () => {
     },
   ];
 
-  const documents = [
-    {
-      id: 1,
-      name: "Business Registration",
-      status: "verified",
-      expiryDate: "2025-12-31",
-      lastUpdated: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Import License",
-      status: "pending",
-      expiryDate: "2024-12-31",
-      lastUpdated: "2024-02-01",
-    },
-  ];
-
   // const handleUploadClick = () => {
   //   setSelectedDocType('');
   //   setShowUploadModal(true);
@@ -101,7 +88,7 @@ const BuyerCompliance = () => {
   //   }, 300);
   // };
 
-  const handleFileUpload = (file) => {
+  const handleFileUpload = async (file) => {
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -114,27 +101,37 @@ const BuyerCompliance = () => {
         formData.append("files", file); // Ensure "files" is the key name
         formData.append("documentType", selectedDocType || file.name);
         // formData.append("expiryDate", "2025-12-31"); // Adjust as needed
-
+        console.log(formData);
         // API call
-        fetch("http://localhost:3000/docs/upload/17", {
+        fetch(`http://localhost:3000/docs/upload/${user.id}`, {
           method: "POST",
           body: formData,
         })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Upload successful:", data);
+          .then((response) => {
+            console.log(response);
+            return response.json();
+          })
+          .then(async (data) => {
+            console.log(data);
 
-            // Add document to uploaded list
-            const newDoc = {
-              id: Date.now(),
-              name: selectedDocType || file.name,
-              status: "pending",
-              expiryDate: "2025-12-31",
-              lastUpdated: new Date().toISOString().split("T")[0],
-              file: file,
-            };
-
-            setUploadedDocuments((prev) => [...prev, newDoc]);
+            if (data.error) {
+              console.log("Error Verifyinig document!!");
+              alert(
+                "We could not verify your document. Either you uploaded a wrong document or the image is not clear enough."
+              );
+            } else {
+              console.log("Upload successful:", data);
+              // Add document to uploaded list
+              const newDoc = {
+                id: Date.now(),
+                name: selectedDocType || file.name,
+                status: "VERIFIED",
+                // expiryDate: "2025-12-31",
+                lastUpdated: new Date().toISOString().split("T")[0],
+                file: file,
+              };
+              setUploadedDocuments((prev) => [...prev, newDoc]);
+            }
           })
           .catch((error) => console.error("Upload failed:", error))
           .finally(() => {
@@ -228,7 +225,7 @@ const BuyerCompliance = () => {
           <div className="space-y-4">
             {documentList.map((doc) => {
               const isUploaded = uploadedDocuments.some(
-                (uploaded) => uploaded.name === doc.name
+                (uploaded) => uploaded.name === doc.id
               );
               return (
                 <div

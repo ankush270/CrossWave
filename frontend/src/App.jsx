@@ -8,16 +8,6 @@ import SignUp from "./pages/SignUp";
 import Buyer from "./pages/Buyer";
 import Seller from "./pages/Seller";
 import Product from "./pages/Product";
-import SellerProducts from "./pages/SellerProducts";
-import Payments from "./pages/Payments";
-import BuyerPayments from "./pages/BuyerPayments";
-import Logistics from "./pages/Logistics";
-import SellerLogistics from "./pages/SellerLogistics";
-import BuyerAnalytics from "./pages/BuyerAnalytics";
-import SellerAnalytics from "./pages/SellerAnalytics";
-import ComplianceManager from "./pages/ComplianceManager";
-import BuyerProfile from "./pages/BuyerProfile";
-import SellerProfile from "./pages/SellerProfile";
 import FeedbackForm from "./pages/FeedbackForm";
 import Settings from "./pages/Settings";
 import HelpCenter from "./pages/HelpCenter";
@@ -51,7 +41,8 @@ const App = () => {
     "/kyc",
     "/pay-now",
     "/paymet-success",
-    "/paymet-failure"
+    "/paymet-failure",
+    "/product/:id"
   ];
 
   return (
@@ -93,12 +84,6 @@ const App = () => {
 
             {/* Buyer Routes */}
             <Route path="/buyer/dashboard" element={<Buyer />} />
-            {/* <Route path="/buyer/payments" element={<BuyerPayments />} />
-            <Route path="/buyer/analytics" element={<BuyerAnalytics />} />
-            <Route path="/buyer/compliance" element={<ComplianceManager />} />
-             */}
-
-            <Route path="/buyer/profile" element={<BuyerProfile />} />  
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Seller />} />
@@ -109,7 +94,7 @@ const App = () => {
             <Route path="/seller/compliance" element={<ComplianceManager />} />
             
              */}
-             <Route path="/seller/profile" element={<SellerProfile />} />
+             {/* <Route path="/seller/profile" element={<SellerProfile />} /> */}
             {/* Shared Routes */}
             {/* <Route path="/logistics" element={<Logistics />} /> */}
             <Route path="/feedback" element={<FeedbackForm />} />

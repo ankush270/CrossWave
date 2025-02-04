@@ -1,4 +1,4 @@
-import React, { useState , useEffect , useRef} from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
 import axios from "axios";
@@ -12,82 +12,16 @@ const socket = io("http://localhost:3000", {
 const Chat = ({ product, isOpen, onClose }) => {
   const {user} = useAuth();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [chatId, setChatId] = useState(null);
-  cosnt [userId, setUserId] = useState("");
-  const userType = "buyer";
-
-  // hard coded
-  const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
-  const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
-
-  console.log("user data in chat page :" , user);
-
-    // Extract user Id from user
-    useEffect(() => {
-        try {
-          setUserId(user.id);
-        } catch (error) {
-          console.error("Invalid User Data", error);
-        }
-    }, []);
-
-    console.log("User Type : ", userType);
-
-    useEffect(() => {
-      if (buyerId && sellerId) {
-        fetchChatHistory();
-      }
-    }, [buyerId, sellerId]);
-  
-    const fetchChatHistory = async () => {
-
-      console.log( " buyer id in fetch function  :", buyerId );
-      console.log( " seller id in fetch function :", sellerId );
-      
-      try {
-        const response = await axios.post(
-          "http://localhost:3000/chat/get-or-create-chat",
-          { buyerId, sellerId }
-        );
-        if (response.data.success) {
-          console.log("chatId is :" , response.data.chatId)
-          setChatId(response.data.chatId);
-          setMessages(response.data.messages || []);
-        }
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    };
-
-     // Ensure socket joins the chat room after chatId is set
-  useEffect(() => {
-    if (chatId) {
-      console.log(`Joining chat room: ${chatId}`);
-      socket.emit("join_chat", { chatId });
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      sender: 'system',
+      text: 'You are now connected with the supplier.',
+      timestamp: new Date()
     }
-  }, [chatId]);
+  ]);
 
-  // Listen for incoming messages
-  useEffect(() => {
-    if (!chatId) return;
-
-    const handleMessageReceive = (data) => {
-      console.log("Received message:", data);
-      setMessages((prevMessages) => [...prevMessages, data]); // ✅ Update messages correctly
-    };
-
-    socket.on("receiveMessage", handleMessageReceive);
-
-    return () => {
-      socket.off("receiveMessage", handleMessageReceive);
-    };
-  }, [chatId]);
-
-
-
-
-  const handleSend = async (e) => {
+  const handleSend = (e) => {
     e.preventDefault();
 
     if (message.trim() === "" || !chatId || !userType) {
@@ -111,7 +45,7 @@ const Chat = ({ product, isOpen, onClose }) => {
     socket.emit("sendMessage", newMessage);
 
     try {
-      const response = await axios.post("http://localhost:3000/chat/send-message", newMessage);
+      const response = axios.post("http://localhost:3000/chat/send-message", newMessage);
       if (response.data.success) {
         // setMessages((prev) => [...prev, response.data.newMessage]);
       } else {
@@ -187,7 +121,6 @@ const Chat = ({ product, isOpen, onClose }) => {
                 </div>
               </motion.div>
             ))}
-            {/* <div ref={messagesEndRef}></div> */}
           </div>
 
           {/* Message Input */}
@@ -214,4 +147,4 @@ const Chat = ({ product, isOpen, onClose }) => {
   );
 };
 
-export default Chat; 
+export default Chat;

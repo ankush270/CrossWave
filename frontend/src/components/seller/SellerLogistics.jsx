@@ -51,6 +51,7 @@ const SellerLogistics = () => {
       status: 'in-transit',
       eta: '2024-02-25'
     },
+    
     // Add more shipments...
   ];
 
