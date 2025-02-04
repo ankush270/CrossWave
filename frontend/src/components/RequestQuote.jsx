@@ -1,21 +1,46 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaFileContract, FaBox } from 'react-icons/fa';
+import { FaTimes, FaFileContract } from 'react-icons/fa';
 
-const RequestQuote = ({ product, isOpen, onClose }) => {
+const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
   const [formData, setFormData] = useState({
+    productId: product?.id || '',
+    productName: product?.name || '',
+    initialPrice: '',
     quantity: '',
-    targetPrice: '',
     requirements: '',
-    deliveryLocation: '',
-    timeframe: 'immediate',
-    additionalNotes: ''
   });
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle quote request submission
-    console.log('Quote requested:', formData);
+    
+    if (!currentUser) {
+      setError('Please login to submit a quote request');
+      return;
+    }
+
+    setError('');
+    
+    const chatData = {
+      productId: formData.productId,
+      productName: formData.productName,
+      initialPrice: formData.initialPrice,
+      buyerId: currentUser.id,
+      sellerId: product.sellerId,
+      status: 'active',
+      negotiations: [{
+        price: formData.initialPrice,
+        quantity: formData.quantity,
+        requirements: formData.requirements,
+        proposedBy: {
+          userId: currentUser.id,
+          role: 'buyer'
+        }
+      }]
+    };
+
+    console.log('Chat initiated:', chatData);
     onClose();
   };
 
@@ -30,22 +55,26 @@ const RequestQuote = ({ product, isOpen, onClose }) => {
           exit={{ opacity: 0, scale: 0.95 }}
           className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         >
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold flex items-center gap-2">
-                <FaFileContract className="text-blue-600" />
-                Request Quote
-              </h2>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <FaTimes />
-              </button>
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <FaFileContract className="text-blue-600 text-xl" />
+              <h2 className="text-xl font-semibold">Request Quote</h2>
             </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <FaTimes />
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <div className="bg-blue-50 rounded-xl p-4 flex gap-4">
               <img
                 src={product.image}
@@ -58,95 +87,48 @@ const RequestQuote = ({ product, isOpen, onClose }) => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantity Required *
-                </label>
-                <div className="relative">
-                  <FaBox className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="number"
-                    required
-                    min={product.moq}
-                    value={formData.quantity}
-                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                    className="pl-10 w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder={`Min ${product.moq} units`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Target Price (per unit)
-                </label>
-                <input
-                  type="number"
-                  value={formData.targetPrice}
-                  onChange={(e) => setFormData({ ...formData, targetPrice: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your target price"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Proposed Price (per unit) *
+              </label>
+              <input
+                type="number"
+                required
+                value={formData.initialPrice}
+                onChange={(e) => setFormData({ ...formData, initialPrice: parseFloat(e.target.value) })}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your proposed price"
+                min="0"
+                step="0.01"
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Specific Requirements *
+                Quantity *
+              </label>
+              <input
+                type="number"
+                required
+                min={product.moq}
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder={`Min ${product.moq} units`}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Requirements *
               </label>
               <textarea
                 required
                 value={formData.requirements}
                 onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                rows="3"
+                rows="4"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Describe your specific requirements..."
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Location *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.deliveryLocation}
-                  onChange={(e) => setFormData({ ...formData, deliveryLocation: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter delivery location"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Timeframe
-                </label>
-                <select
-                  value={formData.timeframe}
-                  onChange={(e) => setFormData({ ...formData, timeframe: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="immediate">Immediate</option>
-                  <option value="within_week">Within a Week</option>
-                  <option value="within_month">Within a Month</option>
-                  <option value="flexible">Flexible</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Additional Notes
-              </label>
-              <textarea
-                value={formData.additionalNotes}
-                onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                rows="2"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Any additional information..."
+                placeholder="Specify your requirements, specifications, and any other details..."
               />
             </div>
 
@@ -160,9 +142,10 @@ const RequestQuote = ({ product, isOpen, onClose }) => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!currentUser}
               >
-                Submit Quote Request
+                {currentUser ? 'Submit Quote Request' : 'Login to Submit'}
               </button>
             </div>
           </form>
