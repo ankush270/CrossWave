@@ -11,8 +11,10 @@ import RequestQuote from '../components/RequestQuote';
 import Chat from '../components/Chat';
 import {productAPI} from "../api/api.js";
 import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
-
+import {useAuth} from '../contexts/AuthContext';
 const Product = () => {
+  const {user} = useAuth();
+  const currentUser = user;
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -240,6 +242,7 @@ const Product = () => {
         product={product}
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
+        currentUser={currentUser}
       />
       {/*<Chat */}
       {/*  product={product}*/}

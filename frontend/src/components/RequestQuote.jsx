@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaFileContract } from 'react-icons/fa';
 
+  
 const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
   const [formData, setFormData] = useState({
     productId: product?.id || '',
@@ -11,6 +12,7 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
     requirements: '',
   });
   const [error, setError] = useState('');
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaHeart, FaFileAlt, FaPlus, FaTrash, FaEdit,
   FaSearch, FaFilter, FaShare, FaShoppingCart,
   FaExclamationCircle, FaCheckCircle, FaClock,
-  FaArrowRight, FaStar, FaEllipsisV, FaBox
+  FaArrowRight, FaStar, FaEllipsisV, FaBox, FaFileContract, FaSpinner
 } from 'react-icons/fa';
 
-const BuyerWishlist = () => {
+const BuyerWishlist = ({ currentUser }) => {
   const [activeTab, setActiveTab] = useState('wishlist');
   const [searchQuery, setSearchQuery] = useState('');
   const [showRfqForm, setShowRfqForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const wishlistItems = [
     {
@@ -69,6 +71,25 @@ const BuyerWishlist = () => {
     }
   ];
 
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch(`/api/chats?buyerId=${currentUser.id}`);
+        const data = await response.json();
+        setChats(data);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser) {
+      fetchChats();
+    }
+  }, [currentUser]);
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-600';
@@ -77,6 +98,26 @@ const BuyerWishlist = () => {
       default: return 'bg-blue-100 text-blue-600';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <FaSpinner className="animate-spin text-2xl text-blue-600" />
+      </div>
+    );
+  }
+
+  if (chats.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <FaFileContract className="mx-auto text-4xl text-gray-400 mb-4" />
+        <h3 className="text-lg font-medium text-gray-900">No Quote Requests Yet</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Your quote requests and negotiations will appear here
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -392,6 +433,81 @@ const BuyerWishlist = () => {
           </motion.div>
         </motion.div>
       )}
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4">Your Quote Requests</h2>
+        
+        <div className="grid gap-6">
+          {chats.map((chat) => {
+            const latestNegotiation = chat.negotiations[chat.negotiations.length - 1];
+            
+            return (
+              <motion.div
+                key={chat._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="flex gap-4">
+                    <img
+                      src={chat.productImage || '/placeholder-product.png'}
+                      alt={chat.productName}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg">{chat.productName}</h3>
+                      <div className="mt-2 grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Latest Price</p>
+                          <p className="font-medium">${latestNegotiation.price.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Quantity</p>
+                          <p className="font-medium">{latestNegotiation.quantity} units</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                        chat.status === 'active' 
+                          ? 'bg-green-100 text-green-800'
+                          : chat.status === 'completed'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {chat.status.charAt(0).toUpperCase() + chat.status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-500">Requirements</p>
+                    <p className="mt-1 text-sm">{latestNegotiation.requirements}</p>
+                  </div>
+
+                  <div className="mt-4 flex justify-end gap-3">
+                    <button
+                      className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg"
+                      onClick={() => {/* Handle view details */}}
+                    >
+                      View Details
+                    </button>
+                    {chat.status === 'active' && (
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                        onClick={() => {/* Handle continue chat */}}
+                      >
+                        Continue Chat
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };

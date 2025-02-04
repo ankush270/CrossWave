@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server.js",
+    "dev": "nodemon server.js",
     "test": "bash -c \"python3 -m pip install easyocr opencv-python ultralytics huggingface_hub && node .\\src\\microservices\\kyc\\aadhaar.js\""
   },
   "author": "",
