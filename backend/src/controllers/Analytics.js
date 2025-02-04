@@ -19,7 +19,7 @@ async function getAnalyticsData() {
     const response = await analyticsData.properties.runReport({
       property: "properties/476082887", // Replace with your GA4 property ID
       requestBody: {
-        dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+        dateRanges: [{ startDate: "today", endDate: "today" }],
         dimensions: [{ name: "country" }],
         metrics: [{ name: "activeUsers" }],
       },
