@@ -14,27 +14,31 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  email        String         @unique
-  passwordHash String
-  is_buyer     Boolean
-  is_seller    Boolean
-  document     UserDocument[]
-  profile      UserProfile?
-  order_buyer  Order[]        @relation(name: "BuyerRelation")
-  order_seller Order[]        @relation(name: "SellerRelation")
-  userReview   UserReview[]   @relation(name: "ReviewReceiver")
-  userReviwed  UserReview[]   @relation(name: "ReviewGiver")
-  is_kyc_done  Boolean        @default(false)
-  is_personal_docs_done Boolean @default(false)
-  is_company_docs_done Boolean @default(false)
-  documentDocId String?
+  id                    String         @id @default(uuid())
+  email                 String         @unique
+  passwordHash          String
+  is_buyer              Boolean
+  is_seller             Boolean
+  document              UserDocument[]
+  profile               UserProfile?
+  order_buyer           Order[]        @relation(name: "BuyerRelation")
+  order_seller          Order[]        @relation(name: "SellerRelation")
+  userReview            UserReview[]   @relation(name: "ReviewReceiver")
+  userReviwed           UserReview[]   @relation(name: "ReviewGiver")
+  is_kyc_done           Boolean        @default(false)
+  is_personal_docs_done Boolean        @default(false)
+  is_company_docs_done  Boolean        @default(false)
+  documentDocId         String?
 }
 
 model UserProfile {
   id          String @id @default(uuid())
   companyName String
   address     String
+  state       String
+  city        String
+  pinCode     Int
+  country     String
   GST         String
   phoneNo     String
   name        String
@@ -43,27 +47,27 @@ model UserProfile {
 }
 
 model UserDocument {
-  id     String     @id @default(uuid())
-  user   User       @relation(fields: [userId], references: [id])
-  userId String
+  id      String @id @default(uuid())
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
   docName String
-  url String
+  url     String
 }
 
 model UserReview {
-  id              String  @id @default(uuid())
-  reviewUser      User    @relation("ReviewReceiver", fields: [userId], references: [id]) 
-  userId          String
-  reviewGiver     User    @relation("ReviewGiver", fields: [reviewGiverId], references: [id]) 
-  order           Order   @relation(fields: [orderId], references: [id])
-  orderId         String 
-  reviewGiverId   String
-  review          String
-  createdAt       DateTime @default(now()) 
+  id            String   @id @default(uuid())
+  reviewUser    User     @relation("ReviewReceiver", fields: [userId], references: [id])
+  userId        String
+  reviewGiver   User     @relation("ReviewGiver", fields: [reviewGiverId], references: [id])
+  order         Order    @relation(fields: [orderId], references: [id])
+  orderId       String
+  reviewGiverId String
+  review        String
+  createdAt     DateTime @default(now())
 }
 
 model Order {
-  id              String      @id @default(uuid())
+  id              String       @id @default(uuid())
   buyer_id        String
   seller_id       String
   product_id      String
@@ -71,16 +75,16 @@ model Order {
   logistics_id    String
   quantity        Int
   price           Float
-  buyer_status    User        @relation(name: "BuyerRelation", fields: [buyer_id], references: [id])
-  seller_status   User        @relation(name: "SellerRelation", fields: [seller_id], references: [id])
+  buyer_status    User         @relation(name: "BuyerRelation", fields: [buyer_id], references: [id])
+  seller_status   User         @relation(name: "SellerRelation", fields: [seller_id], references: [id])
   orderPayment    Payment?
   userReview      UserReview[]
-  status          OrderStatus @default(PENDING)
+  status          OrderStatus  @default(PENDING)
   shiping_address Json
   billing_address Json
 
-  created_at      DateTime    @default(now())
-  updated_at      DateTime    @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("orders")
 }
@@ -106,13 +110,13 @@ enum Currency {
 }
 
 model Payment {
-  id                String      @id @default(uuid())
-  razorpayPaymentId String      @unique
-  razorpayOrderId   String      @unique
+  id                String        @id @default(uuid())
+  razorpayPaymentId String        @unique
+  razorpayOrderId   String        @unique
   razorpaySignature String
   status            PaymentStatus
-  order             Order       @relation(fields: [orderId], references: [id])
-  orderId           String      @unique
+  order             Order         @relation(fields: [orderId], references: [id])
+  orderId           String        @unique
   totalAmount       Float
   currency          Currency
   paymentMethod     String
