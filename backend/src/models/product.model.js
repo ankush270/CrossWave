@@ -5,72 +5,113 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  seller_id: {
+  overview: {
     type: String,
     required: true,
   },
-  description: {
-    type: String,
-    required: true,
-  },
-  stock : {
-    type: Number,
-    required: true,
-  },
-  images: [
-    {
-      type: String,
-    },
-  ],
   category: {
     type: String,
     required: true,
   },
-  seller_name: {
-    type: String,
-   //required: true,
-  },
-  seller_country: {
-    type: String,
-   // required: true,
-  },
-  features: [
-    {
-      type: String,
-    },
-  ],
-  specifications: [
-    {
-      type: String,
-    },
-  ],
-  weight_per_unit_in_gm: {
+  stock: {
     type: Number,
     required: true,
   },
-  buy_options: [{
-    categories:{
-      type: String,
-      enum: ["Sample", "Standard", "Premium"],
-      required: true,
-    },
-    min_quantity: {
-      type: Number,
-      required: true,
-    },
-    price_per_unit: {
-      type: Number,
-      required: true,
-    },
+  images: [{
+    type: String,
   }],
-  height_in_cm: {
+  origin: {
+    type: String,
+    required: true,
+  },
+  moq: {
     type: Number,
     required: true,
   },
-  width_in_cm: {
-    type: Number,
+  subcategory: {
+    type: String,
+  },
+  pricing: {
+    sample: {
+      price: {
+        type: Number,
+        required: true,
+      },
+      moq: {
+        type: Number,
+        required: true,
+      },
+      features: [{
+        type: String,
+      }],
+    },
+    standard: {
+      price: {
+        type: Number,
+        required: true,
+      },
+      moq: {
+        type: Number,
+        required: true,
+      },
+      features: [{
+        type: String,
+      }],
+    },
+    premium: {
+      price: {
+        type: Number,
+        required: true,
+      },
+      moq: {
+        type: Number,
+        required: true,
+      },
+      features: [{
+        type: String,
+      }],
+    },
+  },
+  specifications: {
+    technical: [{
+      key: {
+        type: String,
+        required: true,
+      },
+      value: {
+        type: String,
+        required: true,
+      },
+    }],
+    physical: [{
+      key: {
+        type: String,
+        required: true,
+      },
+      value: {
+        type: String,
+        required: true,
+      },
+    }],
+  },
+  seller_id: {
+    type: String,
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// Update the updatedAt field before saving
+productSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
 });
 
 export const Product = mongoose.model("Product", productSchema);

@@ -86,7 +86,7 @@ export const login = async (req, res) => {
 
     const token = jwt.sign({
       id: user.id,
-      // role: is_buyer ? "buyer" : "seller",
+      role: is_buyer ? "buyer" : "seller",
     }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     })
@@ -101,7 +101,7 @@ export const login = async (req, res) => {
       success: true,
       msg: 'User logged in',
       user,
-      // logged_in_as : role,
+      logged_in_as : role,
       token
     });
 

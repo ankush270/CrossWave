@@ -39,6 +39,14 @@ export const profileAPI = {
 export const productAPI = {
   addProduct: (productData)=>{
     return api.post('/product/add',productData)
+  },
+
+  getProducts: ()=>{
+    return api.get('/product/get')
+  },
+
+  getProductById:(id)=>{
+    return api.get('/product/getId/'+id);
   }
 
 }
