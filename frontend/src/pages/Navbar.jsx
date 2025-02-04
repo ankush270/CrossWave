@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { 
-  FaSearch, FaBell, FaUserCircle, FaGlobe, FaSun, 
+  FaSearch, FaGlobe, FaSun, 
   FaMoon, FaChevronDown, FaBars, FaTimes 
 } from 'react-icons/fa'
 import {useAuth} from "../contexts/AuthContext.jsx";

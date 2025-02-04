@@ -18,6 +18,7 @@ import {FaTruck,
   FaAngleDown,
   FaSun,
   FaMoon,
+  FaUserCheck
 } from "react-icons/fa";
 import {
   Chart as ChartJS,
@@ -56,6 +57,7 @@ import BuyerContracts from "../components/buyer/BuyerContracts";
 import BuyerProfile from "../components/buyer/BuyerProfile";
 import BuyerCompliance from "../components/buyer/BuyerCompliance";
 import EKYC from "./EKYC";
+import Logistics from "./Logistics";
 
 // Add this CSS at the beginning of your component
 const scrollbarHiddenStyles = {
@@ -82,6 +84,13 @@ const Buyer = () => {
       badge: null,
     },
     {
+      id: "Logistics",
+      title: "Logistics",
+      icon: <FaUserCog />,
+      component: Logistics,
+      badge: null,
+    },
+    {
       id: "dashboard",
       title: "Dashboard",
       icon: <FaTachometerAlt />,
@@ -105,9 +114,9 @@ const Buyer = () => {
     {
       id: "E-KYC",
       title: "E-KYC",
-      icon: <FaChartLine />,
+      icon: <FaUserCheck/>,
       component: EKYC,
-      badge: "8",
+      badge: null,
     },
     {
       id: "analytics",
