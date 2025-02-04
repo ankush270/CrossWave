@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDropzone } from "react-dropzone";
 import {
@@ -17,7 +17,7 @@ import {
   requiredDocumentsUAE,
 } from "../../constants/documents.js";
 import { useAuth } from "../../contexts/AuthContext.jsx";
-import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
+// import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
 // import prisma from "../../../../backend/src/config/prisma_db.js";
 
 const BuyerCompliance = () => {
@@ -32,6 +32,39 @@ const BuyerCompliance = () => {
 
   const documentList =
     selectedCountry === "india" ? requiredDocumentsIndia : requiredDocumentsUAE;
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/docs/${user.id}`); // Replace with your API URL
+      // const res = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log(result);
+
+      // create uploadedDocs array from result.documents
+      const userDocs = [];
+      for (const doc in result.documents) {
+        userDocs.push({
+          id: doc._id,
+          name: doc,
+          status: doc.status,
+          verifiedAt: doc.verifiedAt,
+        });
+      }
+      console.log(userDocs);
+
+      setUploadedDocuments(userDocs);
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const complianceStats = [
     {
@@ -76,7 +109,7 @@ const BuyerCompliance = () => {
   //         name: selectedDocType || file.name,
   //         status: 'pending',
   //         expiryDate: '2025-12-31',
-  //         lastUpdated: new Date().toISOString().split('T')[0],
+  //         verifiedAt: new Date().toISOString().split('T')[0],
   //         file: file
   //       };
   //       setUploadedDocuments(prev => [...prev, newDoc]);
@@ -117,20 +150,21 @@ const BuyerCompliance = () => {
             if (data.error) {
               console.log("Error Verifyinig document!!");
               alert(
-                "We could not verify your document. Either you uploaded a wrong document or the image is not clear enough."
+                "We could not verify your document. Please try again or upload a better image."
               );
             } else {
               console.log("Upload successful:", data);
+              fetchData();
               // Add document to uploaded list
-              const newDoc = {
-                id: Date.now(),
-                name: selectedDocType || file.name,
-                status: "VERIFIED",
-                // expiryDate: "2025-12-31",
-                lastUpdated: new Date().toISOString().split("T")[0],
-                file: file,
-              };
-              setUploadedDocuments((prev) => [...prev, newDoc]);
+              // const newDoc = {
+              //   id: Date.now(),
+              //   name: selectedDocType || file.name,
+              //   status: "VERIFIED",
+              //   // expiryDate: "2025-12-31",
+              //   verifiedAt: new Date().toISOString().split("T")[0],
+              //   file: file,
+              // };
+              // setUploadedDocuments((prev) => [...prev, newDoc]);
             }
           })
           .catch((error) => console.error("Upload failed:", error))
@@ -165,7 +199,7 @@ const BuyerCompliance = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {complianceStats.map((stat, index) => (
           <motion.div
             key={index}
@@ -194,7 +228,7 @@ const BuyerCompliance = () => {
             </div>
           </motion.div>
         ))}
-      </div>
+      </div> */}
 
       {/* Documents Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -284,7 +318,7 @@ const BuyerCompliance = () => {
                       <div>
                         <h4 className="font-medium">{doc.name}</h4>
                         <p className="text-sm text-gray-500">
-                          Last updated: {doc.lastUpdated}
+                          Last updated: {doc.verifiedAt}
                         </p>
                       </div>
                     </div>
