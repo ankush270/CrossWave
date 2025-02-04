@@ -36,7 +36,7 @@ import { initializeSocket } from "./src/middlewares/socketio.js";
 import http from "http";
 const server = http.createServer(app); // HTTP server
 // Initialize Socket.IO
-initializeSocket( server);
+initializeSocket(server);
 
 
 
