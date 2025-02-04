@@ -53,23 +53,6 @@ const BuyerCompliance = () => {
     },
   ];
 
-  const documents = [
-    {
-      id: 1,
-      name: "Business Registration",
-      status: "verified",
-      expiryDate: "2025-12-31",
-      lastUpdated: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Import License",
-      status: "pending",
-      expiryDate: "2024-12-31",
-      lastUpdated: "2024-02-01",
-    },
-  ];
-
   // const handleUploadClick = () => {
   //   setSelectedDocType('');
   //   setShowUploadModal(true);
@@ -120,21 +103,30 @@ const BuyerCompliance = () => {
           method: "POST",
           body: formData,
         })
-          .then((response) => response.json())
+          .then((response) => {
+            console.log(response);
+            response = response.json();
+            return response;
+          })
           .then((data) => {
-            console.log("Upload successful:", data);
-
-            // Add document to uploaded list
-            const newDoc = {
-              id: Date.now(),
-              name: selectedDocType || file.name,
-              status: "pending",
-              expiryDate: "2025-12-31",
-              lastUpdated: new Date().toISOString().split("T")[0],
-              file: file,
-            };
-
-            setUploadedDocuments((prev) => [...prev, newDoc]);
+            if (data.error) {
+              console.log("Error Verifyinig document!!");
+              alert(
+                "We could not verify your document. Either you uploaded a wrong document or the image is not clear enough."
+              );
+            } else {
+              console.log("Upload successful:", data);
+              // Add document to uploaded list
+              const newDoc = {
+                id: Date.now(),
+                name: selectedDocType || file.name,
+                status: "VERIFIED",
+                // expiryDate: "2025-12-31",
+                lastUpdated: new Date().toISOString().split("T")[0],
+                file: file,
+              };
+              setUploadedDocuments((prev) => [...prev, newDoc]);
+            }
           })
           .catch((error) => console.error("Upload failed:", error))
           .finally(() => {
@@ -228,7 +220,7 @@ const BuyerCompliance = () => {
           <div className="space-y-4">
             {documentList.map((doc) => {
               const isUploaded = uploadedDocuments.some(
-                (uploaded) => uploaded.name === doc.name
+                (uploaded) => uploaded.name === doc.id
               );
               return (
                 <div
