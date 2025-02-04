@@ -88,7 +88,7 @@ const BuyerCompliance = () => {
   //   }, 300);
   // };
 
-  const handleFileUpload = (file) => {
+  const handleFileUpload = async (file) => {
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -109,10 +109,11 @@ const BuyerCompliance = () => {
         })
           .then((response) => {
             console.log(response);
-            response = response.json();
-            return response;
+            return response.json();
           })
           .then(async (data) => {
+            console.log(data);
+
             if (data.error) {
               console.log("Error Verifyinig document!!");
               alert(

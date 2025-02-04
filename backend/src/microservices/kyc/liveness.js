@@ -13,6 +13,8 @@ import {
 //   GetFaceLivenessSessionResultsCommand,
 // } = require("@aws-sdk/client-rekognition"); // CommonJS import
 
+import prisma from "../../config/prisma_db.js";
+
 const config = { region: "us-east-1" };
 
 const client = new RekognitionClient(config);
@@ -90,7 +92,7 @@ export const getResults = async (req, res) => {
   try {
     const response = await getFaceLivenessSessionResults(sessionId);
     console.log(response);
-    if (response.results.Confidence > 50 && !user.is_kyc_done) {
+    if (response.Confidence > 50 && !user.is_kyc_done) {
       await prisma.user.update({
         where: {
           id: userId,

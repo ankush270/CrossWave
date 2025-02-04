@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import uploadService from "../services/upload.service.js";
 import prisma from "../../../config/prisma_db.js";
+import Document from "../models/document.model.js";
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -64,16 +65,16 @@ async function checkUploadedDocuments(userId) {
     if (!userDocs || !userDocs.documents) {
       return { indian: false, uae: false, personal: false }; // No documents uploaded
     }
+    console.log(userDocs);
 
     const uploadedStatus = {};
 
     for (const category in requiredDocuments) {
-      uploadedStatus[category] = requiredDocuments[category].every(
-        (doc) =>
-          userDocs.documents[doc] &&
-          userDocs.documents[doc].status !== "NOT_UPLOADED"
+      uploadedStatus[category] = requiredDocuments[category].every((doc) =>
+        userDocs.documents.get(doc)
       );
     }
+    console.log(uploadedStatus);
 
     return uploadedStatus;
   } catch (error) {
@@ -137,7 +138,7 @@ export const uploadDocument = async (req, res) => {
       }
 
       if (userDocsStatus.personal && !user.is_personal_docs_done) {
-        updates.personal = true;
+        updates.is_personal_docs_done = true;
       }
 
       if (Object.keys(updates).length > 0) {
