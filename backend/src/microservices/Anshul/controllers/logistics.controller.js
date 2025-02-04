@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Logistics } from "../models/logistics.model.js";
+import { Logistics } from "../../../../models/logistics.model.js";
 
 export const createShipment = async (req, res, next) => {
   try {
@@ -26,10 +26,13 @@ export const createShipment = async (req, res, next) => {
       throw new Error("Failed to create shipment");
     }
 
-    console.log(data.completedPackageDetails);
+    console.log(shipment.data.transactionId);
     
 
     const newShipment = await new Logistics({
+      // transactionId: shipment.data.transactionId,
+      transactionId: "shipment.data.transactionId",
+
       trackingNumber: data.masterTrackingNumber,
 
       carrierCode: data?.completedShipmentDetail?.carrierCode,
