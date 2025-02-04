@@ -43,6 +43,8 @@ const router = express.Router();
 router.post('/', auth, upload.array('files', 1), async (req, res) => {
   try {
     const { documentType, documentNumber } = req.body;
+    console.log(req.body);
+    
     const files = req.files;
 
     if (!files || files.length === 0) {
@@ -52,7 +54,9 @@ router.post('/', auth, upload.array('files', 1), async (req, res) => {
     if (!documentType || !documentNumber) {
       return res.status(400).json({ error: 'Document type and number are required' });
     }
-
+    console.log("Worlddddddddddddddddddddddddddddddd");
+    console.log(req.user._id, req.user.email);
+    
     const document = await uploadService.uploadFiles(
       files, 
       req.user._id,
@@ -60,12 +64,15 @@ router.post('/', auth, upload.array('files', 1), async (req, res) => {
       { documentType, documentNumber }
     );
 
+    // console.log(document);
+    
+
     // Clean up uploaded files
-    files.forEach(file => {
-      fs.unlink(file.path, err => {
-        if (err) console.error('Error deleting temporary file:', err);
-      });
-    });
+    // files.forEach(file => {
+    //   fs.unlink(file.path, err => {
+    //     if (err) console.error('Error deleting temporary file:', err);
+    //   });
+    // });
 
     res.status(201).json(document);
   } catch (error) {

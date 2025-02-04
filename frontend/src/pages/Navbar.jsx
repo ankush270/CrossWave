@@ -5,12 +5,16 @@ import {
   FaSearch, FaBell, FaUserCircle, FaGlobe, FaSun, 
   FaMoon, FaChevronDown, FaBars, FaTimes 
 } from 'react-icons/fa'
+import {useAuth} from "../contexts/AuthContext.jsx";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const {user, logout, role} = useAuth();
+
+  console.log(role);
 
   // Handle navbar background on scroll
   useEffect(() => {
@@ -133,24 +137,43 @@ const Navbar = () => {
             </motion.button>
 
             {/* Auth Buttons */}
-            <Link to="/login">
+            {user ?
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                 onClick={logout}
+                 whileHover={{scale: 1.05}}
+                 whileTap={{scale: 0.95}}
+                 className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
               >
-                Login
+                Logout
               </motion.button>
-            </Link>
-            <Link to="/signup">
+             :
+               <Link to="/login">
+                 <motion.button
+                    whileHover={{scale: 1.05}}
+                    whileTap={{scale: 0.95}}
+                    className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                 >
+                   Login
+                 </motion.button>
+               </Link>}
+
+            {user ? <Link to={`/${role}/dashboard`}>
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
+                 whileHover={{scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"}}
+                 whileTap={{scale: 0.95}}
+                 className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
+              >
+                My Profile
+              </motion.button>
+            </Link> : <Link to="/signup">
+              <motion.button
+                 whileHover={{scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"}}
+                 whileTap={{scale: 0.95}}
+                 className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
               >
                 Sign Up
               </motion.button>
-            </Link>
+            </Link>}
           </div>
 
           {/* Mobile Menu Button */}

@@ -19,3 +19,4 @@ build/
 .idea/
 .vscode/
 *.test.js
+src/microservices/verify_product/uploads/

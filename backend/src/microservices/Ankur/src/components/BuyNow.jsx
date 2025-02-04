@@ -17,7 +17,6 @@ const BuyNow = ({ testData }) => {
         console.log('Current product ID:', id);
         console.log('Location state:', location.state);
 
-        // If we have deal details in location state, use those
         if (location.state?.dealDetails) {
           console.log('Using deal details from state:', location.state.dealDetails);
           setOrderDetails({
@@ -28,7 +27,6 @@ const BuyNow = ({ testData }) => {
           return;
         }
 
-        // If we have test data, use that
         if (testData) {
           setOrderDetails({
             ...testData,
@@ -38,7 +36,6 @@ const BuyNow = ({ testData }) => {
           return;
         }
 
-        // Otherwise fetch from API
         console.log('Fetching order details for product:', id);
         const response = await fetch(`/api/chats/buy-now/${id}`);
         

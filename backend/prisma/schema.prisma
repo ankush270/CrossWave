@@ -9,25 +9,54 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") 
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  name         String
+  id           String         @id @default(uuid())
   email        String         @unique
   passwordHash String
-  phone        String         @unique
   is_buyer     Boolean
   is_seller    Boolean
   document     UserDocument[]
+  profile      UserProfile?
+  order_buyer  Order[]        @relation(name: "BuyerRelation")
+  order_seller Order[]        @relation(name: "SellerRelation")
+  userReview   UserReview[]   @relation(name: "ReviewReceiver")
+  userReviwed  UserReview[]   @relation(name: "ReviewGiver")
+  is_kyc_done  Boolean        @default(false)
+  is_personal_docs_done Boolean @default(false)
+  is_company_docs_done Boolean @default(false)
+}
+
+model UserProfile {
+  id          String @id @default(uuid())
+  companyName String
+  address     String
+  GST         String
+  phoneNo     String
+  name        String
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String @unique
 }
 
 model UserDocument {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
+  id     String     @id @default(uuid())
+  user   User       @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model UserReview {
+  id              String  @id @default(uuid())
+  reviewUser      User    @relation("ReviewReceiver", fields: [userId], references: [id]) 
+  userId          String
+  reviewGiver     User    @relation("ReviewGiver", fields: [reviewGiverId], references: [id]) 
+  order           Order   @relation(fields: [orderId], references: [id])
+  orderId         String 
+  reviewGiverId   String
+  review          String
+  createdAt       DateTime @default(now()) 
 }
 
 model Order {
@@ -37,25 +66,20 @@ model Order {
   product_id      String
   quote_id        String
   logistics_id    String
-  payment_id      String
   quantity        Int
-  price          Float
-  status         OrderStatus @default(PENDING)
+  price           Float
+  buyer_status    User        @relation(name: "BuyerRelation", fields: [buyer_id], references: [id])
+  seller_status   User        @relation(name: "SellerRelation", fields: [seller_id], references: [id])
+  orderPayment    Payment?
+  userReview      UserReview[]
+  status          OrderStatus @default(PENDING)
   shiping_address Json
   billing_address Json
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
+
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
 
   @@map("orders")
-}
-
-model Review {
-  id           String   @id @default(uuid())
-  reviewer_id  String
-  description  String
-  created_at   DateTime @default(now())
-
-  @@map("reviews")
 }
 
 enum OrderStatus {
@@ -64,4 +88,31 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  FAILED
+  SUCCESS
+}
+
+enum Currency {
+  INR
+  AED
+}
+
+model Payment {
+  id                String      @id @default(uuid())
+  razorpayPaymentId String      @unique
+  razorpayOrderId   String      @unique
+  razorpaySignature String
+  status            PaymentStatus
+  order             Order       @relation(fields: [orderId], references: [id])
+  orderId           String      @unique
+  totalAmount       Float
+  currency          Currency
+  paymentMethod     String
+  taxDetails        String
+  shippingCost      Float
 }

@@ -6,20 +6,34 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "bash -c \"python3 -m pip install easyocr opencv-python ultralytics huggingface_hub && node .\\src\\microservices\\kyc\\aadhaar.js\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.3.0",
+    "@aws-sdk/client-rekognition": "^3.738.0",
+    "@google/generative-ai": "^0.21.0",
+    "@prisma/client": "^6.2.1",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.7.9",
+    "bcrypt": "^5.1.1",
+    "canvas": "^3.1.0",
+    "child_process": "^1.0.2",
+    "cloudinary": "^2.5.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "framer-motion": "^12.0.8",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
+    "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.9",
-    "react-icons": "^5.4.0"
+    "razorpay": "^2.9.5",
+    "socket.io": "^4.8.1",
+    "socketio": "^1.0.0",
+    "tesseract.js": "^6.0.0"
   },
   "devDependencies": {
-    "prisma": "^6.3.0"
+    "prisma": "^6.2.1"
   }
 }

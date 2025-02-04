@@ -199,19 +199,10 @@ const chatController = {
                 throw new Error('Product ID is required');
             }
 
-            // First try to find by productId
-            let chat = await Chat.findOne({
+            const chat = await Chat.findOne({
                 productId: productId,
                 status: 'accepted'
             }).sort({ updatedAt: -1 });
-
-            // If not found, try to find by chat ID
-            if (!chat) {
-                chat = await Chat.findOne({
-                    _id: productId,
-                    status: 'accepted'
-                });
-            }
 
             console.log('Found chat for product:', productId, chat);
 

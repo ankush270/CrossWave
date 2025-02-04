@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export const createOrder = async (req, res, next) => {
+export const createOrder = async (req, res, next) => {  
   const {
     buyer_id,
     seller_id,
@@ -17,9 +17,6 @@ export const createOrder = async (req, res, next) => {
   } = req.body;
 
   if (
-    !buyer_id ||
-    !seller_id ||
-    !product_id ||
     !quote_id ||
     !logistics_id ||
     !payment_id ||
@@ -30,6 +27,10 @@ export const createOrder = async (req, res, next) => {
   ) {
     return res.status(400).json({ message: "Missing required fields" });
   }
+  if (buyer_id === seller_id) {
+    return res.status(400).json({ message: "Cannot place an order with yourself" });
+  }
+  
   try {
     const order = await prisma.order.create({
       data: {
@@ -69,24 +70,6 @@ export const updateOrderStatus = async (req, res, next) => {
     if (error.code === 'P2025') {
       return res.status(404).json({ message: "Order not found" });
     }
-    next(error);
-  }
-};
-
-export const review = async (req, res, next) => {
-  const { reviewer_id, description } = req.body;
-  if (!description)
-    return res.status(400).json({ message: "Missing required fields" });
-
-  try {
-    const review = await prisma.review.create({
-      data: {
-        description,
-        reviewer_id,
-      },
-    });
-    res.status(201).json(review);
-  } catch (error) {
     next(error);
   }
 };

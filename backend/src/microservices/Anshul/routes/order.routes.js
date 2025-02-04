@@ -8,7 +8,7 @@ import {
 
 const router = Router();
 
-router.route("/addorder").post(createOrder);
+router.route("/addorder/:product_id").post(createOrder);
 router.route("/update-status/:id").put(updateOrderStatus);
 router.route("/get-orders-buyer/:buyer_id").get(getOrdersForBuyer);
 router.route("/get-orders-seller/:seller_id").get(getOrdersForSeller);

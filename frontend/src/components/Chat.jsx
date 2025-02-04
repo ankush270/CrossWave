@@ -1,35 +1,140 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect , useRef} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPaperPlane, FaUser } from 'react-icons/fa';
+import axios from "axios";
+import { io } from "socket.io-client";
+import {useAuth} from '../contexts/AuthContext';
+const socket = io("http://localhost:3000", {
+  transports: ["websocket"], // ✅ Enforce WebSocket transport
+  withCredentials: true,
+} ); // Connect to backend
 
 const Chat = ({ product, isOpen, onClose }) => {
+  const {user} = useAuth();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'system',
-      text: 'You are now connected with the supplier.',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [chatId, setChatId] = useState(null);
+  cosnt [userId, setUserId] = useState("");
+  const userType = "buyer";
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  // hard coded
+  const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
+  const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
 
-    setMessages([
-      ...messages,
-      {
-        id: messages.length + 1,
-        sender: 'buyer',
-        text: message,
-        timestamp: new Date()
+  console.log("user data in chat page :" , user);
+
+    // Extract user Id from user
+    useEffect(() => {
+        try {
+          setUserId(user.id);
+        } catch (error) {
+          console.error("Invalid User Data", error);
+        }
+    }, []);
+
+    console.log("User Type : ", userType);
+
+    useEffect(() => {
+      if (buyerId && sellerId) {
+        fetchChatHistory();
       }
-    ]);
-    setMessage('');
+    }, [buyerId, sellerId]);
+  
+    const fetchChatHistory = async () => {
+
+      console.log( " buyer id in fetch function  :", buyerId );
+      console.log( " seller id in fetch function :", sellerId );
+      
+      try {
+        const response = await axios.post(
+          "http://localhost:3000/chat/get-or-create-chat",
+          { buyerId, sellerId }
+        );
+        if (response.data.success) {
+          console.log("chatId is :" , response.data.chatId)
+          setChatId(response.data.chatId);
+          setMessages(response.data.messages || []);
+        }
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    };
+
+     // Ensure socket joins the chat room after chatId is set
+  useEffect(() => {
+    if (chatId) {
+      console.log(`Joining chat room: ${chatId}`);
+      socket.emit("join_chat", { chatId });
+    }
+  }, [chatId]);
+
+  // Listen for incoming messages
+  useEffect(() => {
+    if (!chatId) return;
+
+    const handleMessageReceive = (data) => {
+      console.log("Received message:", data);
+      setMessages((prevMessages) => [...prevMessages, data]); // ✅ Update messages correctly
+    };
+
+    socket.on("receiveMessage", handleMessageReceive);
+
+    return () => {
+      socket.off("receiveMessage", handleMessageReceive);
+    };
+  }, [chatId]);
+
+
+
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+
+    if (message.trim() === "" || !chatId || !userType) {
+      console.error("Missing required fields in sendMessage:", { chatId, userType, message });
+      return;
+    }
+
+    let senderId = "", receiverId= "";
+    if (userType === "seller") {
+      senderId = sellerId;
+      receiverId = buyerId;
+    } else {
+      senderId = buyerId;
+      receiverId = sellerId;
+    }
+    
+    const newMessage = { chatId, senderId, receiverId, role: userType, message };
+     
+    console.log("message :" , newMessage);
+    
+    socket.emit("sendMessage", newMessage);
+
+    try {
+      const response = await axios.post("http://localhost:3000/chat/send-message", newMessage);
+      if (response.data.success) {
+        // setMessages((prev) => [...prev, response.data.newMessage]);
+      } else {
+        console.error("Message sending failed:", response.data.error);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error.response?.data || error.message);
+    }
+
+    setMessage("");
   };
 
   if (!isOpen) return null;
+  
+
+    // auto scroll to bottom
+    // const messagesEndRef = useRef(null);
+    // useEffect(() => {
+    //   if (messagesEndRef.current) {
+    //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    //   }
+    // }, [messages]);
+
 
   return (
     <AnimatePresence>
@@ -66,24 +171,23 @@ const Chat = ({ product, isOpen, onClose }) => {
                 key={msg.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex ${msg.sender === 'buyer' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${msg.userType === 'sender' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                    msg.sender === 'buyer'
+                    msg.userType === 'buyer'
                       ? 'bg-blue-600 text-white'
-                      : msg.sender === 'system'
+                      : msg.userType === 'system'
                       ? 'bg-gray-100 text-gray-600'
                       : 'bg-gray-200'
                   }`}
                 >
-                  <p>{msg.text}</p>
-                  <p className="text-xs opacity-70 mt-1">
-                    {msg.timestamp.toLocaleTimeString()}
-                  </p>
+                  <p>{msg.message}</p>
+
                 </div>
               </motion.div>
             ))}
+            {/* <div ref={messagesEndRef}></div> */}
           </div>
 
           {/* Message Input */}

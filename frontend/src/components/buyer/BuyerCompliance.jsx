@@ -1,151 +1,168 @@
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useDropzone } from 'react-dropzone';
-import { 
-  FaShieldAlt, FaCheckCircle, FaExclamationTriangle, 
-  FaFileAlt, FaDownload, FaUpload, FaClock, FaTimes,
-  FaCloudUploadAlt
-} from 'react-icons/fa';
+import React, { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useDropzone } from "react-dropzone";
+import {
+  FaShieldAlt,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaFileAlt,
+  FaDownload,
+  FaUpload,
+  FaClock,
+  FaTimes,
+  FaCloudUploadAlt,
+} from "react-icons/fa";
+import {
+  requiredDocumentsIndia,
+  requiredDocumentsUAE,
+} from "../../constants/documents.js";
 
 const BuyerCompliance = () => {
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState("overview");
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedDocType, setSelectedDocType] = useState('');
+  const [selectedDocType, setSelectedDocType] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
 
+  const [selectedCountry, setSelectedCountry] = useState("india");
+
+  const documentList =
+    selectedCountry === "india" ? requiredDocumentsIndia : requiredDocumentsUAE;
+
   const complianceStats = [
     {
-      title: 'Overall Compliance',
-      value: '95%',
-      status: 'good',
+      title: "Overall Compliance",
+      value: "95%",
+      status: "good",
       icon: <FaShieldAlt />,
-      color: 'green'
+      color: "green",
     },
     {
-      title: 'Pending Documents',
-      value: '2',
-      status: 'warning',
+      title: "Pending Documents",
+      value: "2",
+      status: "warning",
       icon: <FaFileAlt />,
-      color: 'yellow'
+      color: "yellow",
     },
     {
-      title: 'Last Verification',
-      value: '10 days ago',
-      status: 'good',
+      title: "Last Verification",
+      value: "10 days ago",
+      status: "good",
       icon: <FaClock />,
-      color: 'blue'
-    }
+      color: "blue",
+    },
   ];
 
   const documents = [
     {
       id: 1,
-      name: 'Business Registration',
-      status: 'verified',
-      expiryDate: '2025-12-31',
-      lastUpdated: '2024-01-15'
+      name: "Business Registration",
+      status: "verified",
+      expiryDate: "2025-12-31",
+      lastUpdated: "2024-01-15",
     },
     {
       id: 2,
-      name: 'Import License',
-      status: 'pending',
-      expiryDate: '2024-12-31',
-      lastUpdated: '2024-02-01'
-    }
+      name: "Import License",
+      status: "pending",
+      expiryDate: "2024-12-31",
+      lastUpdated: "2024-02-01",
+    },
   ];
 
-  const requiredDocuments = [
-    {
-      id: 'business_reg',
-      name: 'Business Registration',
-      description: 'Company Registration or Proprietorship Document',
-      required: true
-    },
-    {
-      id: 'import_license',
-      name: 'Import License',
-      description: 'Valid Import-Export Code (IEC)',
-      required: true
-    },
-    {
-      id: 'gst',
-      name: 'GST Registration',
-      description: 'GST Registration Certificate',
-      required: true
-    },
-    {
-      id: 'pan',
-      name: 'PAN Card',
-      description: 'Permanent Account Number Card',
-      required: true
-    },
-    {
-      id: 'bank_details',
-      name: 'Bank Details',
-      description: 'Bank Account Verification Letter',
-      required: true
-    },
-    {
-      id: 'trade_license',
-      name: 'Trade License',
-      description: 'Local Trade License if applicable',
-      required: false
-    },
-    {
-      id: 'msme',
-      name: 'MSME Registration',
-      description: 'MSME Registration Certificate if applicable',
-      required: false
-    }
-  ];
+  // const handleUploadClick = () => {
+  //   setSelectedDocType('');
+  //   setShowUploadModal(true);
+  // };
 
-  const handleUploadClick = () => {
-    setSelectedDocType('');
-    setShowUploadModal(true);
-  };
+  // const handleFileUpload = (file) => {
+  //   // Simulate upload progress
+  //   let progress = 0;
+  //   const interval = setInterval(() => {
+  //     progress += 10;
+  //     setUploadProgress(progress);
+  //     if (progress >= 100) {
+  //       clearInterval(interval);
+  //       // Add document to uploaded documents list
+  //       const newDoc = {
+  //         id: Date.now(),
+  //         name: selectedDocType || file.name,
+  //         status: 'pending',
+  //         expiryDate: '2025-12-31',
+  //         lastUpdated: new Date().toISOString().split('T')[0],
+  //         file: file
+  //       };
+  //       setUploadedDocuments(prev => [...prev, newDoc]);
+  //       setTimeout(() => {
+  //         setShowUploadModal(false);
+  //         setUploadProgress(0);
+  //       }, 500);
+  //     }
+  //   }, 300);
+  // };
 
   const handleFileUpload = (file) => {
-    // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
       setUploadProgress(progress);
       if (progress >= 100) {
         clearInterval(interval);
-        // Add document to uploaded documents list
-        const newDoc = {
-          id: Date.now(),
-          name: selectedDocType || file.name,
-          status: 'pending',
-          expiryDate: '2025-12-31',
-          lastUpdated: new Date().toISOString().split('T')[0],
-          file: file
-        };
-        setUploadedDocuments(prev => [...prev, newDoc]);
-        setTimeout(() => {
-          setShowUploadModal(false);
-          setUploadProgress(0);
-        }, 500);
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append("files", file); // Ensure "files" is the key name
+        formData.append("documentType", selectedDocType || file.name);
+        // formData.append("expiryDate", "2025-12-31"); // Adjust as needed
+
+        // API call
+        fetch("http://localhost:3000/docs/upload/17", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Upload successful:", data);
+
+            // Add document to uploaded list
+            const newDoc = {
+              id: Date.now(),
+              name: selectedDocType || file.name,
+              status: "pending",
+              expiryDate: "2025-12-31",
+              lastUpdated: new Date().toISOString().split("T")[0],
+              file: file,
+            };
+
+            setUploadedDocuments((prev) => [...prev, newDoc]);
+          })
+          .catch((error) => console.error("Upload failed:", error))
+          .finally(() => {
+            setShowUploadModal(false);
+            setUploadProgress(0);
+          });
       }
     }, 300);
   };
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-  }, [selectedDocType]);
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+    },
+    [selectedDocType]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf'],
-      'image/*': ['.jpeg', '.jpg', '.png']
+      "application/pdf": [".pdf"],
+      "image/*": [".jpeg", ".jpg", ".png"],
     },
     maxSize: 5242880, // 5MB
-    multiple: false
+    multiple: false,
   });
 
   return (
@@ -162,10 +179,14 @@ const BuyerCompliance = () => {
               <div>
                 <p className="text-sm text-gray-600">{stat.title}</p>
                 <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
-                <span className={`text-sm ${
-                  stat.status === 'good' ? 'text-green-500' : 'text-yellow-500'
-                }`}>
-                  {stat.status === 'good' ? 'Good Standing' : 'Needs Attention'}
+                <span
+                  className={`text-sm ${
+                    stat.status === "good"
+                      ? "text-green-500"
+                      : "text-yellow-500"
+                  }`}
+                >
+                  {stat.status === "good" ? "Good Standing" : "Needs Attention"}
                 </span>
               </div>
               <div className={`p-3 bg-${stat.color}-50 rounded-lg`}>
@@ -184,7 +205,17 @@ const BuyerCompliance = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Required Documents</h3>
-            <motion.button
+
+            <select
+              className="mb-4 p-2 border rounded-lg"
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+            >
+              <option value="india">India</option>
+              <option value="uae">UAE</option>
+            </select>
+
+            {/* <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleUploadClick}
@@ -192,12 +223,12 @@ const BuyerCompliance = () => {
             >
               <FaUpload />
               Upload Document
-            </motion.button>
+            </motion.button> */}
           </div>
           <div className="space-y-4">
-            {requiredDocuments.map((doc) => {
+            {documentList.map((doc) => {
               const isUploaded = uploadedDocuments.some(
-                uploaded => uploaded.name === doc.name
+                (uploaded) => uploaded.name === doc.name
               );
               return (
                 <div
@@ -220,17 +251,17 @@ const BuyerCompliance = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
-                      setSelectedDocType(doc.name);
+                      setSelectedDocType(doc.id);
                       setShowUploadModal(true);
                     }}
                     className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                      isUploaded 
-                        ? 'bg-green-500 text-white'
-                        : 'bg-blue-500 text-white'
+                      isUploaded
+                        ? "bg-green-500 text-white"
+                        : "bg-blue-500 text-white"
                     }`}
                   >
                     <FaUpload />
-                    {isUploaded ? 'Update' : 'Upload'}
+                    {isUploaded ? "Update" : "Upload"}
                   </motion.button>
                 </div>
               );
@@ -310,7 +341,9 @@ const BuyerCompliance = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Upload {selectedDocType}</h3>
+                <h3 className="text-lg font-semibold">
+                  Upload {selectedDocType}
+                </h3>
                 <button
                   onClick={() => setShowUploadModal(false)}
                   className="p-2 hover:bg-gray-100 rounded-full"
@@ -322,7 +355,9 @@ const BuyerCompliance = () => {
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                  isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                  isDragActive
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
                 }`}
               >
                 <input {...getInputProps()} />
@@ -363,4 +398,4 @@ const BuyerCompliance = () => {
   );
 };
 
-export default BuyerCompliance; 
+export default BuyerCompliance;
