@@ -28,7 +28,7 @@ model User {
   is_kyc_done  Boolean        @default(false)
   is_personal_docs_done Boolean @default(false)
   is_company_docs_done Boolean @default(false)
-  documentDocId String
+  documentDocId String?
 }
 
 model UserProfile {
