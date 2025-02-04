@@ -18,25 +18,26 @@ const socket = io("http://localhost:3000" ,  {
 
 
 const SellerMessages = () => {
-  const [selectedChat, setSelectedChat] = useState(null);
+  const [selectedChat, setSelectedChat] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
 
-
   const {user} = useAuth();
+  // const [userId , setUserId] = useEffect("");
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [chatId, setChatId] = useState(null);
+  // const [chatId, setChatId] = useState("");
   const userType = "seller"; 
   const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
 
     // hard coded
-    const buyerId = "c3185ff0-fabd-415f-ab11-3459cc147538";
-    const sellerId = "ed784258-a737-4157-b0a9-08225b7c7c30";
+    const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
+    const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
 
    // Extract user Id from user
        useEffect(() => {
            try {
-             setUserId(user.id);
+            //  setUserId(user.id);
            } catch (error) {
              console.error("Invalid User Data", error);
            }
@@ -44,10 +45,15 @@ const SellerMessages = () => {
 
       
        useEffect(() => {
-             if (buyerId && sellerId) {
+             try{
+              if (buyerId && sellerId) {
                fetchAllChats();
-               fetchChatHistory();
              }
+            }catch(e){
+
+            }finally{
+              setLoading(false);
+            }
       }, [buyerId, sellerId]);
 
       const fetchAllChats = async () => {
@@ -66,35 +72,39 @@ const SellerMessages = () => {
    
 
       const fetchChatHistory = async () => {
+        setLoading(true);
 
         console.log( " buyer id ", buyerId );
         console.log( " seller id ", sellerId );
-        
+        console.log( " seletedChat ", selectedChat );
+         
         try {
-          const response = await axios.post(
-            "http://localhost:3000/chat/get-or-create-chat",
-            { buyerId, sellerId }
-          );
-          if (response.data.success) {
-            setChatId(response.data.chatId);
-            setMessages(response.data.messages || []);
+          const { data } = await axios.get(`http://localhost:3000/chat/get-chat/${selectedChat}`);
+          console.log(data);
+          
+          if (data.success) {
+            //setChatId(response.data.chatId);
+            setMessages(data.chat.history || []);
           }
         } catch (error) {
           console.error("Error fetching chat history:", error);
+        }finally{
+          setLoading(false);
         }
       };
 
           // Ensure socket joins the chat room after chatId is set
       useEffect(() => {
-        if (chatId) {
-          console.log(`Joining chat room: ${chatId}`);
-          socket.emit("join_chat", { chatId });
+        if (selectedChat) {
+          console.log(`Joining chat room: ${selectedChat}`);
+          socket.emit("join_chat", { selectedChat });
         }
-      }, [chatId]);
+      }, [selectedChat]);
     
       // Listen for incoming messages
       useEffect(() => {
-        if (!chatId) return;
+        if (!selectedChat) return;
+        fetchChatHistory();
     
         const handleMessageReceive = (data) => {
           console.log("Received message:", data);
@@ -106,12 +116,12 @@ const SellerMessages = () => {
         return () => {
           socket.off("receiveMessage", handleMessageReceive);
         };
-      }, [chatId]);
+      }, [selectedChat]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (message.trim() === "" || !chatId || !userType) {
-      console.error("Missing required fields in sendMessage:", { chatId, userType, message });
+    if (message.trim() === "" || !selectedChat || !userType) {
+      console.error("Missing required fields in sendMessage:", { selectedChat, userType, message });
       return;
     }
 
@@ -124,7 +134,7 @@ const SellerMessages = () => {
       receiverId = sellerId;
     }
     
-    const newMessage = { chatId, senderId, receiverId, role: userType, message };
+    const newMessage = { selectedChat, senderId, receiverId, role: userType, message };
      
     console.log("message :" , newMessage);
     
@@ -133,7 +143,7 @@ const SellerMessages = () => {
     try {
       const response = await axios.post("http://localhost:3000/chat/send-message", newMessage);
       if (response.data.success) {
-        // setMessages((prev) => [...prev, response.data.newMessage]);
+        setMessages((prev) => [...prev, response.data.newMessage]);
       } else {
         console.error("Message sending failed:", response.data.error);
       }
@@ -143,6 +153,14 @@ const SellerMessages = () => {
 
     setMessage("");
   };
+
+  if(messages){
+    console.log(messages);
+  }
+
+  if(loading){
+    return <div>Loading....</div>
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -172,12 +190,15 @@ const SellerMessages = () => {
               <div className="overflow-y-auto h-[calc(100%-73px)]">
                 {chats.map((chat) => (
                   <motion.div
-                    key={chat.id}
+                    key={chat._id}
                     whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
                     className={`p-4 cursor-pointer border-b border-gray-100 ${
                       selectedChat?.id === chat.id ? 'bg-blue-50' : ''
                     }`}
-                    onClick={() => setSelectedChat(chat)}
+                    onClick={() => {
+                      setLoading(true);
+                      setSelectedChat(chat._id)
+                    }}
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -213,7 +234,7 @@ const SellerMessages = () => {
                     <div className="flex items-center gap-3">
                       <FaUserCircle className="text-4xl text-gray-400" />
                       <div>
-                        <h3 className="font-semibold">{selectedChat.user}</h3>
+                        <h3 className="font-semibold">{selectedChat.sellerId}</h3>
                         <span className="text-sm text-green-500">Online</span>
                       </div>
                     </div>
@@ -224,23 +245,23 @@ const SellerMessages = () => {
 
                   {/* Messages */}
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {selectedChat.history.map((message) => (
+                    {messages.map((msg) => (
                       <motion.div
-                        key={message.id}
+                        key={msg._id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${message.userType === 'seller' ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${msg.userType === 'seller' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                          message.userType === 'seller'
+                          msg.userType === 'seller'
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-100'
                         }`}>
-                          <p>{message.message}</p>
+                          <p>{msg.message}</p>
                           <div className="flex items-center justify-end gap-1 mt-1">
-                            <span className="text-xs opacity-70">{message.time}</span>
-                            {message.userType === 'seller' && (
-                              message.status === 'read' ? <FaCheckDouble className="text-xs" /> : <FaCheck className="text-xs" />
+                            <span className="text-xs opacity-70">{msg.time}</span>
+                            {msg.userType === 'seller' && (
+                              msg.status === 'read' ? <FaCheckDouble className="text-xs" /> : <FaCheck className="text-xs" />
                             )}
                           </div>
                         </div>

@@ -34,9 +34,9 @@ dotenv.config();
 // Import socket middleware and http
 import { initializeSocket } from "./src/middlewares/socketio.js";
 import http from "http";
-const ioserver = http.createServer(app); // HTTP server
+const server = http.createServer(app); // HTTP server
 // Initialize Socket.IO
-initializeSocket(ioserver);
+initializeSocket( server);
 
 
 
@@ -48,10 +48,10 @@ connectMongoDB();
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['set-cookie']
+    exposedHeaders: ['set-cookie'],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true // Allow cookies, if needed
   })
 );
 
@@ -74,7 +74,7 @@ app.use("/docs",DocUploadRoutes);
 
 // Start server
 const SOCKETIO_PORT = PORT;
-const server = app.listen(SOCKETIO_PORT, () => {
+ server.listen(SOCKETIO_PORT, () => {
   console.log(`Server running on http://localhost:${SOCKETIO_PORT}`);
 });
 

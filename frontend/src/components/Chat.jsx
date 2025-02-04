@@ -14,11 +14,12 @@ const Chat = ({ product, isOpen, onClose }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [chatId, setChatId] = useState(null);
+  cosnt [userId, setUserId] = useState("");
   const userType = "buyer";
 
   // hard coded
-  const buyerId = "c3185ff0-fabd-415f-ab11-3459cc147538";
-  const sellerId = "ed784258-a737-4157-b0a9-08225b7c7c30";
+  const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
+  const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
 
   console.log("user data in chat page :" , user);
 
@@ -124,6 +125,16 @@ const Chat = ({ product, isOpen, onClose }) => {
   };
 
   if (!isOpen) return null;
+  
+
+    // auto scroll to bottom
+    // const messagesEndRef = useRef(null);
+    // useEffect(() => {
+    //   if (messagesEndRef.current) {
+    //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    //   }
+    // }, [messages]);
+
 
   return (
     <AnimatePresence>
@@ -176,6 +187,7 @@ const Chat = ({ product, isOpen, onClose }) => {
                 </div>
               </motion.div>
             ))}
+            {/* <div ref={messagesEndRef}></div> */}
           </div>
 
           {/* Message Input */}

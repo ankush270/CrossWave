@@ -7,7 +7,12 @@ import {
   FaShoppingCart, FaHeart, FaChartLine, FaDollarSign, FaCertificate,
   FaHome, FaTv, FaBlender, FaFan, FaCamera, FaTimes
 } from 'react-icons/fa'
-import { productsData } from '../data/productsData'
+// import { productsData } from '../data/productsData'
+import ProductCard from '../components/products/ProductCard'
+import ProductFilters from '../components/products/ProductFilters'
+import CategorySidebar from '../components/products/CategorySidebar'
+import { categories } from '../data/categories'
+import {productAPI} from "../api/api.js";
 
 const Products = () => {
   // State management
@@ -20,66 +25,24 @@ const Products = () => {
   const [priceRange, setPriceRange] = useState('all')
   const [selectedOrigin, setSelectedOrigin] = useState('all')
   const [selectedCertification, setSelectedCertification] = useState('all')
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [productsData, setProductsData] = useState([]);
 
-  // Enhanced categories with more electronics items
-  const categories = {
-    all: {
-      name: 'All Products',
-      icon: <FaMicrochip />,
-      subcategories: []
-    },
-    smartphones: {
-      name: 'Smartphones & Tablets',
-      icon: <FaMobile />,
-      subcategories: ['Mobile Phones', 'Tablets', 'Accessories', 'Spare Parts']
-    },
-    homeAppliances: {
-      name: 'Home Appliances',
-      icon: <FaHome />,
-      subcategories: [
-        'Refrigerators',
-        'Washing Machines',
-        'Air Conditioners',
-        'Microwave Ovens',
-        'Dishwashers'
-      ]
-    },
-    entertainment: {
-      name: 'Entertainment',
-      icon: <FaTv />,
-      subcategories: ['TVs', 'Home Theater', 'Gaming Consoles', 'Speakers']
-    },
-    computers: {
-      name: 'Computers & Laptops',
-      icon: <FaLaptop />,
-      subcategories: ['Laptops', 'Desktops', 'Monitors', 'Printers']
-    },
-    kitchenAppliances: {
-      name: 'Kitchen Appliances',
-      icon: <FaBlender />,
-      subcategories: [
-        'Mixers & Grinders',
-        'Food Processors',
-        'Electric Kettles',
-        'Induction Cooktops'
-      ]
-    },
-    cooling: {
-      name: 'Cooling Solutions',
-      icon: <FaFan />,
-      subcategories: ['Fans', 'Air Coolers', 'Exhaust Fans']
-    },
-    cameras: {
-      name: 'Cameras & Accessories',
-      icon: <FaCamera />,
-      subcategories: ['DSLR Cameras', 'Security Cameras', 'Action Cameras']
-    },
-    components: {
-      name: 'Electronic Components',
-      icon: <FaMicrochip />,
-      subcategories: ['Semiconductors', 'Circuit Boards', 'Power Supply']
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try{
+        const { data } = await productAPI.getProducts();
+        console.log(data);
+        setProductsData(data);
+      }catch (e) {
+        console.log("An error occurred while fetching: " + e.message);
+      }finally {
+        setLoading(false);
+      }
     }
-  }
+    fetchProducts();
+  }, [])
 
   // Use productsData instead of inline products array
   const filteredProducts = productsData.filter(product => {
@@ -123,23 +86,6 @@ const Products = () => {
 
   const sortedProducts = sortProducts(filteredProducts)
 
-  // Add price range filter in the filters section
-  const priceRangeFilter = (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-      <select
-        value={priceRange}
-        onChange={(e) => setPriceRange(e.target.value)}
-        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="all">All Prices</option>
-        <option value="low">Under $500</option>
-        <option value="medium">$500 - $1000</option>
-        <option value="high">Above $1000</option>
-      </select>
-    </div>
-  )
-
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -161,6 +107,10 @@ const Products = () => {
         stiffness: 100
       }
     }
+  }
+
+  if (loading) {
+    return <div>Loading...</div>
   }
 
   return (
@@ -272,145 +222,27 @@ const Products = () => {
           </motion.button>
         </motion.div>
 
-        {/* Filters Section */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl shadow-lg p-6 mb-8"
-            >
-              <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {/* Sort Options */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="popular">Most Popular</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="moq-low">MOQ: Low to High</option>
-                  </select>
-                </div>
-                
-                {/* MOQ Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Order</label>
-                  <select
-                    value={minOrder}
-                    onChange={(e) => setMinOrder(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="any">Any MOQ</option>
-                    <option value="100">100+ units</option>
-                    <option value="500">500+ units</option>
-                    <option value="1000">1000+ units</option>
-                  </select>
-                </div>
+        <ProductFilters 
+          showFilters={showFilters}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          minOrder={minOrder}
+          setMinOrder={setMinOrder}
+          selectedOrigin={selectedOrigin}
+          setSelectedOrigin={setSelectedOrigin}
+          selectedCertification={selectedCertification}
+          setSelectedCertification={setSelectedCertification}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+        />
 
-                {/* Origin Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Origin</label>
-                  <select
-                    value={selectedOrigin}
-                    onChange={(e) => setSelectedOrigin(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Countries</option>
-                    <option value="China">China</option>
-                    <option value="USA">USA</option>
-                    <option value="Japan">Japan</option>
-                    <option value="Germany">Germany</option>
-                    <option value="Taiwan">Taiwan</option>
-                    <option value="South Korea">South Korea</option>
-                    <option value="India">India</option>
-                  </select>
-                </div>
-
-                {/* Certification Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Certification</label>
-                  <select
-                    value={selectedCertification}
-                    onChange={(e) => setSelectedCertification(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Certifications</option>
-                    <option value="ISO 9001">ISO 9001</option>
-                    <option value="CE">CE</option>
-                    <option value="RoHS">RoHS</option>
-                    <option value="UL">UL</option>
-                  </select>
-                </div>
-
-                {/* Price Range Filter */}
-                {priceRangeFilter}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Main Content Grid */}
         <div className="flex gap-8">
-          {/* Categories Sidebar */}
-          <motion.div 
-            className="hidden lg:block w-64 bg-white rounded-2xl shadow-lg p-6 h-fit"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold mb-6">Categories</h3>
-            <motion.div 
-              className="space-y-2"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {Object.entries(categories).map(([key, category]) => (
-                <motion.div key={key} variants={itemVariants}>
-                  <button
-                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 ${
-                      selectedCategory === key 
-                        ? 'bg-blue-50 text-blue-600 shadow-md' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => setSelectedCategory(key)}
-                  >
-                    <span className="text-lg">{category.icon}</span>
-                    <span className="font-medium">{category.name}</span>
-                  </button>
-                  
-                  <AnimatePresence>
-                    {category.subcategories.length > 0 && selectedCategory === key && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="ml-6 mt-2 space-y-1"
-                      >
-                        {category.subcategories.map((sub) => (
-                          <motion.button
-                            key={sub}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-300"
-                            whileHover={{ x: 5 }}
-                          >
-                            {sub}
-                          </motion.button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
+          <CategorySidebar 
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
 
-          {/* Products Grid */}
           <motion.div 
             className="flex-1"
             variants={containerVariants}
@@ -418,109 +250,14 @@ const Products = () => {
             animate="visible"
           >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {sortedProducts.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    variants={itemVariants}
-                    layout
-                    whileHover={{ y: -10 }}
-                    className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    <Link to={`/product/${product.id}`}>
-                      <div className="relative overflow-hidden rounded-t-xl">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-56 object-cover transform group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <div className="absolute top-2 right-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
-                          MOQ: {product.moq}
-                        </div>
-                        
-                        {hoveredProduct === product.id && (
-                          <motion.div 
-                            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <div className="flex justify-between items-center">
-                              <span className="text-white">View Details</span>
-                              <div className="flex gap-2">
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className="p-2 bg-white/20 rounded-full text-white backdrop-blur-sm"
-                                >
-                                  <FaHeart />
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className="p-2 bg-white/20 rounded-full text-white backdrop-blur-sm"
-                                >
-                                  <FaShoppingCart />
-                                </motion.button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </div>
-
-                      <div className="p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          {product.name}
-                        </h3>
-
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="flex items-center gap-1">
-                            <FaGlobe className="text-gray-400" />
-                            <span className="text-sm text-gray-600">{product.origin}</span>
-                          </div>
-                          <div className="flex items-center text-yellow-400">
-                            <FaStar />
-                            <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <div className="text-sm text-gray-500">Sample Price</div>
-                            <div className="text-xl font-bold text-blue-600">
-                              {product.price.sample}
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Bulk: {product.price.bulk}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {product.certifications.map((cert, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full"
-                              >
-                                {cert}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Add specifications */}
-                        <div className="mt-4 text-sm text-gray-600">
-                          {product.specifications && product.specifications.technical && (
-                            Object.entries(product.specifications.technical).map(([key, value]) => (
-                              <div key={key} className="flex justify-between items-center">
-                                <span className="capitalize">{key}:</span>
-                                <span className="font-medium">{value.toString()}</span>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {sortedProducts.map((product) => (
+                 <ProductCard
+                  key={product._id}
+                  product={product}
+                  hoveredProduct={hoveredProduct}
+                  setHoveredProduct={setHoveredProduct}
+                />
+              ))}
             </div>
           </motion.div>
         </div>
