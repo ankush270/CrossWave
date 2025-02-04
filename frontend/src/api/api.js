@@ -9,8 +9,8 @@ const api = axios.create({
 })
 
 export const authAPI = {
-  login: (email, password) => {
-    return api.post('/user/login', { email, password })
+  login: (email, password, role) => {
+    return api.post('/user/login', { email, password, role })
   },
 
   logout: () => {
@@ -43,6 +43,10 @@ export const productAPI = {
 
   getProducts: ()=>{
     return api.get('/product/get')
+  },
+
+  getProductById:(id)=>{
+    return api.get('/product/getId/'+id);
   }
 
 }

@@ -1,5 +1,4 @@
 import 'dotenv/config';
-
 import express from "express";
 import prisma from "./src/config/prisma_db.js";
 import connectMongoDB from "./src/config/mongo_db.js";
@@ -11,6 +10,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import kycRouter from "./src/routes/kyc.js";
 // import { extractText } from "./src/microservices/kyc/aadhaar.js";
+
 // payment routes
 import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 // chat routes
@@ -18,7 +18,7 @@ import ChatRoutes from "./src/routes/ChatRoutes.js";
 // analytics routes
 import AnalyticsRoutes from "./src/routes/AnalyticsRoutes.js"
 
-
+import DocUploadRoutes from "./src/routes/doc_upload.js"
 
 import {
   verifyProduct,
@@ -49,7 +49,8 @@ connectMongoDB();
 
 app.use(
   cors({
-    origin: ['http://localhost:5173'], // Allow all origins
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    exposedHeaders: ['set-cookie'],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true // Allow cookies, if needed
@@ -70,6 +71,7 @@ app.use('/user-review',reviewRouter)
 
 app.use("/payment", PaymentRoutes);
 app.use('/chat', ChatRoutes);
+app.use("/docs",DocUploadRoutes);
 app.use('/analytics', AnalyticsRoutes);
 
 

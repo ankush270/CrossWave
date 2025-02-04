@@ -2,6 +2,7 @@
 //loading environment variables
 require('dotenv').config();
 
+
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -10,6 +11,7 @@ const socketIO = require('socket.io');
 const SocketService = require('./services/socket.service');
 const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
+const { chatController, initializeDefaultChat, setSocketService } = require('./controllers/chat.controller');
 
 // Import routes
 const chatRoutes = require('./routes/chat.routes');
@@ -20,34 +22,54 @@ const server = http.createServer(app);
 
 // Configure CORS
 app.use(cors({
-    origin: "http://localhost:8080",  // Update this to match your test.html server
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type"]
 }));
 
 // Initialize Socket.IO with proper configuration
 const io = socketIO(server, {
     cors: {
-        origin: "http://localhost:8080",  // Update this to match your test.html server
+        origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
         methods: ["GET", "POST"],
         credentials: true,
-        allowedHeaders: ["*"]
+        allowedHeaders: ["Content-Type"]
     },
-    transports: ['websocket', 'polling'],
-    allowEIO3: true,
-    pingTimeout: 60000
+    path: '/socket.io/',
+    serveClient: false,
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    cookie: false
 });
 
 // Initialize Socket Service
 const socketService = new SocketService(io);
 socketService.initialize();
 
+// Pass socket service to controller
+setSocketService(socketService);
+
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Add this before your routes
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    console.log('Request params:', req.params);
+    console.log('Request query:', req.query);
+    next();
+});
 
 // Routes
-app.use('/api/chat', chatRoutes);
+app.use('/api/chats', chatRoutes);
+
+// Add error logging middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    next();
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -63,7 +85,10 @@ process.on('unhandledRejection', (reason, promise) => {
 // Connect to MongoDB and start server
 const startServer = async () => {
     try {
+        console.log('Initializing default chat...');
         await connectDB();
+        await initializeDefaultChat();
+        
         const PORT = process.env.PORT || 5000;
         server.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);

@@ -11,6 +11,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts'
+import { useAuth } from "../contexts/AuthContext";
+import { profileAPI } from "../api/api";
 
 // Enhanced dummy data
 const transactions = [
@@ -287,21 +289,11 @@ const ThemeToggle = ({ isDarkMode, setIsDarkMode }) => (
 )
 
 const BuyerProfile = () => {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState('personal')
   const [isEditing, setIsEditing] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 234 567 8900',
-    address: '123 Business Street, Tech City, TC 12345',
-    isEmailVerified: true,
-    notifications: {
-      orders: true,
-      promotions: false,
-      updates: true
-    }
-  })
+  const [profileData, setProfileData] = useState(user)
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [notifications, setNotifications] = useState([
     {
@@ -329,6 +321,24 @@ const BuyerProfile = () => {
     }
   }, [])
 
+  // Update the profile update handler
+  const handleProfileUpdate = async () => {
+    if (isEditing) {
+      try {
+        console.log(profileData);
+        const response = await profileAPI.updateProfile(profileData);
+        if (response.data) {
+          console.log('Profile updated successfully');
+          setIsEditing(false);
+        }
+      } catch (error) {
+        console.error('Failed to update profile:', error);
+      }
+    } else {
+      setIsEditing(true);
+    }
+  };
+
   // Personal Information Section
   const PersonalInfo = () => (
     <div className="space-y-6">
@@ -337,7 +347,7 @@ const BuyerProfile = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={handleProfileUpdate}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
         >
           <FaEdit className="w-4 h-4" />

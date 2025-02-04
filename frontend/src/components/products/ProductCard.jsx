@@ -21,7 +21,7 @@ const ProductCard = ({ product, hoveredProduct, setHoveredProduct }) => {
             MOQ: {product.moq}
           </div>
           
-          {hoveredProduct === product.id && (
+          {hoveredProduct === product._id && (
             <motion.div 
               className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
               initial={{ opacity: 0, y: 20 }}

@@ -411,7 +411,9 @@
             const formData = new FormData(event.target);
             
             try {
-                const response = await fetch('/api/documents', {
+                console.log("Helooooooooooooooooooo");
+                
+                const response = await fetch('http://127.0.0.1:3005/api/documents', {
                     method: 'POST',
                     headers: {
                         'X-User-Id': TEST_USER.id,
@@ -419,6 +421,7 @@
                     },
                     body: formData
                 });
+                console.log(response);
                 
                 if (!response.ok) {
                     throw new Error('Upload failed');

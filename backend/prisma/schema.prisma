@@ -25,6 +25,9 @@ model User {
   order_seller Order[]        @relation(name: "SellerRelation")
   userReview   UserReview[]   @relation(name: "ReviewReceiver")
   userReviwed  UserReview[]   @relation(name: "ReviewGiver")
+  is_kyc_done  Boolean        @default(false)
+  is_personal_docs_done Boolean @default(false)
+  is_company_docs_done Boolean @default(false)
 }
 
 model UserProfile {

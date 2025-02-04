@@ -6,6 +6,7 @@ class UploadService {
   async uploadFiles(files, userId, userEmail, documentDetails) {
     try {
       // First, find or create user document record
+      console.log("Yayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
       let userDocs = await Document.findOne({ userId });
       
       if (!userDocs) {
@@ -26,7 +27,8 @@ class UploadService {
         unique_filename: true,
         overwrite: true
       });
-
+      console.log(result);
+      
       // Update the specific document type
       userDocs.documents[documentDetails.documentType] = {
         documentNumber: documentDetails.documentNumber,
@@ -39,6 +41,8 @@ class UploadService {
         verificationComments: null,
         verifiedAt: null
       };
+      console.log(userDocs);
+      
 
       await userDocs.save();
       return userDocs.documents[documentDetails.documentType];

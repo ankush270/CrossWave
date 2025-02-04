@@ -251,8 +251,8 @@ const Products = () => {
           >
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedProducts.map((product) => (
-                <ProductCard 
-                  key={product.id}
+                 <ProductCard
+                  key={product._id}
                   product={product}
                   hoveredProduct={hoveredProduct}
                   setHoveredProduct={setHoveredProduct}

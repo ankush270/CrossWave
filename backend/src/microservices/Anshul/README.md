@@ -1,9 +1,46 @@
-# API Documentation
+# CrossWave API Documentation
 
 ## Product Routes
+- Base Path: `/api/product`
 
-### Add Product
-- **Endpoint:** `POST /add-product`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/add-product` | Add new product with images |
+| GET | `/get-product` | Get all products |
+| GET | `/get-user-product/:seller` | Get products by seller |
+| DELETE | `/remove-product/:productId` | Delete product |
+| PUT | `/update-product/:productId` | Update product details |
+
+## Review Routes
+- Base Path: `/api/review`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/user-review/:reviewee_id` | Add user review |
+| GET | `/get-user-reviews/:reviewee_id` | Get reviews for user |
+| GET | `/user-avg-rating/:reviewee_id` | Get user average rating |
+| POST | `/product-review/:product_id` | Add product review |
+| GET | `/get-product-reviews/:product_id` | Get reviews for product |
+| GET | `/product-avg-rating/:product_id` | Get product average rating |
+
+## Order Routes
+- Base Path: `/api/order`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/addorder/:product_id` | Create new order |
+| PUT | `/update-status/:id` | Update order status |
+| GET | `/get-orders-buyer/:buyer_id` | Get buyer's orders |
+| GET | `/get-orders-seller/:seller_id` | Get seller's orders |
+
+## Detailed Route Documentation
+
+### Product Routes
+
+#### Add Product
+- **Endpoint:** `POST /api/product/add-product`
+- **Auth:** Required
+- **Content-Type:** multipart/form-data
 - **Middleware:** `multer` (max 10 images)
 - **Request Body:**
 ```json
@@ -39,7 +76,7 @@
 }
 ```
 
-### Get All Products
+#### Get All Products
 - **Endpoint:** `GET /get-product`
 - **Response (200):**
 ```json
@@ -53,7 +90,7 @@
 ]
 ```
 
-### Get User Products
+#### Get User Products
 - **Endpoint:** `GET /get-user-product/:seller`
 - **Parameters:** `seller` (seller ID)
 - **Response (200):**
@@ -67,7 +104,7 @@
 ]
 ```
 
-### Remove Product
+#### Remove Product
 - **Endpoint:** `DELETE /remove-product/:productId`
 - **Parameters:** `productId`
 - **Response (200):**
@@ -77,7 +114,7 @@
 }
 ```
 
-### Update Product
+#### Update Product
 - **Endpoint:** `PUT /update-product/:productId`
 - **Parameters:** `productId`
 - **Request Body:**
@@ -90,9 +127,9 @@
 }
 ```
 
-## Review Routes
+### Review Routes
 
-### Add Review
+#### Add Review
 - **Endpoint:** `POST /review/:reviewee_id`
 - **Parameters:** `reviewee_id`
 - **Request Body:**
@@ -114,7 +151,7 @@
 }
 ```
 
-### Get Reviews
+#### Get Reviews
 - **Endpoint:** `GET /get-reviews/:reviewee_id`
 - **Parameters:** `reviewee_id`
 - **Response (200):**
@@ -128,7 +165,7 @@
 ]
 ```
 
-### Get Average Rating
+#### Get Average Rating
 - **Endpoint:** `GET /avg-rating/:reviewee_id`
 - **Parameters:** `reviewee_id`
 - **Response (200):**
@@ -138,9 +175,9 @@
 }
 ```
 
-## Order Routes
+### Order Routes
 
-### Create Order
+#### Create Order
 - **Endpoint:** `POST /addorder`
 - **Request Body:**
 ```json
@@ -170,7 +207,7 @@
 }
 ```
 
-### Update Order Status
+#### Update Order Status
 - **Endpoint:** `PUT /update-status/:id`
 - **Parameters:** `id` (order ID)
 - **Request Body:**
@@ -180,7 +217,7 @@
 }
 ```
 
-### Get Buyer Orders
+#### Get Buyer Orders
 - **Endpoint:** `GET /get-orders-buyer/:buyer_id`
 - **Parameters:** `buyer_id`
 - **Response (200):**
@@ -195,7 +232,7 @@
 ]
 ```
 
-### Get Seller Orders
+#### Get Seller Orders
 - **Endpoint:** `GET /get-orders-seller/:seller_id`
 - **Parameters:** `seller_id`
 - **Response:** Same as buyer orders
