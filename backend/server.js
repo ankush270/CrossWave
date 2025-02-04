@@ -15,6 +15,10 @@ import kycRouter from "./src/routes/kyc.js";
 import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 // chat routes
 import ChatRoutes from "./src/routes/ChatRoutes.js";
+// analytics routes
+import AnalyticsRoutes from "./src/routes/AnalyticsRoutes.js"
+
+
 
 import {
   verifyProduct,
@@ -66,6 +70,7 @@ app.use('/user-review',reviewRouter)
 
 app.use("/payment", PaymentRoutes);
 app.use('/chat', ChatRoutes);
+app.use('/analytics', AnalyticsRoutes);
 
 
 
