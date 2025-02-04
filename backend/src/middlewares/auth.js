@@ -1,27 +1,27 @@
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 
 const authMiddleware = async (req, res, next) => {
-  try{
-    const {token} = req.cookies;
-    console.log(token);
+  try {
+    const { token } = req.cookies;
+    // console.log(token);
     if (!token) {
       return res.status(401).json({
         isAuthenticated: false,
-        msg: "Please log in first"
-      })
+        msg: "Please log in first",
+      });
     }
 
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded);
+    // console.log(decoded);
     req.id = decoded.id;
     req.role = decoded.role;
     next();
-  }catch (e) {
+  } catch (e) {
     return res.status(500).json({
       success: false,
-      msg: e
-    })
+      msg: e,
+    });
   }
-}
+};
 
 export default authMiddleware;
