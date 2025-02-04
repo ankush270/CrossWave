@@ -32,6 +32,7 @@ import Kyc from "./components/kyc/Kyc";
 import PayNow from "./pages/PayNow.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
 import PaymentFailure from "./pages/PaymentFailure.jsx";
+import {Toaster} from "sonner";
 
 
 const App = () => {
@@ -58,6 +59,7 @@ const App = () => {
     <Router>
       <AuthProvider>
       <div className="min-h-screen flex flex-col">
+        <Toaster position="top-right" richColors closeButton/>
         {/* Navbar will show on all pages except specified routes */}
         <Routes>
           {hiddenNavbarRoutes.map((path) => (

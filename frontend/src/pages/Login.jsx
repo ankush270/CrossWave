@@ -5,6 +5,7 @@ import {
   FaEnvelope, FaLock,FaShoppingBag, FaStore, FaEye, FaEyeSlash 
 } from 'react-icons/fa'
 import {useAuth} from "../contexts/AuthContext.jsx";
+import {toast} from "sonner";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -38,13 +39,16 @@ const [formData, setFormData] = useState({
   const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('Form submitted:', formData)
+    const toastId = toast.loading("Logging in...", { duration: Infinity});
 
     try{
       await login(formData.email, formData.password, formData.role);
+      toast.success("Logged In", { id: toastId});
       navigate('/');
     }catch (e) {
-      setError(error.response?.data?.error || 'Failed to login');
+      setError(e.response?.data?.error || 'Failed to login');
       console.log('Error occurred: ' , e);
+      toast.error(e.response?.data?.error || "An error occurred.", { id: toastId})
     }
 
   }
