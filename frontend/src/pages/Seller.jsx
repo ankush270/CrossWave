@@ -58,6 +58,7 @@ import QuickActions from '../components/ui/QuickActions'
 import Header from '../components/ui/Header'
 import NotificationsPanel from '../components/ui/NotificationsPanel'
 import FloatingActions from '../components/ui/FloatingActions'
+import {useAuth} from "../contexts/AuthContext.jsx";
 
 // Register ChartJS components
 ChartJS.register(
@@ -87,7 +88,8 @@ const Seller = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { user, role } = useAuth();
 
   const menuItems = [
     {
@@ -340,14 +342,14 @@ const Seller = () => {
                               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                             </div>
                             <div>
-                              <h3 className="font-medium">John's Electronics</h3>
+                              <h3 className="font-medium">{user.profile.name}</h3>
                               <div className="flex items-center gap-2">
                                 <span
                                   className={`text-sm ${
                                     isDarkMode ? "text-gray-400" : "text-gray-500"
                                   }`}
                                 >
-                                  Premium Buyer
+                                  {role}
                                 </span>
                                 <FaAngleDown
                                   className={
