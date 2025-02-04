@@ -193,7 +193,7 @@ const Product = () => {
                 className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-green-700"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate(`/product/${product.id}/buy`, {
+                onClick={() => navigate(`/product/${product._id}/buy`, {
                   state: { selectedPricing }
                 })}
               >
