@@ -26,6 +26,7 @@ import {
   FaMoon,
   FaWarehouse,
   FaClipboardList,
+  FaBoxOpen,
   FaUserCog,
   FaGlobe,
   FaHandshake,
@@ -70,6 +71,15 @@ ChartJS.register(
   Filler,
   ArcElement
 )
+
+// Add this CSS at the beginning of your component
+const scrollbarHiddenStyles = {
+  scrollbarWidth: "none" /* Firefox */,
+  msOverflowStyle: "none" /* IE and Edge */,
+  "&::-webkit-scrollbar": {
+    display: "none" /* Chrome, Safari and Opera */,
+  },
+};
 
 const Seller = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -281,59 +291,171 @@ const Seller = () => {
       {/* Main Layout */}
       <div className="flex w-full relative">
         {/* Sidebar */}
-        <motion.aside 
-          initial={{ x: -300 }}
-          animate={{ x: 0 }}
+        <motion.div 
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
           className={`w-72 h-screen fixed left-0 ${themeStyles.sidebar} border-r border-r-gray-200/20 shadow-xl z-30`}
         >
-          {/* Logo */}
-          <div className="h-20 flex items-center justify-center">
-            <motion.h1 
-              className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
-              whileHover={{ scale: 1.05 }}
-            >
-              CrossWave
-            </motion.h1>
-          </div>
-
-          {/* Profile Section */}
-          <div className="px-4 py-6">
-            <motion.div
-              whileHover={{ y: -2 }}
-              className="p-4 rounded-xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10"
-            >
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg">
-                    T
-                  </div>
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                </div>
-                <div>
-                  <h3 className={`font-medium ${themeStyles.text}`}>Tech Solutions Ltd</h3>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Verified Seller
-                    </span>
-                    <FaAngleDown className="text-gray-400" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="px-4 space-y-2 h-[calc(100vh-320px)] overflow-y-auto">
-            {menuItems.map((item) => (
-              <MenuItem 
-                key={item.id}
-                item={item}
-                isActive={activeSection === item.id}
-                isDarkMode={isDarkMode}
-                onClick={() => handleMenuClick(item.id)}
-              />
-            ))}
-          </nav>
+          <motion.div
+                        className="overflow-y-auto h-full pb-10"
+                        style={scrollbarHiddenStyles}
+                      >
+                        {/* Logo/Brand Section */}
+                        <div
+                          className={`h-16 flex items-center justify-center border-b ${
+                            isDarkMode
+                              ? "border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-900/50"
+                              : "border-white/30 bg-white/10"
+                          }`}
+                        >
+                          <motion.h1
+                            className={`text-2xl font-bold ${
+                              isDarkMode
+                                ? "bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+                                : "bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent"
+                            }`}
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            CrossWave
+                          </motion.h1>
+                        </div>
+          
+                        {/* Profile Quick View */}
+                        <div
+                          className={`p-4 border-b ${
+                            isDarkMode
+                              ? "border-gray-700/50 bg-gradient-to-r from-gray-800/30 to-gray-900/30"
+                              : "border-white/30 bg-white/10"
+                          }`}
+                        >
+                          <motion.div
+                            whileHover={{ y: -2 }}
+                            className="flex items-center space-x-3 cursor-pointer"
+                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                          >
+                            <div className="relative">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
+                                J
+                              </div>
+                              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                            </div>
+                            <div>
+                              <h3 className="font-medium">John's Electronics</h3>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`text-sm ${
+                                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                                  }`}
+                                >
+                                  Premium Buyer
+                                </span>
+                                <FaAngleDown
+                                  className={
+                                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </motion.div>
+                        </div>
+          
+                        {/* Navigation Menu */}
+                        <nav className="p-4 space-y-2">
+                          {menuItems.map((item) => (
+                            <motion.div
+                              key={item.id}
+                              onClick={() => handleMenuClick(item.id)}
+                              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group cursor-pointer
+                              ${
+                                activeSection === item.id
+                                  ? isDarkMode
+                                    ? "bg-gradient-to-r from-blue-600/90 to-purple-700/90 text-white shadow-lg backdrop-blur-xl"
+                                    : "bg-gradient-to-r from-blue-500/90 to-purple-600/90 text-white shadow-lg backdrop-blur-xl"
+                                  : isDarkMode
+                                  ? "text-gray-300 hover:bg-gray-700/30"
+                                  : "text-gray-700 hover:bg-white/40"
+                              }`}
+                              whileHover={{ x: 5, scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span
+                                  className={`text-xl ${
+                                    activeSection === item.id
+                                      ? "text-white"
+                                      : isDarkMode
+                                      ? "text-gray-400 group-hover:text-purple-400"
+                                      : "text-gray-500 group-hover:text-blue-500"
+                                  }`}
+                                >
+                                  {item.icon}
+                                </span>
+                                <span className="font-medium">{item.title}</span>
+                              </div>
+                              {item.badge && (
+                                <motion.span
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className={`px-2 py-1 rounded-full text-xs ${
+                                    activeSection === item.id
+                                      ? "bg-white text-blue-600"
+                                      : "bg-blue-100 text-blue-600"
+                                  }`}
+                                >
+                                  {item.badge}
+                                </motion.span>
+                              )}
+                            </motion.div>
+                          ))}
+                        </nav>
+          
+                        {/* Quick Actions */}
+                        <div
+                          className={`-mt-2 p-4 border-t ${
+                            isDarkMode
+                              ? "border-gray-700/50 bg-gradient-to-b from-gray-800/30 to-gray-900/30"
+                              : "border-white/30 bg-white/10"
+                          } mt-4`}
+                        >
+                          <h4
+                            className={`text-sm font-semibold ${
+                              isDarkMode ? "text-gray-400" : "text-gray-700"
+                            } mb-3`}
+                          >
+                            Quick Actions
+                          </h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { icon: FaBoxOpen, label: "New RFQ", color: "blue" },
+                              { icon: FaTruck, label: "Track Order", color: "green" },
+                              { icon: FaGlobe, label: "Browse", color: "purple" },
+                              { icon: FaHandshake, label: "Support", color: "orange" },
+                            ].map((action, index) => (
+                              <motion.button
+                                key={index}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`p-3 ${
+                                  isDarkMode
+                                    ? "bg-gray-700/50 hover:bg-gray-600/50"
+                                    : "bg-white/50 hover:bg-white/60"
+                                } backdrop-blur-sm rounded-lg text-center transition-all duration-200`}
+                              >
+                                <action.icon
+                                  className={`text-${action.color}-500 mx-auto mb-1 text-xl`}
+                                />
+                                <span
+                                  className={`text-xs ${
+                                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                                  }`}
+                                >
+                                  {action.label}
+                                </span>
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
 
           {/* Bottom Actions */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200/20 backdrop-blur-sm">
@@ -343,26 +465,10 @@ const Seller = () => {
               <LogoutButton />
             </div>
           </div>
-        </motion.aside>
+        </motion.div>
 
         {/* Main Content */}
         <div className="flex-1 ml-72">
-          {/* Header */}
-          <motion.header 
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className={`h-20 sticky top-0 z-20 px-8 backdrop-blur-xl border-b border-gray-200/20
-              ${isDarkMode ? 'bg-gray-900/80' : 'bg-white/80'}`}
-          >
-            <div className="h-full flex items-center justify-between">
-              <PageTitle title={menuItems.find(item => item.id === activeSection)?.title} />
-              <HeaderActions 
-                isDarkMode={isDarkMode}
-                onNotificationClick={() => setIsNotificationsOpen(true)}
-              />
-            </div>
-          </motion.header>
-
           {/* Page Content */}
           <main className="p-8">
             <AnimatePresence mode="wait">
