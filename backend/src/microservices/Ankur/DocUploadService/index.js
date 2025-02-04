@@ -8,11 +8,14 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const path = require('path');
 const { findAvailablePort } = require('./config/service.config');
+// const cors = require( "cors");
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+app.use(cors())
 
 // Security middleware
 app.use(helmet({

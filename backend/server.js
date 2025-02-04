@@ -16,6 +16,8 @@ import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 // chat routes
 import ChatRoutes from "./src/routes/ChatRoutes.js";
 
+import DocUploadRoutes from "./src/routes/doc_upload.js"
+
 import {
   verifyProduct,
   upload,
@@ -67,7 +69,7 @@ app.use('/user-review',reviewRouter)
 
 app.use("/payment", PaymentRoutes);
 app.use('/chat', ChatRoutes);
-
+app.use("/docs",DocUploadRoutes);
 
 
 // Start server

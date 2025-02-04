@@ -12,9 +12,9 @@ const Navbar = () => {
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const {user, logout} = useAuth();
+  const {user, logout, role} = useAuth();
 
-  console.log(user);
+  console.log(role);
 
   // Handle navbar background on scroll
   useEffect(() => {
@@ -157,7 +157,7 @@ const Navbar = () => {
                  </motion.button>
                </Link>}
 
-            {user ? <Link to={`/${user.logged_in_as}/profile`}>
+            {user ? <Link to={`/${role}/dashboard`}>
               <motion.button
                  whileHover={{scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"}}
                  whileTap={{scale: 0.95}}

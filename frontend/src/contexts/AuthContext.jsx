@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   const login = async(email, password, role) => {
     try{
       const {data} = await authAPI.login(email, password, role);
-      console.log(data);
+      console.log(data.logged_in_as);
       setUser(data.user);
       setRole(data.logged_in_as);
       setLoading(false);

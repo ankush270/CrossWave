@@ -7,7 +7,7 @@ import { Loader, ThemeProvider } from "@aws-amplify/ui-react";
 import { Amplify } from "aws-amplify";
 import "@aws-amplify/ui-react/styles.css";
 import awsexports from "../../aws-exports";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 Amplify.configure(awsexports);
@@ -23,6 +23,7 @@ export default function LivenessCheck() {
 
   const fetchCreateLiveness = async () => {
     console.log("Creating session...");
+    console.log(role);
 
     const res = await fetch(`${BASE_URL}/kyc/liveness/session/create`);
     const data = await res.json();
@@ -57,7 +58,7 @@ export default function LivenessCheck() {
 
     if (data.results.Confidence > 50) {
       alert("Verified!!!");
-      navigate(`/${role}/profile`);
+      navigate(`/`);
     } else {
       alert("We could not verify you. Please verify again!");
       window.location.reload(); // Reloads the whole page
