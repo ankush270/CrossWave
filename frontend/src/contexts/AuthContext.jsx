@@ -7,12 +7,14 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const checkAuthStatus = async () => {
     try {
       const {data} = await authAPI.getCurrentUser();
       setUser(data);
+      
     }catch (e) {
       console.error('Auth check failed:', e);
       setUser(null);
@@ -32,10 +34,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, [location.pathname])
 
-  const login = async(email, password) => {
+  const login = async(email, password, role) => {
     try{
-      const {data} = await authAPI.login(email, password);
+      const {data} = await authAPI.login(email, password, role);
+      console.log(data.logged_in_as);
       setUser(data.user);
+      setRole(data.logged_in_as);
       setLoading(false);
       return data.user
     }catch (e) {
@@ -58,6 +62,7 @@ export const AuthProvider = ({ children }) => {
     try{
       const { data } = await authAPI.register(userData);
       setUser(data.user);
+      setRole(data.logged_in_as); 
       return data.user;
     }catch (e) {
       console.error('Registration failed:', e);
@@ -71,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    role
   }
 
   return (

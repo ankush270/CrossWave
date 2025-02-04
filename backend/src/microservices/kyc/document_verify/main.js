@@ -40,7 +40,7 @@ function getFuncForDocType(docType) {
   return docTypeFunctionMap[docType] || [dummy];
 }
 
-async function verifyDocument(filePath, docType) {
+export async function verifyDocument(filePath, docType) {
   try {
     // 1. Extract text from the document using OCR.
     let extractedText = "";
@@ -97,6 +97,6 @@ async function verifyDocument(filePath, docType) {
 //   console.log(`Verification Result for ${docType}:`, result);
 // }
 
-verifyDocument("Test Docs/Certificate Of Origin.jpg", "coo").then((result) => {
-  console.log("Document Verification Result:", result);
-});
+// verifyDocument("Test Docs/Certificate Of Origin.jpg", "coo").then((result) => {
+//   console.log("Document Verification Result:", result);
+// });
