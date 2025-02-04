@@ -41,7 +41,8 @@ const App = () => {
     "/kyc",
     "/pay-now",
     "/paymet-success",
-    "/paymet-failure"
+    "/paymet-failure",
+    "/product/:id"
   ];
 
   return (
@@ -83,12 +84,6 @@ const App = () => {
 
             {/* Buyer Routes */}
             <Route path="/buyer/dashboard" element={<Buyer />} />
-            {/* <Route path="/buyer/payments" element={<BuyerPayments />} />
-            <Route path="/buyer/analytics" element={<BuyerAnalytics />} />
-            <Route path="/buyer/compliance" element={<ComplianceManager />} />
-             */}
-{/* 
-            <Route path="/buyer/profile" element={<BuyerProfile />} />   */}
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Seller />} />

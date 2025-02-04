@@ -474,7 +474,8 @@ const Seller = () => {
         <div className="flex-1 ml-72">
           {/* Page Content */}
           <main className="p-8">
-            <AnimatePresence mode="wait">
+            {/* <AnimatePresence mode="wait"> */}
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeSection}
                 initial={{ opacity: 0, y: 20 }}

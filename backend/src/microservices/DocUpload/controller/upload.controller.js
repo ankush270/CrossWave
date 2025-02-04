@@ -43,6 +43,7 @@ export const upload = multer({
 
 export const uploadDocument = async (req, res) => {
   try {
+    // console.log("Worlddddddddddddddddddddddddddddddd");
     const { documentType } = req.body;
     const files = req.files;
 

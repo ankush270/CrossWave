@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 import { productsData } from "../data/productsData";
 import axios from "axios";
+import { productAPI } from "../api/api.js";
 
 const BuyNow = () => {
   const { id } = useParams();
@@ -46,12 +47,20 @@ const BuyNow = () => {
   });
 
   useEffect(() => {
-    const foundProduct = productsData.find((p) => p.id === Number(id)); // Ensure ID comparison works
-    if (foundProduct) {
-      setProduct(foundProduct);
-    }
-    setLoading(false);
-  }, [id, productsData]);
+    const fetchProduct = async () => {
+      try {
+        const { data } = await productAPI.getProductById(id);
+        setProduct(data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        navigate('/products'); // Redirect on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -99,11 +108,11 @@ const BuyNow = () => {
   const calculateSubtotal = () => {
     if (!product?.pricing?.[selectedPricing]) return 0;
 
-    const price = parseFloat(
-      product.pricing[selectedPricing].price.replace(/[^0-9.]/g, "")
-    );
+    const price = product.pricing[selectedPricing].price;
+    // Check if price is already a number
+    const priceValue = typeof price === 'number' ? price : parseFloat(price.replace(/[^0-9.]/g, ""));
     const quantity = parseInt(product.pricing[selectedPricing].moq);
-    return (price * quantity).toFixed(2);
+    return (priceValue * quantity).toFixed(2);
   };
 
   const calculateShipping = () => {
@@ -163,6 +172,7 @@ const BuyNow = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <p className="ml-4">Loading product details...</p>
       </div>
     );
   }

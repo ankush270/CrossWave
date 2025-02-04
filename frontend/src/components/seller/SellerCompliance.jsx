@@ -134,7 +134,7 @@ const SellerCompliance = () => {
       <div className="relative z-10 space-y-6 p-6">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">Compliance Management</h2>
+          <h2 className="text-2xl font-bold text-black">Compliance Management</h2>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
