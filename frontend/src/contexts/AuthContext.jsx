@@ -6,10 +6,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState(null);
 
   const [role, setRole] = useState(() => {
     const storedRole = localStorage.getItem("role");
@@ -47,6 +44,7 @@ export const AuthProvider = ({ children }) => {
     try{
       const {data} = await authAPI.login(email, password, role);
       console.log(data.logged_in_as);
+      console.log(data.user);
       setUser(data.user);
       setRole(data.logged_in_as);
       localStorage.setItem("user", JSON.stringify(data.user));

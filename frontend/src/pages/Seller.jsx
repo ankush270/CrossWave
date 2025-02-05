@@ -89,6 +89,7 @@ const Seller = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const navigate = useNavigate();
+  const [loading, isLoading] = useState(true);
   const { user, role } = useAuth();
 
   const menuItems = [
@@ -157,120 +158,7 @@ const Seller = () => {
     return menuItem ? <menuItem.component /> : null
   }
 
-  // Sample data
-  const salesData = {
-    '7days': {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      data: [3200, 4100, 3800, 5200, 4800, 6100, 5400]
-    },
-    '30days': {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      data: [18500, 22400, 19800, 24600]
-    }
-  }
 
-  const recentOrders = [
-    {
-      id: 'ORD001',
-      product: 'Premium Headphones',
-      buyer: 'John Doe',
-      status: 'Pending',
-      amount: 129.99,
-      date: '2024-02-20'
-    },
-    {
-      id: 'ORD002',
-      product: 'Wireless Keyboard',
-      buyer: 'Jane Smith',
-      status: 'Shipped',
-      amount: 89.99,
-      date: '2024-02-19'
-    }
-  ]
-
-  const productPerformance = {
-    labels: ['Electronics', 'Accessories', 'Gadgets'],
-    datasets: [{
-      data: [45, 30, 25],
-      backgroundColor: [
-        'rgba(59, 130, 246, 0.8)',
-        'rgba(16, 185, 129, 0.8)',
-        'rgba(249, 115, 22, 0.8)'
-      ]
-    }]
-  }
-
-  const notifications = [
-    {
-      id: 1,
-      title: 'New Order Received',
-      message: 'Order #ORD123 received from Tech Solutions',
-      time: '2 min ago',
-      type: 'order'
-    },
-    {
-      id: 2,
-      title: 'Stock Alert',
-      message: 'Low stock warning for Order SKU-456',
-      time: '1 hour ago',
-      type: 'inventory'
-    }
-  ]
-
-  const dashboardCards = [
-    {
-      title: 'Total Products',
-      value: '156',
-      change: '+12%',
-      icon: <FaBox className="text-blue-500" />,
-      link: '/seller/products'
-    },
-    {
-      title: 'Total Orders',
-      value: '1,234',
-      change: '+23%',
-      icon: <FaFileInvoiceDollar className="text-green-500" />,
-      link: '/seller/payments'
-    },
-    {
-      title: 'Revenue',
-      value: '₹12.4M',
-      change: '+18%',
-      icon: <FaChartLine className="text-purple-500" />,
-      link: '/seller/analytics'
-    },
-    {
-      title: 'Shipments',
-      value: '89',
-      change: '+5%',
-      icon: <FaTruck className="text-orange-500" />,
-      link: '/seller/logistics'
-    }
-  ];
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: 'order',
-      message: 'New order received for Electronics Component',
-      time: '2 minutes ago'
-    },
-    {
-      id: 2,
-      type: 'payment',
-      message: 'Payment received for order #12345',
-      time: '1 hour ago'
-    },
-    // Add more activities...
-  ];
-
-  // Quick actions configuration
-  const quickActions = [
-    { icon: FaPlus, label: 'Add Order', color: 'blue' },
-    { icon: FaWarehouse, label: 'Inventory', color: 'green' },
-    { icon: FaGlobe, label: 'Store', color: 'purple' },
-    { icon: FaHandshake, label: 'Support', color: 'orange' }
-  ];
 
   // Styles based on theme
   const themeStyles = {
