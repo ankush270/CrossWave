@@ -20,6 +20,8 @@ const SellerLogistics = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPickupModal, setShowPickupModal] = useState(false);
   const [showCancelPickupModal, setShowCancelPickupModal] = useState(false);
+  // const [showReturnShipmentModal, setShowReturnShipmentModal] = useState(false);
+  const [showCancelShipmentModal, setShowCancelShipmentModal] = useState(false);
   const [formData, setFormData] = useState({
     labelResponseOptions: "URL_ONLY",
     requestedShipment: {
@@ -136,12 +138,88 @@ const SellerLogistics = () => {
 
   const [cancelPickupFormData, setCancelPickupFormData] = useState({
     associatedAccountNumber: {
-      value: "XXX561073"
+      value: "XXX561073",
     },
     pickupConfirmationCode: "",
     carrierCode: "FDXE",
-    scheduledDate: new Date().toISOString().split('T')[0],
-    location: ""
+    scheduledDate: new Date().toISOString().split("T")[0],
+    location: "",
+  });
+
+  // const [returnShipmentData, setReturnShipmentData] = useState({
+  //   requestedShipment: {
+  //     shipper: {
+  //       contact: {
+  //         personName: "",
+  //         phoneNumber: "",
+  //       },
+  //       address: {
+  //         streetLines: [""],
+  //         city: "",
+  //         stateOrProvinceCode: "",
+  //         postalCode: "",
+  //         countryCode: "US",
+  //       },
+  //     },
+  //     recipients: [
+  //       {
+  //         contact: {
+  //           personName: "",
+  //           phoneNumber: "",
+  //         },
+  //         address: {
+  //           streetLines: [""],
+  //           city: "",
+  //           stateOrProvinceCode: "",
+  //           postalCode: "",
+  //           countryCode: "US",
+  //         },
+  //       },
+  //     ],
+  //     shipDatestamp: new Date().toISOString().split("T")[0],
+  //     pickupType: "CONTACT_FEDEX_TO_SCHEDULE",
+  //     serviceType: "PRIORITY_OVERNIGHT",
+  //     packagingType: "FEDEX_BOX",
+  //     shippingChargesPayment: {
+  //       paymentType: "SENDER",
+  //       payor: {
+  //         responsibleParty: {
+  //           accountNumber: {
+  //             value: "XXX561073",
+  //           },
+  //         },
+  //       },
+  //     },
+  //     shipmentSpecialServices: {
+  //       specialServiceTypes: ["RETURN_SHIPMENT"],
+  //       returnShipmentDetail: {
+  //         returnType: "FEDEX_TAG",
+  //       },
+  //     },
+  //     blockInsightVisibility: false,
+  //     pickupDetail: {
+  //       readyPickupDateTime: "",
+  //       latestPickupDateTime: "",
+  //     },
+  //     requestedPackageLineItems: [
+  //       {
+  //         weight: {
+  //           units: "LB",
+  //           value: 5,
+  //         },
+  //       },
+  //     ],
+  //   },
+  //   accountNumber: {
+  //     value: "XXX561073",
+  //   },
+  // });
+
+  const [cancelShipmentData, setCancelShipmentData] = useState({
+    accountNumber: {
+      value: "XXX561073",
+    },
+    trackingNumber: "",
   });
 
   const logisticsStats = [
@@ -184,7 +262,7 @@ const SellerLogistics = () => {
       status: "in-transit",
       eta: "2024-02-25",
     },
-    
+
     // Add more shipments...
   ];
 
@@ -235,6 +313,38 @@ const SellerLogistics = () => {
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  // const handleReturnShipmentSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:5000/logistics/return-shipment",
+  //       returnShipmentData
+  //     );
+  //     console.log(response.data);
+  //     setShowReturnShipmentModal(false);
+  //   } catch (error) {
+  //     console.error("Error creating return shipment:", error);
+  //   }
+  // };
+
+  const handleCancelShipmentSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put(
+        "http://localhost:5000/logistics/cancel-shipment",
+        cancelShipmentData
+      );
+      console.log(response.data);
+      setShowCancelShipmentModal(false);
+      setCancelShipmentData((prev) => ({
+        ...prev,
+        trackingNumber: "",
+      }));
+    } catch (error) {
+      console.error("Error canceling shipment:", error);
+    }
   };
 
   const renderShipmentForm = () => (
@@ -983,24 +1093,211 @@ const SellerLogistics = () => {
     </form>
   );
 
+  // const renderReturnShipmentForm = () => (
+  //   <form onSubmit={handleReturnShipmentSubmit} className="px-6 py-4">
+  //     <div className="space-y-6">
+  //       {/* Shipper Information */}
+  //       <div className="border rounded-lg p-4 space-y-4">
+  //         <h4 className="font-medium text-gray-900">Shipper Information</h4>
+  //         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  //           <div>
+  //             <label className="block text-sm font-medium text-gray-700 mb-2">
+  //               Name
+  //             </label>
+  //             <input
+  //               type="text"
+  //               required
+  //               value={
+  //                 returnShipmentData.requestedShipment.shipper.contact
+  //                   .personName
+  //               }
+  //               onChange={(e) =>
+  //                 setReturnShipmentData((prev) => ({
+  //                   ...prev,
+  //                   requestedShipment: {
+  //                     ...prev.requestedShipment,
+  //                     shipper: {
+  //                       ...prev.requestedShipment.shipper,
+  //                       contact: {
+  //                         ...prev.requestedShipment.shipper.contact,
+  //                         personName: e.target.value,
+  //                       },
+  //                     },
+  //                   },
+  //                 }))
+  //               }
+  //               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+  //             />
+  //           </div>
+  //           <div>
+  //             <label className="block text-sm font-medium text-gray-700 mb-2">
+  //               Phone
+  //             </label>
+  //             <input
+  //               type="tel"
+  //               required
+  //               value={
+  //                 returnShipmentData.requestedShipment.shipper.contact
+  //                   .phoneNumber
+  //               }
+  //               onChange={(e) =>
+  //                 setReturnShipmentData((prev) => ({
+  //                   ...prev,
+  //                   requestedShipment: {
+  //                     ...prev.requestedShipment,
+  //                     shipper: {
+  //                       ...prev.requestedShipment.shipper,
+  //                       contact: {
+  //                         ...prev.requestedShipment.shipper.contact,
+  //                         phoneNumber: e.target.value,
+  //                       },
+  //                     },
+  //                   },
+  //                 }))
+  //               }
+  //               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+  //             />
+  //           </div>
+  //           {/* Add address fields similarly */}
+  //         </div>
+  //       </div>
+
+  //       {/* Pickup Details */}
+  //       <div className="border rounded-lg p-4 space-y-4">
+  //         <h4 className="font-medium text-gray-900">Pickup Schedule</h4>
+  //         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  //           <div>
+  //             <label className="block text-sm font-medium text-gray-700 mb-2">
+  //               Ready Time
+  //             </label>
+  //             <input
+  //               type="datetime-local"
+  //               required
+  //               onChange={(e) =>
+  //                 setReturnShipmentData((prev) => ({
+  //                   ...prev,
+  //                   requestedShipment: {
+  //                     ...prev.requestedShipment,
+  //                     pickupDetail: {
+  //                       ...prev.requestedShipment.pickupDetail,
+  //                       readyPickupDateTime: new Date(
+  //                         e.target.value
+  //                       ).toISOString(),
+  //                     },
+  //                   },
+  //                 }))
+  //               }
+  //               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+  //             />
+  //           </div>
+  //           <div>
+  //             <label className="block text-sm font-medium text-gray-700 mb-2">
+  //               Latest Pickup Time
+  //             </label>
+  //             <input
+  //               type="datetime-local"
+  //               required
+  //               onChange={(e) =>
+  //                 setReturnShipmentData((prev) => ({
+  //                   ...prev,
+  //                   requestedShipment: {
+  //                     ...prev.requestedShipment,
+  //                     pickupDetail: {
+  //                       ...prev.requestedShipment.pickupDetail,
+  //                       latestPickupDateTime: new Date(
+  //                         e.target.value
+  //                       ).toISOString(),
+  //                     },
+  //                   },
+  //                 }))
+  //               }
+  //               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+  //             />
+  //           </div>
+  //         </div>
+  //       </div>
+
+  //       {/* Package Details */}
+  //       <div className="border rounded-lg p-4 space-y-4">
+  //         <h4 className="font-medium text-gray-900">Package Details</h4>
+  //         <div>
+  //           <label className="block text-sm font-medium text-gray-700 mb-2">
+  //             Weight (LB)
+  //           </label>
+  //           <input
+  //             type="number"
+  //             required
+  //             value={
+  //               returnShipmentData.requestedShipment
+  //                 .requestedPackageLineItems[0].weight.value
+  //             }
+  //             onChange={(e) =>
+  //               setReturnShipmentData((prev) => ({
+  //                 ...prev,
+  //                 requestedShipment: {
+  //                   ...prev.requestedShipment,
+  //                   requestedPackageLineItems: [
+  //                     {
+  //                       ...prev.requestedShipment.requestedPackageLineItems[0],
+  //                       weight: {
+  //                         ...prev.requestedShipment.requestedPackageLineItems[0]
+  //                           .weight,
+  //                         value: Number(e.target.value),
+  //                       },
+  //                     },
+  //                   ],
+  //                 },
+  //               }))
+  //             }
+  //             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+  //           />
+  //         </div>
+  //       </div>
+  //     </div>
+
+  //     {/* Form Actions */}
+  //     <div className="bg-white border-t px-6 py-4 mt-6">
+  //       <div className="flex justify-end gap-4">
+  //         <button
+  //           type="button"
+  //           onClick={() => setShowReturnShipmentModal(false)}
+  //           className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+  //         >
+  //           Cancel
+  //         </button>
+  //         <button
+  //           type="submit"
+  //           className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+  //         >
+  //           Create Return Shipment
+  //         </button>
+  //       </div>
+  //     </div>
+  //   </form>
+  // );
+
   const cancelPickup = (e) => {
     e.preventDefault();
-    axios.put('http://localhost:5000/logistics/cancel-pickup', cancelPickupFormData)
-      .then(response => {
+    axios
+      .put(
+        "http://localhost:5000/logistics/cancel-pickup",
+        cancelPickupFormData
+      )
+      .then((response) => {
         console.log(response);
         setShowCancelPickupModal(false);
         // Reset form
         setCancelPickupFormData({
           associatedAccountNumber: {
-            value: "XXX561073"
+            value: "XXX561073",
           },
           pickupConfirmationCode: "",
           carrierCode: "FDXE",
-          scheduledDate: new Date().toISOString().split('T')[0],
-          location: "NQAA"
+          scheduledDate: new Date().toISOString().split("T")[0],
+          location: "NQAA",
         });
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   };
@@ -1020,9 +1317,9 @@ const SellerLogistics = () => {
                 required
                 value={cancelPickupFormData.pickupConfirmationCode}
                 onChange={(e) =>
-                  setCancelPickupFormData(prev => ({
+                  setCancelPickupFormData((prev) => ({
                     ...prev,
-                    pickupConfirmationCode: e.target.value
+                    pickupConfirmationCode: e.target.value,
                   }))
                 }
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1037,9 +1334,9 @@ const SellerLogistics = () => {
                 required
                 value={cancelPickupFormData.scheduledDate}
                 onChange={(e) =>
-                  setCancelPickupFormData(prev => ({
+                  setCancelPickupFormData((prev) => ({
                     ...prev,
-                    scheduledDate: e.target.value
+                    scheduledDate: e.target.value,
                   }))
                 }
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1054,9 +1351,9 @@ const SellerLogistics = () => {
                 required
                 value={cancelPickupFormData.location}
                 onChange={(e) =>
-                  setCancelPickupFormData(prev => ({
+                  setCancelPickupFormData((prev) => ({
                     ...prev,
-                    location: e.target.value
+                    location: e.target.value,
                   }))
                 }
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1081,6 +1378,55 @@ const SellerLogistics = () => {
             className="px-4 py-2 bg-red-500 text-white rounded-lg"
           >
             Cancel Pickup
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+
+  const renderCancelShipmentForm = () => (
+    <form onSubmit={handleCancelShipmentSubmit} className="px-6 py-4">
+      <div className="space-y-6">
+        <div className="border rounded-lg p-4 space-y-4">
+          <h4 className="font-medium text-gray-900">Cancel Shipment Details</h4>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tracking Number
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Enter tracking number"
+                value={cancelShipmentData.trackingNumber}
+                onChange={(e) =>
+                  setCancelShipmentData((prev) => ({
+                    ...prev,
+                    trackingNumber: e.target.value,
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Actions */}
+      <div className="bg-white border-t px-6 py-4 mt-6">
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={() => setShowCancelShipmentModal(false)}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-red-500 text-white rounded-lg"
+          >
+            Cancel Shipment
           </button>
         </div>
       </div>
@@ -1112,24 +1458,38 @@ const SellerLogistics = () => {
         <div className="flex justify-between">
           <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}
-            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border `}
+            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center`}
             onClick={() => setShowAddModal(true)}
           >
             Create a new shipment
           </motion.div>
           <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}
-            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border `}
+            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center`}
             onClick={() => setShowPickupModal(true)}
           >
             Create a new pickup
           </motion.div>
           <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}
-            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border `}
+            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center`}
             onClick={() => setShowCancelPickupModal(true)}
           >
             Cancel a exising pickup
+          </motion.div>
+          {/* <motion.div
+            whileHover={{ scale: 1.02, translateY: -5 }}
+            className="bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center"
+            onClick={() => setShowReturnShipmentModal(true)}
+          >
+            Create Return Shipment
+          </motion.div> */}
+          <motion.div
+            whileHover={{ scale: 1.02, translateY: -5 }}
+            className="bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center"
+            onClick={() => setShowCancelShipmentModal(true)}
+          >
+            Cancel Shipment
           </motion.div>
         </div>
 
@@ -1200,6 +1560,52 @@ const SellerLogistics = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 {renderCancelPickupForm()}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* return shipment form */}
+        {/* <AnimatePresence>
+          {showReturnShipmentModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto py-6"
+              onClick={() => setShowReturnShipmentModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-xl w-full max-w-2xl mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {renderReturnShipmentForm()}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence> */}
+
+        {/* cancel shipment form */}
+        <AnimatePresence>
+          {showCancelShipmentModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto py-6"
+              onClick={() => setShowCancelShipmentModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-xl w-full max-w-2xl mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {renderCancelShipmentForm()}
               </motion.div>
             </motion.div>
           )}
