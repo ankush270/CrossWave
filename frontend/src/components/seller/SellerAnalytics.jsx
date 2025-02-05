@@ -1,18 +1,40 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { FaChartLine, FaChartBar, FaChartPie, FaDownload, FaCalendar } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
+import {analyticsAPI} from "../../api/api.js";
 
 const SellerAnalytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
   const [activeTab, setActiveTab] = useState('sales');
+  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+    const fetchSellerAnalytics = async () => {
+      try {
+        const { data } = await analyticsAPI.getSellerAnalytics();
+        setAnalytics(data);
+      } catch (e) {
+        console.log("An error occurred: ", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSellerAnalytics();
+  }, []);
+
+  if (loading || !analytics) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   const salesData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: analytics.ordersPerDay.map(order => new Date(order.date).toLocaleDateString('en-US', { weekday: 'short' })),
     datasets: [{
-      label: 'Sales',
-      data: [30, 45, 35, 50, 40, 60, 55],
+      label: 'Orders per Day',
+      data: analytics.ordersPerDay.map(order => order.count),
       fill: true,
       borderColor: 'rgb(59, 130, 246)',
       backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -21,18 +43,18 @@ const SellerAnalytics = () => {
   };
 
   const revenueData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: analytics.ordersPerDay.map(order => new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
     datasets: [{
       label: 'Revenue',
-      data: [12000, 19000, 15000, 22000, 18000, 25000],
+      data: analytics.ordersPerDay.map(order => order.count * 500), // Assuming avg order value is ₹500
       backgroundColor: 'rgba(16, 185, 129, 0.8)',
     }]
   };
 
   const categoryData = {
-    labels: ['Electronics', 'Components', 'Accessories', 'Tools'],
+    labels: analytics.productCategories.map(category => category._id),
     datasets: [{
-      data: [35, 25, 20, 20],
+      data: analytics.productCategories.map(category => category.count),
       backgroundColor: [
         'rgba(59, 130, 246, 0.8)',
         'rgba(16, 185, 129, 0.8)',
@@ -47,6 +69,8 @@ const SellerAnalytics = () => {
     { id: 'revenue', label: 'Revenue', icon: <FaChartBar /> },
     { id: 'categories', label: 'Categories', icon: <FaChartPie /> }
   ];
+
+
 
   return (
     <div className="relative min-h-screen">

@@ -1,22 +1,20 @@
 
 import { Product } from "../models/product.model.js";
-import { PrismaClient } from "@prisma/client"; 
+import prisma from "../config/prisma_db.js";
 
-const prisma = new PrismaClient();
-
-// Get seller analytics
-export const getSellerAnalytics =  async (req, res) => {
+export const getSellerAnalytics = async (req, res) => {
   try {
-    const { sellerId } = req.params;
+    const sellerId = req.id;
+    const today = new Date();
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setDate(today.getDate() - 6); // ✅ Adjust to get last 7 days correctly
 
     // Fetch total products for the seller
     const totalProducts = await Product.countDocuments({ seller_id: sellerId });
 
     // Fetch total orders for the seller
     const totalOrders = await prisma.order.count({
-      where: { seller_id: sellerId }
+      where: { seller_id: sellerId },
     });
 
     // Fetch total revenue from delivered orders
@@ -27,16 +25,34 @@ export const getSellerAnalytics =  async (req, res) => {
 
     // Fetch active shipments (Processing or Shipped)
     const activeShipments = await prisma.order.count({
-      where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } }
+      where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
     });
 
+    // Fetch orders per day for the last 7 days using the correct table name "orders"
+    const rawOrdersPerDay = await prisma.$queryRaw`
+      SELECT DATE(created_at) as date, COUNT(id) as count 
+      FROM "orders"
+      WHERE seller_id = ${sellerId} AND created_at >= ${sevenDaysAgo}
+      GROUP BY date
+      ORDER BY date ASC;
+    `;
 
-    // Fetch orders per day for the last 7 days
-    const ordersPerDay = await prisma.order.groupBy({
-      by: ["created_at"],
-      _count: { id: true },
-      where: { created_at: { gte: sevenDaysAgo } },
-    });
+    console.log("🔍 Raw Orders Per Day Query Result:", rawOrdersPerDay);
+
+    // Convert query result into a map for fast lookup
+    const ordersMap = new Map(rawOrdersPerDay.map(order => [order.date.toISOString().split("T")[0], order.count]));
+
+    // Generate last 7 days correctly
+    const ordersPerDay = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(sevenDaysAgo);
+      date.setDate(sevenDaysAgo.getDate() + i); // ✅ Ensures correct iteration from `sevenDaysAgo`
+      const dateString = date.toISOString().split("T")[0];
+
+      ordersPerDay.push({ date: dateString, count: ordersMap.get(dateString) || 0 });
+    }
+
+    console.log("📊 Final Orders Per Day:", ordersPerDay);
 
     // Fetch product category count
     const productCategories = await Product.aggregate([
@@ -48,15 +64,12 @@ export const getSellerAnalytics =  async (req, res) => {
       totalOrders,
       totalRevenue: totalRevenue._sum.price || 0,
       activeShipments,
-      ordersPerDay: ordersPerDay.map(order => ({
-        date: order.created_at.toISOString().split("T")[0],
-        count: order._count.id,
-      })),
+      ordersPerDay,
       productCategories,
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in getSellerAnalytics:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -64,7 +77,7 @@ export const getSellerAnalytics =  async (req, res) => {
 
 export const getBuyerAnalytics = async (req, res) => {
   try {
-    const { buyerId } = req.params;
+    const buyerId = req.id;
     const currentYear = new Date().getFullYear();
 
     // Active orders (Accepted)

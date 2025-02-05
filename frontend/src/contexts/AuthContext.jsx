@@ -6,7 +6,10 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
   const [role, setRole] = useState(() => {
     const storedRole = localStorage.getItem("role");
@@ -18,6 +21,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const {data} = await authAPI.getCurrentUser();
       setUser(data);
+      console.log(data);
       localStorage.setItem("user", JSON.stringify(data));
     }catch (e) {
       console.error('Auth check failed:', e);
@@ -75,7 +79,6 @@ export const AuthProvider = ({ children }) => {
       const { data } = await authAPI.register(userData);
       setUser(data.user);
       setRole(data.logged_in_as);
-      localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("role", data.logged_in_as);
       return data.user;
     }catch (e) {

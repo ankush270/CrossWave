@@ -48,5 +48,10 @@ export const productAPI = {
   getProductById:(id)=>{
     return api.get('/product/getId/'+id);
   }
+}
 
+export const analyticsAPI = {
+  getSellerAnalytics: ()=>{
+    return api.get('/analytics/get-seller-analytics');
+  }
 }

@@ -150,6 +150,7 @@ export const getCurrentUser = async (req, res) => {
       email: true,
       is_buyer: true,
       is_seller: true,
+      profile: true,
     },
   });
 
