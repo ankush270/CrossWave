@@ -27,8 +27,6 @@ export const createShipment = async (req, res, next) => {
       throw new Error("Failed to create shipment");
     }
 
-    console.log(shipment.data.transactionId);
-
     const newShipment = new Logistics({
       transactionId: shipment.data.transactionId,
 
@@ -103,6 +101,7 @@ export const createShipment = async (req, res, next) => {
     });
 
     const result = await newShipment.save();
+    // console.log(shipment.data.transactionId);
 
     res.status(201).json({
       success: true,
@@ -125,6 +124,15 @@ export const cancelShipment = async (req, res, next) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    const pickup = await Logistics.findOne({ trackingNumber });
+    if (!pickup) {
+      return res.status(404).json({ message: "Pickup not found" });
+    }
+
+    if(pickup.isCancelled) {
+      return res.status(400).json({ message: "Shipment is already cancelled" });
+    }
+
     const shipment = await axios.put(
       "https://apis-sandbox.fedex.com/ship/v1/shipments/cancel",
       {
@@ -138,6 +146,9 @@ export const cancelShipment = async (req, res, next) => {
         },
       }
     );
+
+    pickup.isCancelled = true;
+    await pickup.save();
 
     res.status(200).json({
       success: true,
@@ -214,28 +225,32 @@ export const cancelShipment = async (req, res, next) => {
 // };
 
 export const returnShipment = async (req, res) => {
-  const accessToken = req.shipmentAuthToken;
-  if (!accessToken) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const { body } = req;
-
-  const shipment = await axios.post(
-    "https://apis-sandbox.fedex.com/ship/v1/shipments/tag",
-    body,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
+  try {
+    const accessToken = req.shipmentAuthToken;
+    if (!accessToken) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-  );
 
-  res.status(200).json({
-    success: true,
-    data: shipment.data.output,
-  });
+    const { body } = req;
+
+    const shipment = await axios.post(
+      "https://apis-sandbox.fedex.com/ship/v1/shipments/tag",
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: shipment.data.output,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const createPickup = async (req, res) => {
@@ -260,10 +275,10 @@ export const createPickup = async (req, res) => {
     );
 
     const newPickup = await new Pickup({
-      confirmationCode:pickup.data.output.pickupConfirmationCode,
+      confirmationCode: pickup.data.output.pickupConfirmationCode,
       location: pickup.data.output.location,
       scheduledDate: body.originDetail.readyDateTimestamp.split("T")[0],
-    })
+    });
 
     await newPickup.save();
 
@@ -295,7 +310,7 @@ export const cancelPickup = async (req, res) => {
     const result = await Pickup.findOne({
       confirmationCode: pickupConfirmationCode,
       location: location,
-      scheduledDate: scheduledDate
+      scheduledDate: scheduledDate,
     });
 
     if (!result) {
@@ -315,7 +330,7 @@ export const cancelPickup = async (req, res) => {
     );
 
     // Delete the pickup from database after successful cancellation
-    await Pickup.findByIdAndDelete(result._id)
+    await Pickup.findByIdAndDelete(result._id);
 
     res.status(200).json({
       success: true,
@@ -326,7 +341,7 @@ export const cancelPickup = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to cancel pickup",
-      error: error.message
+      error: error.message,
     });
   }
 };
