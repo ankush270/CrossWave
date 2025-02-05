@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaDownload,
@@ -17,6 +17,7 @@ import {
   Legend,
   PointElement
 } from 'chart.js';
+import {analyticsAPI} from "../../api/api.js";
 
 // ✅ Register required components
 ChartJS.register(
@@ -35,6 +36,10 @@ ChartJS.register(
 const BuyerAnalytics = () => {
   const [timeRange, setTimeRange] = useState('month');
   const [category, setCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+
+
 
   // Sample data for charts
   const purchaseData = {

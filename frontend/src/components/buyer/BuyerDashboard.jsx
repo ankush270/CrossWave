@@ -1,41 +1,65 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaShoppingCart, FaBoxOpen, FaTruck, FaChartLine,
   FaCalendarAlt, FaGlobe, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
 import { Line, Doughnut } from 'react-chartjs-2';
+import {analyticsAPI} from "../../api/api.js";
 
 const BuyerDashboard = () => {
+  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+    const fetchBuyerAnalytics = async () => {
+      setLoading(true); // Show loading while fetching new data
+      try {
+        const { data } = await analyticsAPI.getBuyerAnalytics();
+        console.log(data);
+        setAnalytics(data);
+      } catch (e) {
+        console.log("An error occurred: ", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBuyerAnalytics();
+  }, []);
+
+  if (loading || !analytics) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
   // Sample data for charts
   const purchaseData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: analytics.purchaseVolume.map((entry) => entry.month),
     datasets: [
       {
-        label: 'Purchase Volume',
-        data: [65, 59, 80, 81, 56, 95],
+        label: "Purchase Volume",
+        data: analytics.purchaseVolume.map((entry) => entry.quantity),
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
         fill: true,
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4
-      }
-    ]
+        tension: 0.4,
+      },
+    ],
   };
 
   const categoryData = {
-    labels: ['Semiconductors', 'PCB Components', 'Display Units', 'Power Supplies', 'Others'],
+    labels: analytics.productCategories.map((entry) => entry.category),
     datasets: [
       {
-        data: [35, 25, 20, 15, 5],
+        data: analytics.productCategories.map((entry) => entry.count),
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(168, 85, 247, 0.8)',
-          'rgba(249, 115, 22, 0.8)',
-          'rgba(107, 114, 128, 0.8)'
-        ]
-      }
-    ]
+          "rgba(59, 130, 246, 0.8)",
+          "rgba(34, 197, 94, 0.8)",
+          "rgba(168, 85, 247, 0.8)",
+          "rgba(249, 115, 22, 0.8)",
+          "rgba(107, 114, 128, 0.8)"
+        ],
+      },
+    ],
   };
 
   const stats = [

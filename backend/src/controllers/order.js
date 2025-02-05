@@ -28,6 +28,7 @@ export const createOrder = async (req, res) => {
         delivery_preferences: data.delivery_preferences,
       },
     });
+    console.log(order)
 
     const payment_details = {
       razorpayPaymentId: data.paymentId,

@@ -95,6 +95,7 @@ export const getSellerAnalytics = async (req, res) => {
 };
 
 
+// Backend: Modify getBuyerAnalytics API
 export const getBuyerAnalytics = async (req, res) => {
   try {
     const buyerId = req.id;
@@ -105,30 +106,37 @@ export const getBuyerAnalytics = async (req, res) => {
       where: { buyer_id: buyerId, status: "PROCESSING" }
     });
 
-    // Pending RFCs (assuming RFC means Request for Confirmation or similar)
+    // Pending RFCs
     const pendingRFCs = await prisma.order.count({
-      where: { buyer_id: buyerId, status: "pending" }
+      where: { buyer_id: buyerId, status: "PENDING" }
     });
 
-    // In-transit orders (shipped but not delivered)
+    // In-transit orders
     const inTransitOrders = await prisma.order.count({
       where: { buyer_id: buyerId, status: "SHIPPED" }
     });
 
-    // Total spend (sum of prices of all completed orders)
+    // Total spend
     const totalSpend = await prisma.order.aggregate({
       _sum: { price: true },
       where: { buyer_id: buyerId, status: "DELIVERED" },
     });
 
     // Purchase volume by month (quantity)
-    const purchaseVolume = await prisma.order.groupBy({
-      by: ["created_at"],
-      _sum: { quantity: true },
+    const orders = await prisma.order.findMany({
       where: { buyer_id: buyerId, created_at: { gte: new Date(`${currentYear}-01-01`) } },
+      select: { created_at: true, quantity: true }
     });
 
-    // Bought all different categories
+    const purchaseVolume = orders.reduce((acc, order) => {
+      const month = order.created_at.toISOString().slice(0, 7);
+      acc[month] = (acc[month] || 0) + order.quantity;
+      return acc;
+    }, {});
+
+    const purchaseVolumeData = Object.entries(purchaseVolume).map(([month, quantity]) => ({ month, quantity }));
+
+    // Bought categories
     const productIds = await prisma.order.findMany({
       where: { buyer_id: buyerId },
       select: { product_id: true }
@@ -144,15 +152,12 @@ export const getBuyerAnalytics = async (req, res) => {
       pendingRFCs,
       inTransitOrders,
       totalSpend: totalSpend._sum.price || 0,
-      purchaseVolume: purchaseVolume.map(order => ({
-        month: order.created_at.toISOString().slice(0, 7),
-        quantity: order._sum.quantity,
-      })),
-      productCategories,
+      purchaseVolume: purchaseVolumeData,
+      productCategories: productCategories.map(c => ({ category: c._id, count: c.count }))
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+

@@ -16,7 +16,9 @@ const PayNow = () => {
   const currency = location.state?.currency;
   const product_id = location.state?.product_id;
   const seller_id = location.state?.seller_id;
-  const product = location.state?.product;
+  // const product = location.state?.product;
+  const price = location.state?.price;
+  const quantity = location.state?.quantity;
   const formData = location.state?.formData;
   // const order_details = location.state?.order_details;
 
@@ -36,8 +38,8 @@ const PayNow = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:3000/payment/verify-payment",
-        credentials
+         "http://localhost:3000/payment/verify-payment",
+         credentials
       );
       console.log("data :", data);
 
@@ -48,15 +50,17 @@ const PayNow = () => {
         currency,
         product_id,
         seller_id,
-        price: product.price,
+        // price: product.price,
         // order_details: order_details,
+        price,
+        quantity,
         ...credentials,
-        contactInfo: {
+        contact_info: {
           email: formData.email,
           phone: formData.phone,
           name: formData.contactName,
         },
-        shippingAddress: {
+        shiping_address: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2,
           city: formData.city,
@@ -64,7 +68,7 @@ const PayNow = () => {
           country: formData.country,
           pincode: formData.pincode,
         },
-        billingAddress: {
+        billing_address: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2,
           city: formData.city,
@@ -133,25 +137,25 @@ const PayNow = () => {
   };
 
   return (
-    <div className="flex items-center justify-center mt-64 ">
-      <div className="payment-container ">
-        <h2>Complete Your Payment</h2>
-        <div className="payment-details">
-          <p>Order ID: {order_id}</p>
-          <p>Total Amount: ₹{amount}</p>
-        </div>
+     <div className="flex items-center justify-center mt-64 ">
+       <div className="payment-container ">
+         <h2>Complete Your Payment</h2>
+         <div className="payment-details">
+           <p>Order ID: {order_id}</p>
+           <p>Total Amount: ₹{amount}</p>
+         </div>
 
-        <button
-          onClick={initiatePayment}
-          disabled={isProcessing}
-          className="payment-button"
-        >
-          {isProcessing ? "Processing..." : "Pay Now"}
-        </button>
+         <button
+            onClick={initiatePayment}
+            disabled={isProcessing}
+            className="payment-button"
+         >
+           {isProcessing ? "Processing..." : "Pay Now"}
+         </button>
 
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-      </div>
-    </div>
+         {errorMessage && <p className="error-message">{errorMessage}</p>}
+       </div>
+     </div>
   );
 };
 
