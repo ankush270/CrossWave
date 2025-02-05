@@ -28,48 +28,58 @@ export const getProfile = async (req, res) => {
     }
 }
 
-export const updateProfile = async (req,res) =>{
-    console.log(req.body);
-    const {companyName, address, GST, phoneNo,name}= req.body;
-    try{
-        const id= req.id
+
+export const updateProfile = async (req, res) => {
+    const {
+        companyName, address, state, city, pinCode, country,
+        GST, phoneNo, name
+    } = req.body;
+
+    try {
+        const userId = req.id; // Assuming `req.id` contains the logged-in user's ID
+
         const updatedUser = await prisma.user.update({
-            where: {id: id,},
-            data:{
-                profile:{
-                    upsert:{
+            where: { id: userId },
+            data: {
+                profile: {
+                    upsert: {
                         create: {
                             companyName,
                             address,
+                            state,
+                            city,
+                            pinCode: parseInt(pinCode), // Ensure it's stored as an integer
+                            country,
                             GST,
                             phoneNo,
-                            name
+                            name,
                         },
-                        update:{
+                        update: {
                             companyName,
                             address,
+                            state,
+                            city,
+                            pinCode: parseInt(pinCode),
+                            country,
                             GST,
                             phoneNo,
                             name
                         }
                     }
-
                 }
             },
-            include:{
-                profile: true
-            }
-        })
+            include: { profile: true }
+        });
 
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             updatedUser
-        })
-    }catch(e){
-        console.log(e);
+        });
+    } catch (e) {
+        console.error("Error updating profile:", e);
         res.status(500).json({
             success: false,
             error: 'Some error occurred: ' + e.message
-        })
+        });
     }
-}
+};
