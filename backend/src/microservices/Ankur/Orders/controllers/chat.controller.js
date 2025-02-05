@@ -1,147 +1,142 @@
 const Chat = require('../models/chat.model');
-let socketService; // Will be set from server.js
 
-// Initialize default chat if none exists
-const initializeDefaultChat = async () => {
-    try {
-        console.log('Checking for existing chat...');
-        const existingChat = await Chat.findOne();
-        
-        if (!existingChat) {
-            console.log('No existing chat found. Creating default chat...');
-            const defaultChat = new Chat({
-                productId: 'default-product',
-                productName: 'Test Product',
-                initialPrice: 100,
-                sellerId: 'default-seller',
-                buyerId: 'default-buyer',
-                status: 'active',
-                negotiations: [{
-                    price: 100,
-                    quantity: 10,
-                    requirements: 'Initial requirements',
-                    proposedBy: {
-                        userId: 'default-seller',
-                        role: 'seller'
-                    }
-                }]
-            });
-            
-            await defaultChat.save();
-            console.log('Default chat created successfully');
-            return defaultChat;
-        }
-        
-        console.log('Existing chat found');
-        return existingChat;
-    } catch (error) {
-        console.error('Error initializing default chat:', error);
-        throw error;
-    }
-};
-
-// Add this function to set the socket service
-const setSocketService = (service) => {
-    socketService = service;
-};
+let socketService = null;
 
 const chatController = {
-    // Create a new chat
+    getBuyerChats: async (req, res) => {
+        try {
+            console.log('getBuyerChats called');
+            const { buyerId } = req.params;
+            console.log('Buyer ID:', buyerId);
+            const chats = await Chat.find({ buyerId })
+                .sort({ updatedAt: -1 }) // Sort by most recent first
+                .exec();
+            console.log('Found chats:', chats);
+            res.json(chats);
+            console.log('Chats sent to client');
+        } catch (error) {
+            console.error('Error fetching buyer chats:', error);
+            res.status(500).json({ 
+                message: 'Failed to fetch buyer chats', 
+                error: error.message 
+            });
+        }
+    },
+
+    getSellerChats: async (req, res) => {
+        try {
+            const { sellerId } = req.params;
+            const chats = await Chat.find({ sellerId });
+            res.json(chats);
+        } catch (error) {
+            console.error('Error fetching seller chats:', error);
+            res.status(500).json({ message: 'Failed to fetch seller chats', error: error.message });
+        }
+    },
+
     createChat: async (req, res) => {
         try {
-            console.log('Creating new chat with data:', req.body);
-            if (!req.body.productId) {
-                throw new Error('Product ID is required');
+            const chatData = req.body;
+            console.log('Received chat data:', chatData);
+
+            // Validate required fields
+            if (!chatData.buyerId) {
+                return res.status(400).json({ message: 'Buyer ID is required' });
+            }
+            if (!chatData.sellerId) {
+                return res.status(400).json({ message: 'Seller ID is required' });
+            }
+            if (!chatData.negotiations?.[0]?.proposedBy?.userId) {
+                return res.status(400).json({ message: 'Proposer ID is required' });
             }
 
-            const chatData = {
-                ...req.body,
-                productId: req.body.productId,
-                sellerId: 'default-seller',
-                buyerId: 'current-user-id',
-                status: 'active'
-            };
+            const newChat = new Chat(chatData);
+            const savedChat = await newChat.save();
 
-            console.log('Processed chat data:', chatData);
-            const chat = new Chat(chatData);
-            const savedChat = await chat.save();
-            console.log('Chat created successfully:', savedChat);
+            // Try to emit socket event, but don't fail if it's not available
+            try {
+                if (socketService && typeof socketService.emitNewChat === 'function') {
+                    socketService.emitNewChat(savedChat);
+                }
+            } catch (socketError) {
+                console.warn('Socket emission failed:', socketError);
+                // Continue execution - socket failure shouldn't stop the API response
+            }
+
             res.status(201).json(savedChat);
         } catch (error) {
             console.error('Error creating chat:', error);
-            res.status(500).json({ message: 'Error creating chat', error: error.message });
-        }
-    },
-
-    // Get all chats
-    getAllChats: async (req, res) => {
-        try {
-            let chats = await Chat.find().sort({ updatedAt: -1 });
             
-            if (chats.length === 0) {
-                // If no chats exist, create a default one
-                const defaultChat = await initializeDefaultChat();
-                chats = [defaultChat];
+            if (error.name === 'ValidationError') {
+                return res.status(400).json({
+                    message: 'Validation Error',
+                    errors: Object.keys(error.errors).reduce((acc, key) => {
+                        acc[key] = error.errors[key].message;
+                        return acc;
+                    }, {})
+                });
             }
             
-            res.json(chats);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ 
+                message: 'Failed to create chat', 
+                error: error.message 
+            });
         }
     },
 
-    // Get chat by ID
+    getAllChats: async (req, res) => {
+        try {
+            const chats = await Chat.find();
+            res.json(chats);
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to fetch chats', error: error.message });
+        }
+    },
+
     getChatById: async (req, res) => {
         try {
-            let chat = await Chat.findById(req.params.id);
+            const chat = await Chat.findById(req.params.id);
             if (!chat) {
-                console.log('Chat not found, returning default chat...');
-                chat = await initializeDefaultChat();
+                return res.status(404).json({ message: 'Chat not found' });
             }
             res.json(chat);
         } catch (error) {
-            console.error('Error in getChatById:', error);
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: 'Failed to fetch chat', error: error.message });
         }
     },
 
-    // Submit new negotiation
+    getBuyNowDetails: async (req, res) => {
+        try {
+            const chat = await Chat.findById(req.params.id);
+            if (!chat) {
+                return res.status(404).json({ message: 'Buy now details not found' });
+            }
+            res.json(chat);
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to fetch buy now details', error: error.message });
+        }
+    },
+
     negotiate: async (req, res) => {
         try {
-            const { price, quantity, requirements, userId, role } = req.body;
             const chat = await Chat.findById(req.params.id);
-            
             if (!chat) {
                 return res.status(404).json({ message: 'Chat not found' });
             }
 
-            chat.negotiations.push({
-                price,
-                quantity,
-                requirements,
-                proposedBy: {
-                    userId,
-                    role
-                }
-            });
-            
-            const updatedChat = await chat.save();
-            
-            // Emit update with a small delay to ensure database operation is complete
-            setTimeout(() => {
-                if (socketService) {
-                    console.log('Emitting chat update after negotiation');
-                    socketService.emitChatUpdate(chat._id.toString(), updatedChat);
-                }
-            }, 100);
+            chat.negotiations.push(req.body);
+            await chat.save();
 
-            res.json(updatedChat);
+            if (socketService) {
+                socketService.emitNegotiation(chat);
+            }
+
+            res.json(chat);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: 'Failed to negotiate', error: error.message });
         }
     },
 
-    // Accept deal
     acceptDeal: async (req, res) => {
         try {
             const chat = await Chat.findById(req.params.id);
@@ -149,25 +144,19 @@ const chatController = {
                 return res.status(404).json({ message: 'Chat not found' });
             }
 
-            const lastNegotiation = chat.negotiations[chat.negotiations.length - 1];
             chat.status = 'accepted';
-            chat.finalPrice = lastNegotiation.price;
-            chat.finalQuantity = lastNegotiation.quantity;
-            
-            const updatedChat = await chat.save();
-            
-            // Emit update
+            await chat.save();
+
             if (socketService) {
-                socketService.emitChatUpdate(chat._id.toString(), updatedChat);
+                socketService.emitDealAccepted(chat);
             }
 
-            res.json(updatedChat);
+            res.json(chat);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: 'Failed to accept deal', error: error.message });
         }
     },
 
-    // Reject deal
     rejectDeal: async (req, res) => {
         try {
             const chat = await Chat.findById(req.params.id);
@@ -176,74 +165,92 @@ const chatController = {
             }
 
             chat.status = 'rejected';
-            const updatedChat = await chat.save();
-            
-            // Emit update
+            await chat.save();
+
             if (socketService) {
-                socketService.emitChatUpdate(chat._id.toString(), updatedChat);
+                socketService.emitDealRejected(chat);
             }
 
-            res.json(updatedChat);
+            res.json(chat);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: 'Failed to reject deal', error: error.message });
         }
     },
 
-    // Get buy now details
-    getBuyNowDetails: async (req, res) => {
+    getBuyerChatStats: async (req, res) => {
         try {
-            const productId = req.params.id;
-            console.log('Fetching buy now details for product:', productId);
-            
-            if (!productId) {
-                throw new Error('Product ID is required');
-            }
-
-            const chat = await Chat.findOne({
-                productId: productId,
-                status: 'accepted'
-            }).sort({ updatedAt: -1 });
-
-            console.log('Found chat for product:', productId, chat);
-
-            if (chat) {
-                res.json({
-                    isNegotiated: true,
-                    details: {
-                        productId: chat.productId,
-                        productName: chat.productName,
-                        finalPrice: chat.finalPrice,
-                        finalQuantity: chat.finalQuantity,
-                        chatId: chat._id,
-                        status: chat.status
-                    }
-                });
-            } else {
-                // Return dummy data for testing
-                res.json({
-                    isNegotiated: false,
-                    details: {
-                        productId: productId,
-                        productName: "Standard Product",
-                        finalPrice: 1000,
-                        finalQuantity: 10,
-                        type: 'standard'
-                    }
-                });
-            }
+            const { buyerId } = req.params;
+            const stats = {
+                total: await Chat.countDocuments({ buyerId }),
+                active: await Chat.countDocuments({ buyerId, status: 'active' }),
+                accepted: await Chat.countDocuments({ buyerId, status: 'accepted' }),
+                rejected: await Chat.countDocuments({ buyerId, status: 'rejected' })
+            };
+            res.json(stats);
         } catch (error) {
-            console.error('Error in getBuyNowDetails:', error);
+            console.error('Error fetching buyer chat stats:', error);
             res.status(500).json({ 
-                message: 'Error fetching buy now details',
+                message: 'Failed to fetch chat statistics', 
+                error: error.message 
+            });
+        }
+    },
+
+    getSellerChatStats: async (req, res) => {
+        try {
+            const { sellerId } = req.params;
+            const stats = {
+                total: await Chat.countDocuments({ sellerId }),
+                active: await Chat.countDocuments({ sellerId, status: 'active' }),
+                accepted: await Chat.countDocuments({ sellerId, status: 'accepted' }),
+                rejected: await Chat.countDocuments({ sellerId, status: 'rejected' })
+            };
+            res.json(stats);
+        } catch (error) {
+            console.error('Error fetching seller chat stats:', error);
+            res.status(500).json({ 
+                message: 'Failed to fetch chat statistics', 
                 error: error.message 
             });
         }
     }
 };
 
-// Export both the controller and initialization function
+// Initialize default chat (if needed)
+const initializeDefaultChat = async () => {
+    try {
+        const defaultChat = await Chat.findOne({ isDefault: true });
+        if (!defaultChat) {
+            const newDefaultChat = new Chat({
+                isDefault: true,
+                productId: 'default',
+                productName: 'Default Product',
+                initialPrice: 0,
+                sellerId: 'default',
+                buyerId: 'default',
+                status: 'active'
+            });
+            await newDefaultChat.save();
+            console.log('Default chat initialized');
+        }
+    } catch (error) {
+        console.error('Failed to initialize default chat:', error);
+    }
+};
+
+// Initialize socket service
+const setSocketService = (service) => {
+    if (service && typeof service.emitNewChat === 'function') {
+        socketService = service;
+        console.log('Socket service initialized');
+    } else {
+        console.warn('Invalid socket service provided');
+    }
+};
+
+// Export as a single object with named properties
 module.exports = {
-    chatController,
+    chatController: chatController,  // Make sure this matches how we import it
     initializeDefaultChat,
     setSocketService
 };

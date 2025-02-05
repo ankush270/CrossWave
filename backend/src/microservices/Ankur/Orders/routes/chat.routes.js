@@ -13,11 +13,20 @@ router.use((req, res, next) => {
     next();
 });
 
-// IMPORTANT: Order matters! More specific routes first
+// Get specific chats (more specific routes first)
+router.get('/buyer/:buyerId', chatController.getBuyerChats);
+router.get('/seller/:sellerId', chatController.getSellerChats);
 router.get('/buy-now/:id', chatController.getBuyNowDetails);
-router.post('/', chatController.createChat);
-router.get('/', chatController.getAllChats);
 router.get('/:id', chatController.getChatById);
+router.get('/', chatController.getAllChats);
+router.get('/buyer/:buyerId/stats', chatController.getBuyerChatStats);
+router.get('/seller/:sellerId/stats', chatController.getSellerChatStats);
+
+// Create chat routes
+router.post('/create', chatController.createChat);
+router.post('/', chatController.createChat);
+
+// Negotiate and deal actions
 router.post('/:id/negotiate', chatController.negotiate);
 router.post('/:id/accept', chatController.acceptDeal);
 router.post('/:id/reject', chatController.rejectDeal);

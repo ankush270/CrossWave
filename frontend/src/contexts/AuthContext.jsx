@@ -79,6 +79,11 @@ export const AuthProvider = ({ children }) => {
     role
   }
 
+  // Add debug log when user changes
+  useEffect(() => {
+    console.log('Current user in AuthContext:', user);
+  }, [user]);
+
   return (
      <AuthContext.Provider value={value}>
        {!loading && children}

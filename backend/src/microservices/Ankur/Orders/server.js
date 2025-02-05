@@ -20,27 +20,23 @@ const chatRoutes = require('./routes/chat.routes');
 const app = express();
 const server = http.createServer(app);
 
-// Configure CORS
+// Configure CORS before other middleware
 app.use(cors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
-    methods: ["GET", "POST"],
+    origin: ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    allowedHeaders: ["Content-Type"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
+    maxAge: 600 // Increase preflight cache time to 10 minutes
 }));
 
 // Initialize Socket.IO with proper configuration
 const io = socketIO(server, {
     cors: {
-        origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
-        methods: ["GET", "POST"],
-        credentials: true,
-        allowedHeaders: ["Content-Type"]
-    },
-    path: '/socket.io/',
-    serveClient: false,
-    pingInterval: 10000,
-    pingTimeout: 5000,
-    cookie: false
+        origin: ["http://localhost:5173", "http://localhost:3000"],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        credentials: true
+    }
 });
 
 // Initialize Socket Service
@@ -50,7 +46,7 @@ socketService.initialize();
 // Pass socket service to controller
 setSocketService(socketService);
 
-// Middleware
+// Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -73,8 +69,8 @@ app.use((req, res, next) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!' });
+    console.error('Error:', err);
+    res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
 // Add global error handler
@@ -89,9 +85,9 @@ const startServer = async () => {
         await connectDB();
         await initializeDefaultChat();
         
-        const PORT = process.env.PORT || 5000;
+        const PORT = process.env.PORT || 5003;
         server.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
+            console.log(`Orders Service running on port ${PORT}`);
         });
     } catch (error) {
         console.error('Failed to start server:', error);
@@ -111,3 +107,11 @@ process.on('SIGTERM', () => {
         });
     });
 });
+
+// Development CORS configuration
+app.use(cors({
+    origin: true, // Allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));

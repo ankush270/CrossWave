@@ -1,12 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaShoppingCart, FaBoxOpen, FaTruck, FaChartLine,
   FaCalendarAlt, FaGlobe, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
 import { Line, Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const BuyerDashboard = () => {
+  const { user } = useAuth();
+  const [activeRfqs, setActiveRfqs] = useState(0);
+
+  useEffect(() => {
+    const fetchRfqCount = async () => {
+      try {
+        if (!user?.id) return;
+        
+        const response = await axios.get(`http://localhost:5003/api/chats/buyer/${user.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        const activeCount = response.data.filter(chat => chat.status === 'active').length;
+        setActiveRfqs(activeCount);
+      } catch (err) {
+        console.error('Error fetching RFQ count:', err);
+      }
+    };
+
+    fetchRfqCount();
+  }, [user]);
+
   // Sample data for charts
   const purchaseData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -47,6 +96,13 @@ const BuyerDashboard = () => {
       color: 'blue'
     },
     {
+      title: 'Active RFQs',
+      value: activeRfqs.toString(),
+      change: 'Current',
+      icon: <FaBoxOpen />,
+      color: 'green'
+    },
+    {
       title: 'Pending RFQs',
       value: '8',
       change: '+12%',
@@ -83,8 +139,7 @@ const BuyerDashboard = () => {
       supplier: 'Display Solutions Inc',
       amount: '₹1,20,000',
       status: 'Shipped'
-    },
-    // Add more orders...
+    }
   ];
 
   return (
@@ -97,7 +152,7 @@ const BuyerDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+            className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6`}
           >
             <div className="flex items-center justify-between">
               <div>

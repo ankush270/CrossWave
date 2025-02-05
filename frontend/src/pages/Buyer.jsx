@@ -97,7 +97,7 @@ const Buyer = () => {
     },
     {
       id: "wishlist",
-      title: "Wishlist & RFQs",
+      title: "Negotiations",
       icon: <FaHeart />,
       component: BuyerWishlist,
       badge: "8",

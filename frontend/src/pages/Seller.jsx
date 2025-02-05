@@ -58,7 +58,7 @@ import QuickActions from '../components/ui/QuickActions'
 import Header from '../components/ui/Header'
 import NotificationsPanel from '../components/ui/NotificationsPanel'
 import FloatingActions from '../components/ui/FloatingActions'
-
+import SellerRFQList from '../components/seller/SellerRFQList'
 // Register ChartJS components
 ChartJS.register(
   CategoryScale,
@@ -135,6 +135,13 @@ const Seller = () => {
       title: 'Compliance',
       icon: <FaShieldAlt />,
       component: SellerCompliance,
+      badge: '2'
+    },
+    {
+      id: 'negotiations',
+      title: 'Negotiations',
+      icon: <FaComments />,
+      component: SellerRFQList,
       badge: '2'
     },
     {

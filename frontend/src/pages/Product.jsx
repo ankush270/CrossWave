@@ -13,7 +13,7 @@ import {productAPI} from "../api/api.js";
 import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
 import {useAuth} from '../contexts/AuthContext';
 const Product = () => {
-  const {user} = useAuth();
+  const { user } = useAuth();
   const currentUser = user;
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,14 +29,14 @@ const Product = () => {
 
   useEffect(() => {
     const fetchCurrentProduct = async () => {
-      try{
+      try {
         const { data } = await productAPI.getProductById(id);
-        console.log("data: ", data);
+        console.log("Product data:", data); // Debug log
         setProduct(data);
-      }catch (e) {
+      } catch (e) {
         console.log("An error occurred while fetching: " + e.message);
         navigate('/products');
-      }finally {
+      } finally {
         setLoading(false);
       }
     }
@@ -44,6 +44,10 @@ const Product = () => {
     fetchCurrentProduct();
   }, [])
 
+  // Add debug log when user changes
+  useEffect(() => {
+    console.log('Current user in Product:', user);
+  }, [user]);
 
   if (!product) {
     return (
@@ -239,7 +243,13 @@ const Product = () => {
 
       {/* Modals */}
       <RequestQuote 
-        product={product}
+        product={{
+          _id: product._id,
+          name: product.name,
+          sellerId: product.seller_id,
+          moq: product.moq,
+          image: product.image || product.images?.[0]
+        }}
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
         currentUser={currentUser}

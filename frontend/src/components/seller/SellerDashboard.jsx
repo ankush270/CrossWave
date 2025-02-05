@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaBox, FaChartLine, FaFileInvoiceDollar, FaTruck, 
   FaArrowUp, FaArrowDown, FaEllipsisH, FaGlobe,
-  FaShip, FaPlane, FaIndustry
+  FaShip, FaPlane, FaIndustry, FaComments
 } from 'react-icons/fa';
 import { Line, Doughnut } from 'react-chartjs-2';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
 
 const SellerDashboard = () => {
+  const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
   const [activeCard, setActiveCard] = useState(null);
   const [hoveredStat, setHoveredStat] = useState(null);
+  const [activeRfqs, setActiveRfqs] = useState(0);
 
   // Enhanced sample data
   const salesData = {
@@ -78,8 +82,35 @@ const SellerDashboard = () => {
       icon: <FaTruck />,
       color: 'orange',
       description: 'Shipments in transit'
+    },
+    {
+      title: 'Active RFQs',
+      value: activeRfqs.toString(),
+      change: 'Current',
+      icon: <FaComments />,
+      color: 'green'
     }
   ];
+
+  useEffect(() => {
+    const fetchRfqCount = async () => {
+      try {
+        if (!user?.id) return;
+        
+        const response = await axios.get(`http://localhost:5003/api/chats/seller/${user.id}/stats`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        setActiveRfqs(response.data.active);
+      } catch (err) {
+        console.error('Error fetching RFQ count:', err);
+      }
+    };
+
+    fetchRfqCount();
+  }, [user]);
 
   return (
     <div className="relative min-h-screen">
