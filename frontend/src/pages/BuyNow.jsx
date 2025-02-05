@@ -25,7 +25,7 @@ const BuyNow = () => {
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(null);
 
-  const { selectedPricing } = location.state;
+  const { selectedPricing = "standard" } = location.state || {};
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -97,8 +97,6 @@ const BuyNow = () => {
             product_id: product._id,
             seller_id: product.seller_id,
             formData,
-            price: product.pricing[selectedPricing].price,
-            quantity: product.pricing[selectedPricing].moq,
             // order_details: details of order
           },
         });
@@ -150,12 +148,12 @@ const BuyNow = () => {
   };
 
   const formSections = [
-    // {
-    //   id: "company",
-    //   title: "Company Information",
-    //   icon: <FaBuilding className="text-blue-500" />,
-    //   description: "Enter your business details for billing and compliance",
-    // },
+    {
+      id: "company",
+      title: "Company Information",
+      icon: <FaBuilding className="text-blue-500" />,
+      description: "Enter your business details for billing and compliance",
+    },
     {
       id: "contact",
       title: "Contact Information",
