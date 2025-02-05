@@ -29,6 +29,7 @@ import {
 } from "./src/microservices/verify_product/verifyProduct.js";
 
 import OrderRoutes from "./src/routes/order.js";
+import LogisticsRoutes from "./src/routes/logistics.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -75,6 +76,7 @@ app.use("/docs", DocUploadRoutes);
 app.use("/order", OrderRoutes);
 
 app.use("/analytics", AnalyticsRoutes);
+app.use("/logistics", LogisticsRoutes);
 
 // Start server
 const SOCKETIO_PORT = PORT;
