@@ -14,22 +14,22 @@ import {
 } from "react-icons/fa";
 import { productsData } from "../data/productsData";
 import axios from "axios";
+import { productAPI } from "../api/api.js";
+import { useAuth } from '../contexts/AuthContext.jsx';
+
 
 const BuyNow = () => {
   const { id } = useParams();
+ 
+  const user = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
-
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(null);
-
   const { selectedPricing = "standard" } = location.state || {};
-
   const [formData, setFormData] = useState({
-    companyName: "",
-    gstin: "",
-    businessType: "manufacturer",
     contactName: "",
     email: "",
     phone: "",
@@ -44,14 +44,26 @@ const BuyNow = () => {
     paymentMethod: "bank_transfer",
     currency: "INR",
   });
+  
+
+
 
   useEffect(() => {
-    const foundProduct = productsData.find((p) => p.id === Number(id)); // Ensure ID comparison works
-    if (foundProduct) {
-      setProduct(foundProduct);
-    }
-    setLoading(false);
-  }, [id, productsData]);
+    const fetchProduct = async () => {
+      console.log(" selected product  : ", selectedPricing);
+      try {
+        const { data } = await productAPI.getProductById(id);
+        setProduct(data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        navigate('/products'); // Redirect on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -64,6 +76,30 @@ const BuyNow = () => {
   useEffect(() => {
     setAmount(calculateTotal());
   }, [formData, product]);
+  
+
+  //create order
+  const createOrder = async () => {
+       try{
+            const data = await axios.post("http://localhost:3000/order/create",
+            {
+              buyer_id  : user.id, 
+              seller_id : product.seller_id,
+              product_id : id,
+              //quote_id,
+              quantity : selectedPricing.quantity,
+              price : selectedPricing.price,
+
+
+
+
+                
+            });
+       }
+       catch(e){
+          
+       }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,11 +135,11 @@ const BuyNow = () => {
   const calculateSubtotal = () => {
     if (!product?.pricing?.[selectedPricing]) return 0;
 
-    const price = parseFloat(
-      product.pricing[selectedPricing].price.replace(/[^0-9.]/g, "")
-    );
+    const price = product.pricing[selectedPricing].price;
+    // Check if price is already a number
+    const priceValue = typeof price === 'number' ? price : parseFloat(price.replace(/[^0-9.]/g, ""));
     const quantity = parseInt(product.pricing[selectedPricing].moq);
-    return (price * quantity).toFixed(2);
+    return (priceValue * quantity).toFixed(2);
   };
 
   const calculateShipping = () => {
@@ -134,12 +170,6 @@ const BuyNow = () => {
 
   const formSections = [
     {
-      id: "company",
-      title: "Company Information",
-      icon: <FaBuilding className="text-blue-500" />,
-      description: "Enter your business details for billing and compliance",
-    },
-    {
       id: "contact",
       title: "Contact Information",
       icon: <FaUser className="text-green-500" />,
@@ -163,6 +193,7 @@ const BuyNow = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <p className="ml-4">Loading product details...</p>
       </div>
     );
   }
@@ -534,35 +565,7 @@ const BuyNow = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Payment Method Selection */}
-                {/* <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700">Payment Method</label>
-                  <div className="space-y-2">
-                    {['bank_transfer', 'letter_of_credit', 'advance_payment'].map((method) => (
-                      <motion.button
-                        key={method}
-                        type="button"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`w-full p-4 rounded-lg border ${
-                          formData.paymentMethod === method 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200'
-                        } flex items-center gap-3`}
-                        onClick={() => handleInputChange({ 
-                          target: { name: 'paymentMethod', value: method }
-                        })}
-                      >
-                        <FaCreditCard className={
-                          formData.paymentMethod === method 
-                            ? 'text-blue-500' 
-                            : 'text-gray-400'
-                        } />
-                        <span className="capitalize">{method.replace(/_/g, ' ')}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div> */}
+               
 
                 {/* Place Order Button */}
                 <motion.button

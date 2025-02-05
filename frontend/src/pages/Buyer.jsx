@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {FaTruck,
+import {
+  FaShoppingBag,
+  FaTruck,
+  FaWallet,
   FaBell,
   FaChartLine,
   FaShoppingCart,
@@ -18,7 +21,9 @@ import {FaTruck,
   FaAngleDown,
   FaSun,
   FaMoon,
+  FaUserCheck,
 } from "react-icons/fa";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,7 +36,7 @@ import {
   Filler,
   ArcElement,
 } from "chart.js";
-
+import { Line, Doughnut } from "react-chartjs-2";
 
 // Register ChartJS components
 ChartJS.register(
@@ -56,6 +61,7 @@ import BuyerContracts from "../components/buyer/BuyerContracts";
 import BuyerProfile from "../components/buyer/BuyerProfile";
 import BuyerCompliance from "../components/buyer/BuyerCompliance";
 import EKYC from "./EKYC";
+import Logistics from "./Logistics";
 
 // Add this CSS at the beginning of your component
 const scrollbarHiddenStyles = {
@@ -68,6 +74,7 @@ const scrollbarHiddenStyles = {
 
 const Buyer = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -82,8 +89,16 @@ const Buyer = () => {
       badge: null,
     },
     {
+      id: "Logistics",
+      title: "Logistics",
+      icon: <FaUserCog />,
+      component: Logistics,
+      badge: null,
+    },
+    {
       id: "dashboard",
       title: "Dashboard",
+
       icon: <FaTachometerAlt />,
       component: BuyerDashboard,
       badge: null,
@@ -105,9 +120,9 @@ const Buyer = () => {
     {
       id: "E-KYC",
       title: "E-KYC",
-      icon: <FaChartLine />,
+      icon: <FaUserCheck />,
       component: EKYC,
-      badge: "8",
+      badge: null,
     },
     {
       id: "analytics",
@@ -136,6 +151,13 @@ const Buyer = () => {
       icon: <FaShieldAlt />,
       component: BuyerCompliance,
       badge: "2",
+    },
+    {
+      id: "profile",
+      title: "Profile & Settings",
+      icon: <FaUserCog />,
+      component: BuyerProfile,
+      badge: null,
     },
   ];
 
@@ -182,7 +204,54 @@ const Buyer = () => {
 
       {/* Existing Content */}
       <div className="relative z-10 h-screen flex flex-col">
-        {/* Top Navigation */}
+        {/* Header */}
+        <motion.header
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className={`h-16 backdrop-blur-xl ${
+            isDarkMode
+              ? "bg-gray-800/80 border-gray-700/50"
+              : "bg-white/80 border-gray-200/50"
+          } shadow-sm border-b flex items-center justify-between px-6 sticky top-0 z-30`}
+        >
+          <h2
+            className={`text-xl font-semibold ${
+              isDarkMode ? "text-gray-100" : "text-gray-800"
+            }`}
+          >
+            {menuItems.find((item) => item.id === activeSection)?.title}
+          </h2>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 text-gray-500">
+              <span className="w-2 h-2 bg-green-500 rounded-full" />
+              <span
+                className={`text-sm ${
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Connected to Global Network
+              </span>
+            </div>
+            <div
+              className={`h-8 w-px ${
+                isDarkMode ? "bg-gray-700" : "bg-gray-200"
+              }`}
+            />
+            <div className="text-sm">
+              <span className={isDarkMode ? "text-gray-400" : "text-gray-500"}>
+                Last order:
+              </span>
+              <span
+                className={`ml-2 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                2 days ago
+              </span>
+            </div>
+          </div>
+        </motion.header>
+
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar */}
@@ -194,11 +263,9 @@ const Buyer = () => {
                 ? "bg-gray-800/50 border-gray-700/50"
                 : "bg-white/50 border-gray-200/50"
             } backdrop-blur-lg relative`}
+            style={scrollbarHiddenStyles}
           >
-            <motion.div
-              className="overflow-y-auto h-full pb-10"
-              style={scrollbarHiddenStyles}
-            >
+            <motion.div className="overflow-y-auto custom-scrollbar h-full pb-10">
               {/* Logo/Brand Section */}
               <div
                 className={`h-16 flex items-center justify-center border-b ${
@@ -404,19 +471,8 @@ const Buyer = () => {
           {/* Main Content with margin */}
           <main className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
             <div className="max-w-7xl mx-auto">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center mb-8"
-                >
-                  <h1 className="text-4xl font-bold text-gray-800 mb-2 tracking-tight">
-                    Welcome to Your Export Dashboard
-                  </h1>
-                  <p className="text-gray-600 text-lg">
-                    Manage your international electronics trade efficiently
-                  </p>
-                </motion.div>
+              {/* <AnimatePresence mode="wait"> */}
+              <AnimatePresence mode="popLayout">
                 <motion.div
                   key={activeSection}
                   initial={{ opacity: 0, y: 20 }}

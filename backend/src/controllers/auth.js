@@ -41,6 +41,7 @@ export const register = async (req, res) => {
       success: true,
       msg: "User registered",
       user,
+      logged_in_as: role,
       token,
     });
   } catch (e) {

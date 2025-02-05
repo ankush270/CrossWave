@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaFileContract, FaHandshake } from 'react-icons/fa';
+import { FaShoppingCart, FaFileContract, FaHandshake, FaMobile, FaLaptop, FaMemory, FaMicrochip } from 'react-icons/fa';
 // import { productsData } from '../data/productsData';
 import ProductGallery from '../components/product/ProductGallery';
 import ProductInfo from '../components/product/ProductInfo';
@@ -147,6 +147,41 @@ const Product = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+       {/* Animated Background Elements */}
+            <div className="fixed inset-0 z-0">
+              {/* Circuit Pattern */}
+              <div className="absolute inset-0 bg-repeat opacity-5" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h80v80h-80z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M30 30h40v40h-40z' fill='none' stroke='%234B5563' stroke-width='1'/%3E%3Cpath d='M20 10v80M40 10v80M60 10v80M80 10v80' stroke='%234B5563' stroke-width='0.5'/%3E%3Cpath d='M10 20h80M10 40h80M10 60h80M10 80h80' stroke='%234B5563' stroke-width='0.5'/%3E%3C/svg%3E")`
+              }} />
+      
+              {/* Animated Gradient Orbs */}
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+              
+              {/* Floating Electronics Icons */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-20 left-10 text-blue-500/10 text-6xl animate-float">
+                  <FaMicrochip />
+                </div>
+                <div className="absolute top-40 right-20 text-purple-500/10 text-7xl animate-float-delayed">
+                  <FaMemory />
+                </div>
+                <div className="absolute bottom-40 left-30 text-blue-500/10 text-5xl animate-float">
+                  <FaLaptop />
+                </div>
+                <div className="absolute bottom-20 right-40 text-purple-500/10 text-6xl animate-float-delayed">
+                  <FaMobile />
+                </div>
+              </div>
+      
+              {/* Animated Lines */}
+              <div className="absolute inset-0">
+                <div className="absolute left-0 top-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
+                <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
+                <div className="absolute left-0 bottom-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent animate-slide" />
+                <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-slide-vertical" />
+              </div>
+            </div>
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb Navigation */}
         <motion.nav 
@@ -199,7 +234,7 @@ const Product = () => {
                 className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-green-700"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => navigate(`/product/${product.id}/buy`, {
+                onClick={() => navigate(`/product/${product._id}/buy`, {
                   state: { selectedPricing }
                 })}
               >
@@ -235,7 +270,7 @@ const Product = () => {
           product={product} 
         />
         {/* Price Breakdown Section */}
-        <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} />
+        {/* <PriceBreakdown pricing={product.pricing} selectedPricing={selectedPricing} /> */}
 
         {/* Bottom Gradient */}
         <div className="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none z-20" />

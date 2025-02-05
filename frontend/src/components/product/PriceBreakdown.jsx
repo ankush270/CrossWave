@@ -32,6 +32,26 @@ const PriceBreakdown = ({ pricing, selectedPricing }) => {
           <span className="text-gray-600">Base Price (per unit)</span>
           <span className="font-medium">₹{breakdown.unitPrice.toFixed(2)}</span>
         </div>
+        <div className="flex justify-between text-sm">
+        <span className="text-gray-600">SubTotal (per unit * Total quantity)</span>
+        <span className="font-medium">₹{breakdown.subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+        <span className="text-gray-600">Platform Fee </span>
+        <span className="font-medium">₹{breakdown.platformFee.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+        <span className="text-gray-600">Custom Duty (5%)</span>
+        <span className="font-medium">₹{breakdown.customDuty.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+        <span className="text-gray-600">GST (5%)</span>
+        <span className="font-medium">₹{breakdown.gst.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+        <span className="text-gray-600">Insurance (3%)</span>
+        <span className="font-medium">₹{breakdown.insurance.toFixed(2)}</span>
+        </div>
         {/* Add other breakdown items... */}
         <div className="flex justify-between font-semibold">
           <span>Total Amount</span>

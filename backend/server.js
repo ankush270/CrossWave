@@ -15,8 +15,13 @@ import kycRouter from "./src/routes/kyc.js";
 import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 // chat routes
 import ChatRoutes from "./src/routes/ChatRoutes.js";
+// analytics routes
+import AnalyticsRoutes from "./src/routes/AnalyticsRoutes.js"
 
 import DocUploadRoutes from "./src/routes/doc_upload.js"
+
+// order routes
+import order from "./src/routes/order.js"
 
 import {
   verifyProduct,
@@ -36,7 +41,7 @@ import { initializeSocket } from "./src/middlewares/socketio.js";
 import http from "http";
 const server = http.createServer(app); // HTTP server
 // Initialize Socket.IO
-initializeSocket( server);
+initializeSocket(server);
 
 
 
@@ -70,6 +75,10 @@ app.use('/user-review',reviewRouter)
 app.use("/payment", PaymentRoutes);
 app.use('/chat', ChatRoutes);
 app.use("/docs",DocUploadRoutes);
+app.use('/analytics', AnalyticsRoutes);
+
+app.use('/order', order);
+
 
 
 // Start server

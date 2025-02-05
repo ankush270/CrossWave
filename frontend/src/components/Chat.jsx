@@ -533,4 +533,4 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
   );
 };
 
-export default Chat; 
+export default Chat;

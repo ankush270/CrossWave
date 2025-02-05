@@ -2,6 +2,10 @@ import mongoose, { Schema } from "mongoose";
 
 const logisticsSchema = new Schema(
   {
+    transactionId: {
+      type: String,
+      required: true,
+    },
     trackingNumber: {
       type: String,
       required: true,
