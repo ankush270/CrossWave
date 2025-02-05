@@ -32,7 +32,13 @@ const SellerAnalytics = () => {
   }
 
   const salesData = {
-    labels: analytics.ordersPerDay.map(order => new Date(order.date).toLocaleDateString('en-US', { weekday: 'short' })),
+    labels: analytics.ordersPerDay.map(order =>
+       new Date(order.date).toLocaleDateString('en-US', {
+         month: selectedPeriod === '7days' ? undefined : 'short',
+         day: 'numeric',
+         weekday: selectedPeriod === '7days' ? 'short' : undefined
+       })
+    ),
     datasets: [{
       label: 'Orders per Day',
       data: analytics.ordersPerDay.map(order => order.count),
@@ -44,13 +50,19 @@ const SellerAnalytics = () => {
   };
 
   const revenueData = {
-    labels: analytics.ordersPerDay.map(order => new Date(order.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+    labels: analytics.ordersPerDay.map(order =>
+       new Date(order.date).toLocaleDateString('en-US', {
+         month: 'short',
+         day: 'numeric'
+       })
+    ),
     datasets: [{
       label: 'Revenue',
-      data: analytics.ordersPerDay.map(order => order.count * 500), // Assuming avg order value is ₹500
+      data: analytics.ordersPerDay.map(order => order.count * 500),
       backgroundColor: 'rgba(16, 185, 129, 0.8)',
     }]
   };
+
 
   const categoryData = {
     labels: analytics.productCategories.map(category => category._id),
