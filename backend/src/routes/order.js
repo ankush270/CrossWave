@@ -5,6 +5,7 @@ import {
   getOrdersByUserIdAndRole,
   updateOrder,
   deleteOrder,
+  getAllOrders
 } from "../controllers/order.js";
 import { verifyBuyer } from "../middlewares/order.js";
 
@@ -14,9 +15,11 @@ const router = express.Router();
 router.post("/", createOrder);
 // router.post("/", verifyBuyer, createOrder);
 
+router.get('/all-orders', getAllOrders);
+router.put("/:orderId", updateOrder);
 router.get("/:orderId", getOrderById);
 router.get("/user/:userId", getOrdersByUserIdAndRole);
-router.put("/:orderId", updateOrder);
 router.delete("/:orderId", deleteOrder);
+
 
 export default router;
