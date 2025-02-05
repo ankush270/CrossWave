@@ -20,6 +20,9 @@ import AnalyticsRoutes from "./src/routes/AnalyticsRoutes.js"
 
 import DocUploadRoutes from "./src/routes/doc_upload.js"
 
+// order routes
+import order from "./src/routes/order.js"
+
 import {
   verifyProduct,
   upload,
@@ -73,6 +76,8 @@ app.use("/payment", PaymentRoutes);
 app.use('/chat', ChatRoutes);
 app.use("/docs",DocUploadRoutes);
 app.use('/analytics', AnalyticsRoutes);
+
+app.use('/order', order);
 
 
 

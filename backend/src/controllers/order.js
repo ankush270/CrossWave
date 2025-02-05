@@ -8,6 +8,8 @@ import { createLogistics } from "./logistics.js";
 export const createOrder = async (req, res) => {
   try {
     const data = req.body;
+    
+    console.log("data : ", data);
 
     const order = await prisma.order.create({
       data: {
@@ -37,7 +39,7 @@ export const createOrder = async (req, res) => {
 
     // const logistics = await createLogistics(logistics_details);
 
-    res.status(201).json(order);
+    res.status(201).json({ success : true , data : order});
   } catch (error) {
     res.status(500).json({
       success: false,

@@ -15,22 +15,21 @@ import {
 import { productsData } from "../data/productsData";
 import axios from "axios";
 import { productAPI } from "../api/api.js";
+import { useAuth } from '../contexts/AuthContext.jsx';
+
 
 const BuyNow = () => {
   const { id } = useParams();
+ 
+  const user = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
-
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(null);
-
   const { selectedPricing = "standard" } = location.state || {};
-
   const [formData, setFormData] = useState({
-    companyName: "",
-    gstin: "",
-    businessType: "manufacturer",
     contactName: "",
     email: "",
     phone: "",
@@ -45,9 +44,13 @@ const BuyNow = () => {
     paymentMethod: "bank_transfer",
     currency: "INR",
   });
+  
+
+
 
   useEffect(() => {
     const fetchProduct = async () => {
+      console.log(" selected product  : ", selectedPricing);
       try {
         const { data } = await productAPI.getProductById(id);
         setProduct(data);
@@ -73,6 +76,30 @@ const BuyNow = () => {
   useEffect(() => {
     setAmount(calculateTotal());
   }, [formData, product]);
+  
+
+  //create order
+  const createOrder = async () => {
+       try{
+            const data = await axios.post("http://localhost:3000/order/create",
+            {
+              buyer_id  : user.id, 
+              seller_id : product.seller_id,
+              product_id : id,
+              //quote_id,
+              quantity : selectedPricing.quantity,
+              price : selectedPricing.price,
+
+
+
+
+                
+            });
+       }
+       catch(e){
+          
+       }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,12 +169,6 @@ const BuyNow = () => {
   };
 
   const formSections = [
-    {
-      id: "company",
-      title: "Company Information",
-      icon: <FaBuilding className="text-blue-500" />,
-      description: "Enter your business details for billing and compliance",
-    },
     {
       id: "contact",
       title: "Contact Information",
@@ -544,35 +565,7 @@ const BuyNow = () => {
                   </div>
                 </div>
 
-                {/* Enhanced Payment Method Selection */}
-                {/* <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700">Payment Method</label>
-                  <div className="space-y-2">
-                    {['bank_transfer', 'letter_of_credit', 'advance_payment'].map((method) => (
-                      <motion.button
-                        key={method}
-                        type="button"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`w-full p-4 rounded-lg border ${
-                          formData.paymentMethod === method 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200'
-                        } flex items-center gap-3`}
-                        onClick={() => handleInputChange({ 
-                          target: { name: 'paymentMethod', value: method }
-                        })}
-                      >
-                        <FaCreditCard className={
-                          formData.paymentMethod === method 
-                            ? 'text-blue-500' 
-                            : 'text-gray-400'
-                        } />
-                        <span className="capitalize">{method.replace(/_/g, ' ')}</span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div> */}
+               
 
                 {/* Place Order Button */}
                 <motion.button
