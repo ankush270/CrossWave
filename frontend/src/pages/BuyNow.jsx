@@ -94,7 +94,7 @@ const BuyNow = () => {
             amount,
             currency: data.currency,
             product,
-            product_id: product.id,
+            product_id: product._id,
             seller_id: product.seller_id,
             formData,
             // order_details: details of order

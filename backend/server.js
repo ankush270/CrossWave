@@ -15,8 +15,13 @@ import kycRouter from "./src/routes/kyc.js";
 import PaymentRoutes from "./src/routes/PaymentRoutes.js";
 // chat routes
 import ChatRoutes from "./src/routes/ChatRoutes.js";
+// analytics routes
+import AnalyticsRoutes from "./src/routes/AnalyticsRoutes.js";
 
 import DocUploadRoutes from "./src/routes/doc_upload.js";
+
+// order routes
+// import order from "./src/routes/order.js"
 
 import {
   verifyProduct,
@@ -68,6 +73,8 @@ app.use("/payment", PaymentRoutes);
 app.use("/chat", ChatRoutes);
 app.use("/docs", DocUploadRoutes);
 app.use("/order", OrderRoutes);
+
+app.use("/analytics", AnalyticsRoutes);
 
 // Start server
 const SOCKETIO_PORT = PORT;

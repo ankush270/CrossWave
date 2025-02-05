@@ -38,7 +38,7 @@ export const createOrder = async (req, res) => {
 
     // const logistics = await createLogistics(logistics_details);
 
-    res.status(201).json(order);
+    res.status(201).json({ success: true, data: order });
   } catch (error) {
     res.status(500).json({
       success: false,
