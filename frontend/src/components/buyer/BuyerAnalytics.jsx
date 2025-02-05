@@ -1,11 +1,36 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  FaChartLine, FaChartBar, FaChartPie, FaDownload,
-  FaCalendarAlt, FaFilter, FaArrowUp, FaArrowDown,
+  FaDownload,
   FaDollarSign, FaBox, FaTruck, FaIndustry
 } from 'react-icons/fa';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement
+} from 'chart.js';
+
+// ✅ Register required components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement
+);
+
 
 const BuyerAnalytics = () => {
   const [timeRange, setTimeRange] = useState('month');

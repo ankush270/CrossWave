@@ -6,89 +6,148 @@ import {
   FaImage, FaFile, FaSmile, FaLink
 } from 'react-icons/fa';
 
+import axios from "axios";
+import { io } from "socket.io-client";
+import {useAuth} from '../../contexts/AuthContext';
+const socket = io("http://localhost:3000" ,  {
+  transports: ["websocket"], // ✅ Enforce WebSocket transport
+  withCredentials: true,
+}); // Connect to backend
+
+
+
+
+
 const BuyerMessages = () => {
+
+  // hard coded
+  const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
+  const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
+  const userType = "buyer";
+  const [chats, setChats] = useState([]); // set all chats
   const [selectedChat, setSelectedChat] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
 
-  const chats = [
-    {
-      id: 1,
-      supplier: 'Tech Components Ltd',
-      lastMessage: 'Your order #ORD001 has been shipped',
-      time: '2 min ago',
-      unread: 2,
-      status: 'online',
-      avatar: null,
-      messages: [
-        {
-          id: 1,
-          sender: 'supplier',
-          text: 'Your order #ORD001 has been shipped',
-          time: '10:30 AM',
-          status: 'read'
-        },
-        {
-          id: 2,
-          sender: 'buyer',
-          text: 'Great, thanks! When can I expect delivery?',
-          time: '10:32 AM',
-          status: 'read'
-        },
-        {
-          id: 3,
-          sender: 'supplier',
-          text: 'The estimated delivery time is 3-4 business days',
-          time: '10:33 AM',
-          status: 'read'
+ // get all chats
+ const fetchAllChats = async () => {
+  try {
+      const response = await axios.get(`http://localhost:3000/chat/get-all-chats?userId=${buyerId}`);
+      
+      if (response.data.success) {
+          console.log("All chats:", response.data.chats);
+          setChats(response.data.chats);
+      }
+  } catch (error) {
+      console.error("Error fetching chats:", error);
+  }
+ };
+
+useEffect(() => {
+        try{
+          if (buyerId && sellerId) {
+          fetchAllChats();
         }
-      ]
-    },
-    {
-      id: 2,
-      supplier: 'Display Solutions Inc',
-      lastMessage: 'We can offer bulk discount on LCD panels',
-      time: '1 hour ago',
-      unread: 1,
-      status: 'offline',
-      avatar: null,
-      messages: [
-        {
-          id: 1,
-          sender: 'buyer',
-          text: 'What\'s your best price for 500 units?',
-          time: '09:15 AM',
-          status: 'read'
-        },
-        {
-          id: 2,
-          sender: 'supplier',
-          text: 'We can offer bulk discount on LCD panels',
-          time: '09:45 AM',
-          status: 'read'
+        }catch(e){
+
+        }finally{
+          setLoading(false);
         }
-      ]
-    }
-  ];
+  }, [buyerId, sellerId]);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
 
-    // Add new message to the chat
-    if (selectedChat) {
-      const newMsg = {
-        id: selectedChat.messages.length + 1,
-        sender: 'buyer',
-        text: newMessage,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'sent'
-      };
-
-      selectedChat.messages.push(newMsg);
-      setNewMessage('');
+  // now fetch selected chat history
+  const fetchChatHistory = async () => {
+    setLoading(true);
+     
+    try {
+      const { data } = await axios.get(`http://localhost:3000/chat/get-chat/${selectedChat}`);
+      console.log(data);
+      
+      if (data.success) {
+        //setChatId(response.data.chatId);
+        setMessages(data.chat.history || []);
+      }
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }finally{
+      setLoading(false);
     }
   };
+
+  // Ensure socket joins the chat room after chatId is set
+    useEffect(() => {
+      if (selectedChat) {
+        console.log(`Joining chat room: ${selectedChat}`);
+        socket.emit("join_chat", { selectedChat });
+      }
+    }, [selectedChat]);
+  
+    // Listen for incoming messages
+    useEffect(() => {
+      if (!selectedChat) return;
+      fetchChatHistory();
+  
+      const handleMessageReceive = (data) => {
+        console.log("Received message:", data);
+        setMessages((prevMessages) => [...prevMessages, data]); // ✅ Update messages correctly
+      };
+  
+      socket.on("receiveMessage", handleMessageReceive);
+  
+      return () => {
+        socket.off("receiveMessage", handleMessageReceive);
+      };
+    }, [selectedChat]);
+
+
+
+    const handleSendMessage = async (e) => {
+      e.preventDefault();
+      if (message.trim() === "" || !selectedChat || !userType) {
+        console.error("Missing required fields in sendMessage:", { selectedChat, userType, message });
+        return;
+      }
+  
+      let senderId = "", receiverId= "";
+      if (userType === "seller") {
+        senderId = sellerId;
+        receiverId = buyerId;
+      } else {
+        senderId = buyerId;
+        receiverId = sellerId;
+      }
+      
+      const newMessage = { selectedChat, senderId, receiverId, role: userType, message };
+       
+      console.log("message :" , newMessage);
+      
+      socket.emit("sendMessage", newMessage);
+  
+      try {
+        const response = await axios.post("http://localhost:3000/chat/send-message", newMessage);
+        if (response.data.success) {
+          setMessages((prev) => [...prev, response.data.newMessage]);
+        } else {
+          console.error("Message sending failed:", response.data.error);
+        }
+      } catch (error) {
+        console.error("Error sending message:", error.response?.data || error.message);
+      }
+  
+      setMessage("");
+    };
+
+
+    if(messages){
+      console.log(messages);
+    }
+  
+    if(loading){
+      return <div>Loading....</div>
+    }
 
   return (
     <div className="h-[calc(100vh-120px)] bg-white/80 backdrop-blur-lg rounded-xl shadow-lg border border-gray-100 overflow-hidden">
@@ -113,26 +172,28 @@ const BuyerMessages = () => {
           <div className="overflow-y-auto h-[calc(100%-73px)]">
             {chats.map((chat) => (
               <motion.div
-                key={chat.id}
+                key={chat._id}
                 whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
                 className={`p-4 cursor-pointer border-b border-gray-100 ${
-                  selectedChat?.id === chat.id ? 'bg-blue-50' : ''
+                  selectedChat?._id === chat._id ? 'bg-blue-50' : ''
                 }`}
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => {
+                  setLoading(true);
+                  setSelectedChat(chat._id)
+                }} // start chat with this user
               >
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
                       {chat.supplier.charAt(0)}
                     </div>
-                    {chat.status === 'online' && (
+                    {chat.seen === true && (
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <h3 className="font-semibold truncate">{chat.supplier}</h3>
-                      <span className="text-xs text-gray-500">{chat.time}</span>
                     </div>
                     <p className="text-sm text-gray-600 truncate">{chat.lastMessage}</p>
                   </div>
@@ -229,8 +290,8 @@ const BuyerMessages = () => {
                   </motion.button>
                   <input
                     type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Type your message..."
                   />
