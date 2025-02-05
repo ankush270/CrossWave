@@ -51,7 +51,7 @@ export const productAPI = {
 }
 
 export const analyticsAPI = {
-  getSellerAnalytics: ()=>{
-    return api.get('/analytics/get-seller-analytics');
+  getSellerAnalytics: (selectedPeriod)=>{
+    return api.get('/analytics/get-seller-analytics?period='+selectedPeriod);
   }
 }

@@ -13,8 +13,9 @@ const SellerAnalytics = () => {
 
   useEffect(() => {
     const fetchSellerAnalytics = async () => {
+      setLoading(true); // Show loading while fetching new data
       try {
-        const { data } = await analyticsAPI.getSellerAnalytics();
+        const { data } = await analyticsAPI.getSellerAnalytics(selectedPeriod);
         setAnalytics(data);
       } catch (e) {
         console.log("An error occurred: ", e);
@@ -24,7 +25,7 @@ const SellerAnalytics = () => {
     };
 
     fetchSellerAnalytics();
-  }, []);
+  }, [selectedPeriod]);
 
   if (loading || !analytics) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;

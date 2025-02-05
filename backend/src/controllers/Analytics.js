@@ -5,9 +5,19 @@ import prisma from "../config/prisma_db.js";
 export const getSellerAnalytics = async (req, res) => {
   try {
     const sellerId = req.id;
+    const { period } = req.query; // Get the selected period from the frontend
+
+    // Calculate date range based on period
     const today = new Date();
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(today.getDate() - 6); // ✅ Adjust to get last 7 days correctly
+    let startDate = new Date();
+
+    if (period === "30days") {
+      startDate.setDate(today.getDate() - 29);
+    } else if (period === "90days") {
+      startDate.setDate(today.getDate() - 89);
+    } else {
+      startDate.setDate(today.getDate() - 6); // Default to 7 days
+    }
 
     // Fetch total products for the seller
     const totalProducts = await Product.countDocuments({ seller_id: sellerId });
@@ -23,18 +33,16 @@ export const getSellerAnalytics = async (req, res) => {
       where: { seller_id: sellerId, status: "DELIVERED" },
     });
 
-    console.log(totalRevenue);
-
     // Fetch active shipments (Processing or Shipped)
     const activeShipments = await prisma.order.count({
       where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
     });
 
-    // Fetch orders per day for the last 7 days using the correct table name "orders"
+    // Fetch orders per day for the selected period
     const rawOrdersPerDay = await prisma.$queryRaw`
       SELECT DATE(created_at) as date, COUNT(id) as count 
       FROM "orders"
-      WHERE seller_id = ${sellerId} AND created_at >= ${sevenDaysAgo}
+      WHERE seller_id = ${sellerId} AND created_at >= ${startDate}
       GROUP BY date
       ORDER BY date ASC;
     `;
@@ -44,15 +52,14 @@ export const getSellerAnalytics = async (req, res) => {
     // Convert query result into a map for fast lookup
     const ordersMap = new Map(rawOrdersPerDay.map(order => [order.date.toISOString().split("T")[0], order.count]));
 
-    // Generate last 7 days correctly
+    // Generate all days dynamically
     const ordersPerDay = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(sevenDaysAgo);
-      date.setDate(sevenDaysAgo.getDate() + i); // ✅ Ensures correct iteration from `sevenDaysAgo`
+    for (let i = 0; i <= (today - startDate) / (1000 * 60 * 60 * 24); i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
       const dateString = date.toISOString().split("T")[0];
 
       ordersPerDay.push({ date: dateString, count: Number(ordersMap.get(dateString) || 0) });
-
     }
 
     console.log("📊 Final Orders Per Day:", ordersPerDay);
@@ -61,7 +68,6 @@ export const getSellerAnalytics = async (req, res) => {
     const productCategories = await Product.aggregate([
       { $group: { _id: "$category", count: { $sum: 1 } } },
     ]);
-
 
     res.json({
       totalProducts,
@@ -77,6 +83,7 @@ export const getSellerAnalytics = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 
 export const getBuyerAnalytics = async (req, res) => {
