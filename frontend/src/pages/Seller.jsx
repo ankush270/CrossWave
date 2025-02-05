@@ -351,7 +351,7 @@ const Seller = () => {
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                 </div>
                 <div>
-                  <h3 className="font-medium">{user.profile.name}</h3>
+                  <h3 className="font-medium">{user.profile?.name || "John's Company"}</h3>
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-sm ${

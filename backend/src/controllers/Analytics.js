@@ -23,6 +23,8 @@ export const getSellerAnalytics = async (req, res) => {
       where: { seller_id: sellerId, status: "DELIVERED" },
     });
 
+    console.log(totalRevenue);
+
     // Fetch active shipments (Processing or Shipped)
     const activeShipments = await prisma.order.count({
       where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
@@ -49,7 +51,8 @@ export const getSellerAnalytics = async (req, res) => {
       date.setDate(sevenDaysAgo.getDate() + i); // ✅ Ensures correct iteration from `sevenDaysAgo`
       const dateString = date.toISOString().split("T")[0];
 
-      ordersPerDay.push({ date: dateString, count: ordersMap.get(dateString) || 0 });
+      ordersPerDay.push({ date: dateString, count: Number(ordersMap.get(dateString) || 0) });
+
     }
 
     console.log("📊 Final Orders Per Day:", ordersPerDay);
@@ -59,10 +62,11 @@ export const getSellerAnalytics = async (req, res) => {
       { $group: { _id: "$category", count: { $sum: 1 } } },
     ]);
 
+
     res.json({
       totalProducts,
       totalOrders,
-      totalRevenue: totalRevenue._sum.price || 0,
+      totalRevenue: String(totalRevenue._sum.price) || 0,
       activeShipments,
       ordersPerDay,
       productCategories,
