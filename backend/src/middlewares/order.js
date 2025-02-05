@@ -3,6 +3,7 @@ import prisma from "../config/prisma_db.js";
 export const verifyBuyer = async (req, res, next) => {
   try {
     const { buyer_id } = req.body;
+    console.log("buyer_id : ", buyer_id);
 
     // Check if buyer_id is provided
     if (!buyer_id) {
@@ -42,6 +43,7 @@ export const verifyBuyer = async (req, res, next) => {
           "Buyer is not verified. Ensure KYC, personal, and business documents are completed.",
       });
     }
+    console.log("buyer verified");
 
     // If buyer passes the checks, proceed to the next middleware/controller
     next();

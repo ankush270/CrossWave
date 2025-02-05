@@ -25,7 +25,7 @@ const BuyNow = () => {
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(null);
 
-  const { selectedPricing = "standard" } = location.state || {};
+  const { selectedPricing } = location.state;
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -51,9 +51,10 @@ const BuyNow = () => {
       try {
         const { data } = await productAPI.getProductById(id);
         setProduct(data);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching product:", error);
-        navigate('/products'); // Redirect on error
+        navigate("/products"); // Redirect on error
       } finally {
         setLoading(false);
       }
@@ -77,6 +78,7 @@ const BuyNow = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    console.log(product);
 
     try {
       const { data } = await axios.post(
@@ -92,8 +94,11 @@ const BuyNow = () => {
             amount,
             currency: data.currency,
             product,
-            product_id: product.id,
+            product_id: product._id,
             seller_id: product.seller_id,
+            formData,
+            price: product.pricing[selectedPricing].price,
+            quantity: product.pricing[selectedPricing].moq,
             // order_details: details of order
           },
         });
@@ -110,7 +115,10 @@ const BuyNow = () => {
 
     const price = product.pricing[selectedPricing].price;
     // Check if price is already a number
-    const priceValue = typeof price === 'number' ? price : parseFloat(price.replace(/[^0-9.]/g, ""));
+    const priceValue =
+      typeof price === "number"
+        ? price
+        : parseFloat(price.replace(/[^0-9.]/g, ""));
     const quantity = parseInt(product.pricing[selectedPricing].moq);
     return (priceValue * quantity).toFixed(2);
   };
@@ -142,12 +150,12 @@ const BuyNow = () => {
   };
 
   const formSections = [
-    {
-      id: "company",
-      title: "Company Information",
-      icon: <FaBuilding className="text-blue-500" />,
-      description: "Enter your business details for billing and compliance",
-    },
+    // {
+    //   id: "company",
+    //   title: "Company Information",
+    //   icon: <FaBuilding className="text-blue-500" />,
+    //   description: "Enter your business details for billing and compliance",
+    // },
     {
       id: "contact",
       title: "Contact Information",

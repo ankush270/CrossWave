@@ -1,1 +1,2 @@
 use API_URL variable for backend url in frontend
+dummy seller_id used in create order. change it
