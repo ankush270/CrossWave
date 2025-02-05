@@ -37,6 +37,9 @@ const BuyNow = () => {
 
   const { selectedPricing = "standard" } = location.state || {};
   const [formData, setFormData] = useState({
+    companyName: "",
+    gstin: "",
+    businessType: "manufacturer",
     contactName: "",
     email: "",
     phone: "",
@@ -134,6 +137,7 @@ const BuyNow = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    console.log(product);
 
     try {
       const { data } = await axios.post(
@@ -265,6 +269,12 @@ const BuyNow = () => {
   };
 
   const formSections = [
+    // {
+    //   id: "company",
+    //   title: "Company Information",
+    //   icon: <FaBuilding className="text-blue-500" />,
+    //   description: "Enter your business details for billing and compliance",
+    // },
     {
       id: "contact",
       title: "Contact Information",
@@ -699,7 +709,35 @@ const BuyNow = () => {
                   </div>
                 </div>
 
-               
+                {/* Enhanced Payment Method Selection */}
+                {/* <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                  <div className="space-y-2">
+                    {['bank_transfer', 'letter_of_credit', 'advance_payment'].map((method) => (
+                      <motion.button
+                        key={method}
+                        type="button"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full p-4 rounded-lg border ${
+                          formData.paymentMethod === method 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200'
+                        } flex items-center gap-3`}
+                        onClick={() => handleInputChange({ 
+                          target: { name: 'paymentMethod', value: method }
+                        })}
+                      >
+                        <FaCreditCard className={
+                          formData.paymentMethod === method 
+                            ? 'text-blue-500' 
+                            : 'text-gray-400'
+                        } />
+                        <span className="capitalize">{method.replace(/_/g, ' ')}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div> */}
 
                 {/* Place Order Button */}
                 <motion.button

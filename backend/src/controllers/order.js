@@ -8,13 +8,13 @@ import { createLogistics } from "./logistics.js";
 export const createOrder = async (req, res) => {
   try {
     const data = req.body;
-    
-    console.log("data : ", data);
+    console.log("OrderData : ", req.body);
 
     const order = await prisma.order.create({
       data: {
         buyer_id: data.buyer_id,
-        seller_id: data.seller_id,
+        seller_id: "0ca9db35-b652-4f73-a00c-64972696aaea",
+        // seller_id: data.seller_id,
         product_id: data.product_id,
         quote_id: data.quote_id,
         // logistics_id: data.logistics_id,
@@ -29,18 +29,32 @@ export const createOrder = async (req, res) => {
       },
     });
 
-    // const payment_details = {//create payment details
-    //     }
+    const payment_details = {
+      razorpayPaymentId: data.paymentId,
+      razorpayOrderId: data.orderId,
+      razorpaySignature: data.razorpay_signature,
+      status: "PENDING",
+      orderId: order.id,
+      totalAmount: parseFloat(data.amount),
+      currency: data.currency,
+      paymentMethod: "Demo",
+      taxDetails: "Demo",
+      shippingCost: 1,
+    };
 
-    // const payment = await createPayment(payment_details);
+    const payment = await createPaymentDoc(payment_details);
+    console.log(payment);
 
     // const logistics_details = {//create logistics details
     //     }
 
     // const logistics = await createLogistics(logistics_details);
+    console.log("ORder Created");
 
-    res.status(201).json({ success : true , data : order});
+    res.status(201).json({ success: true, data: order });
   } catch (error) {
+    console.log("ERROOOOOOOOOOOOOORRRRRRRRRRR : ", error);
+
     res.status(500).json({
       success: false,
       error: "Error creating order: " + error.message,

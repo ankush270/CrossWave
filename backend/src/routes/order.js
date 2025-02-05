@@ -11,7 +11,8 @@ import { verifyBuyer } from "../middlewares/order.js";
 const router = express.Router();
 
 // Apply `verifyBuyer` middleware before `createOrder`
-router.post("/create", verifyBuyer, createOrder);
+router.post("/", createOrder);
+// router.post("/", verifyBuyer, createOrder);
 
 router.get("/:orderId", getOrderById);
 router.get("/user/:userId", getOrdersByUserIdAndRole);
