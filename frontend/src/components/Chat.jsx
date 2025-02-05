@@ -11,6 +11,7 @@ import io from 'socket.io-client';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'sonner';
 
 const ConfirmationModal = ({ onConfirm, onCancel, price, quantity }) => (
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
@@ -97,7 +98,7 @@ const AcceptedDealBanner = ({ chat, userRole }) => {
       buyerId: chat.buyerId
     };
 
-    navigate(`/buy-now/${chat.productId}`, { 
+    navigate(`/product/${chat.productId}/buy`, { 
       state: { dealDetails }
     });
   };
@@ -138,7 +139,7 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
   const navigate = useNavigate();
 
   // Initialize socket connection
-  useEffect(() => {
+    useEffect(() => {
     console.log('Initializing socket connection...');
     const newSocket = io('http://localhost:5003', {
       path: '/socket.io/',
@@ -180,7 +181,10 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
 
   const handleNegotiate = async (e) => {
     e.preventDefault();
-    if (!newPrice || !newQuantity) return;
+    if (!newPrice || !newQuantity) {
+      toast.error('Please enter both price and quantity');
+      return;
+    }
 
     try {
       const negotiation = {
@@ -206,9 +210,10 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
       setChat(response.data);
       setNewPrice('');
       setNewQuantity('');
+      toast.success('Offer sent successfully!');
     } catch (error) {
       console.error('Error negotiating:', error);
-      setError(error.message);
+      toast.error('Failed to send offer. Please try again.');
     }
   };
 
@@ -226,7 +231,7 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
       setChat(response.data);
     } catch (error) {
       console.error('Error accepting deal:', error);
-      setError(error.message);
+      toast.error('Failed to accept deal. Please try again.');
     }
   };
 
@@ -242,9 +247,10 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
         }
       );
       setChat(response.data);
+      toast.success('Deal rejected');
     } catch (error) {
       console.error('Error rejecting deal:', error);
-      setError(error.message);
+      toast.error('Failed to reject deal. Please try again.');
     }
   };
 
@@ -255,8 +261,23 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
   };
 
   const handleConfirmDeal = async () => {
-    await handleAccept();
-    setShowConfirmation(false);
+    try {
+      const response = await axios.post(
+        `http://localhost:5003/api/chats/${chatId}/accept`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      setChat(response.data);
+      setShowConfirmation(false);
+      toast.success('Deal successfully accepted!');
+    } catch (error) {
+      console.error('Error accepting deal:', error);
+      toast.error('Failed to accept deal. Please try again.');
+    }
   };
 
   // Function to check if user can accept the current offer
@@ -398,8 +419,8 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
                 </div>
               </div>
             </div>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="p-2 hover:bg-white/50 rounded-full transition-colors"
             >
               <FaTimes className="text-gray-500" />
@@ -489,7 +510,7 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
                     Final Price: ₹{chat.negotiations[chat.negotiations.length - 1]?.price} × {chat.negotiations[chat.negotiations.length - 1]?.quantity} units
                   </p>
                 </div>
-                <button
+              <button
                   onClick={() => {
                     const lastNegotiation = chat.negotiations[chat.negotiations.length - 1];
                     const dealDetails = {
@@ -501,13 +522,13 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
                       sellerId: chat.sellerId,
                       buyerId: chat.buyerId
                     };
-                    navigate(`/buy-now/${chat.productId}`, { state: { dealDetails } });
+                    navigate(`/product/${chat.productId}/buy`, { state: { dealDetails } });
                   }}
                   className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2 shadow-md"
                 >
                   <span>Proceed to Buy</span>
                   <span className="text-lg">→</span>
-                </button>
+              </button>
               </div>
             </div>
           ) : (
@@ -533,4 +554,4 @@ const Chat = ({ chatId, userRole = 'buyer', onClose }) => {
   );
 };
 
-export default Chat;
+export default Chat; 

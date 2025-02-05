@@ -7,7 +7,7 @@ const calculatePriceBreakdown = (basePrice, quantity) => {
   return {
     unitPrice: basePrice,
     subtotal: subtotal,
-    platformFee: 20 * quantity,
+    platformFee: 0.10 * quantity*basePrice,
     customDuty: subtotal * 0.05,
     gst: subtotal * 0.05,
     insurance: subtotal * 0.03,

@@ -14,13 +14,13 @@ router.use((req, res, next) => {
 });
 
 // Get specific chats (more specific routes first)
-router.get('/buyer/:buyerId', chatController.getBuyerChats);
-router.get('/seller/:sellerId', chatController.getSellerChats);
-router.get('/buy-now/:id', chatController.getBuyNowDetails);
-router.get('/:id', chatController.getChatById);
-router.get('/', chatController.getAllChats);
 router.get('/buyer/:buyerId/stats', chatController.getBuyerChatStats);
+router.get('/buyer/:buyerId', chatController.getBuyerChats);
 router.get('/seller/:sellerId/stats', chatController.getSellerChatStats);
+router.get('/seller/:sellerId', chatController.getSellerChats);
+router.get('/:id', chatController.getChatById);
+router.get('/buy-now/:id', chatController.getBuyNowDetails);
+router.get('/', chatController.getAllChats);
 
 // Create chat routes
 router.post('/create', chatController.createChat);

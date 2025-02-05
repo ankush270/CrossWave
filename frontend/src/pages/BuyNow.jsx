@@ -11,23 +11,30 @@ import {
   FaUser,
   FaShippingFast,
   FaFileInvoice,
+  FaShoppingCart,
+  FaLock,
 } from "react-icons/fa";
 import { productsData } from "../data/productsData";
 import axios from "axios";
 import { productAPI } from "../api/api.js";
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { toast } from 'sonner';
 
 
 const BuyNow = () => {
   const { id } = useParams();
- 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dealDetails = location.state?.dealDetails;
+  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(null);
+  const [amount, setAmount] = useState(0);
+
+  // Add a state to track if this is a negotiated deal
+  const isNegotiatedDeal = !!dealDetails;
+
   const user = useAuth();
 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [amount, setAmount] = useState(null);
   const { selectedPricing = "standard" } = location.state || {};
   const [formData, setFormData] = useState({
     contactName: "",
@@ -46,24 +53,46 @@ const BuyNow = () => {
   });
   
 
-
-
   useEffect(() => {
     const fetchProduct = async () => {
-      console.log(" selected product  : ", selectedPricing);
       try {
-        const { data } = await productAPI.getProductById(id);
-        setProduct(data);
+        // Check if we have dealDetails first
+        if (dealDetails) {
+          setProduct({
+            _id: dealDetails.productId,
+            name: dealDetails.productName,
+            price: dealDetails.finalPrice,
+            quantity: dealDetails.finalQuantity,
+            totalAmount: dealDetails.finalPrice * dealDetails.finalQuantity,
+            image: dealDetails.productImage || '', // Add default image if needed
+            seller_id: dealDetails.sellerId
+          });
+          setLoading(false);
+          return;
+        }
+
+        // If no dealDetails, fetch from API
+        const response = await axios.get(`http://localhost:5000/api/products/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (response.data) {
+          setProduct(response.data);
+        } else {
+          throw new Error('No product data received');
+        }
       } catch (error) {
-        console.error("Error fetching product:", error);
-        navigate('/products'); // Redirect on error
+        console.error('Error fetching product:', error);
+        toast.error('Failed to load product details: ' + (error.response?.data?.message || error.message));
       } finally {
         setLoading(false);
       }
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, dealDetails]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -74,8 +103,9 @@ const BuyNow = () => {
   };
 
   useEffect(() => {
-    setAmount(calculateTotal());
-  }, [formData, product]);
+    const total = calculateTotal();
+    setAmount(total);
+  }, [formData.deliveryType, product, dealDetails]);
   
 
   //create order
@@ -108,9 +138,19 @@ const BuyNow = () => {
     try {
       const { data } = await axios.post(
         "http://localhost:3000/payment/create-payment",
-        { amount }
+        { 
+          amount,
+          dealDetails: isNegotiatedDeal ? dealDetails : null,
+          product: {
+            id: product._id,
+            name: product.name,
+            price: isNegotiatedDeal ? dealDetails.finalPrice : product.pricing[selectedPricing]?.price,
+            quantity: isNegotiatedDeal ? dealDetails.finalQuantity : product.pricing[selectedPricing]?.moq
+          },
+          shipping: calculateShipping(),
+          tax: calculateTax()
+        }
       );
-      console.log("Payment request response:", data);
 
       if (data.id) {
         navigate("/pay-now", {
@@ -119,32 +159,84 @@ const BuyNow = () => {
             amount,
             currency: data.currency,
             product,
-            product_id: product.id,
+            product_id: product._id,
             seller_id: product.seller_id,
-            // order_details: details of order
+            dealDetails: dealDetails,
           },
         });
       } else {
-        console.error("Payment request did not return an ID.");
+        toast.error("Payment initialization failed");
       }
     } catch (e) {
       console.error("Error during payment request:", e);
+      toast.error("Failed to process payment request");
     }
   };
 
-  const calculateSubtotal = () => {
-    if (!product?.pricing?.[selectedPricing]) return 0;
+  // Render negotiated deal details
+  const renderNegotiatedDetails = () => (
+    <div className="bg-green-50 p-6 rounded-xl border border-green-100 mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <FaLock className="text-green-600" />
+        <h3 className="text-lg font-semibold text-green-800">Negotiated Deal Details</h3>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm text-green-600">Price per unit (Locked)</p>
+          <p className="text-xl font-semibold text-green-700">₹{dealDetails?.finalPrice}</p>
+        </div>
+        <div>
+          <p className="text-sm text-green-600">Quantity (Locked)</p>
+          <p className="text-xl font-semibold text-green-700">{dealDetails?.finalQuantity} units</p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-sm text-green-600">Total Value</p>
+          <p className="text-xl font-semibold text-green-700">
+            ₹{(dealDetails?.finalPrice * dealDetails?.finalQuantity).toFixed(2)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
-    const price = product.pricing[selectedPricing].price;
-    // Check if price is already a number
-    const priceValue = typeof price === 'number' ? price : parseFloat(price.replace(/[^0-9.]/g, ""));
-    const quantity = parseInt(product.pricing[selectedPricing].moq);
-    return (priceValue * quantity).toFixed(2);
+  // Modified price calculations to use negotiated values when available
+  const calculateSubtotal = () => {
+    if (isNegotiatedDeal) {
+      const basePrice = dealDetails.finalPrice;
+      const quantity = dealDetails.finalQuantity;
+      return (basePrice * quantity).toFixed(2);
+    }
+    return 0;
+  };
+
+  const calculatePlatformFee = () => {
+    // Platform fee is ₹20 per unit
+    if (isNegotiatedDeal) {
+      return (0.10 * dealDetails.finalQuantity*dealDetails.finalPrice).toFixed(2);
+    }
+    return 0;
+  };
+
+  const calculateCustomDuty = () => {
+    // 5% of subtotal
+    const subtotal = parseFloat(calculateSubtotal());
+    return (subtotal * 0.05).toFixed(2);
+  };
+
+  const calculateGST = () => {
+    // 5% of subtotal
+    const subtotal = parseFloat(calculateSubtotal());
+    return (subtotal * 0.05).toFixed(2);
+  };
+
+  const calculateInsurance = () => {
+    // 3% of subtotal
+    const subtotal = parseFloat(calculateSubtotal());
+    return (subtotal * 0.03).toFixed(2);
   };
 
   const calculateShipping = () => {
     const subtotal = parseFloat(calculateSubtotal());
-
     switch (formData.deliveryType) {
       case "express":
         return (subtotal * 0.1).toFixed(2);
@@ -162,10 +254,14 @@ const BuyNow = () => {
 
   const calculateTotal = () => {
     const subtotal = parseFloat(calculateSubtotal());
+    const platformFee = parseFloat(calculatePlatformFee());
+    const customDuty = parseFloat(calculateCustomDuty());
+    const gst = parseFloat(calculateGST());
+    const insurance = parseFloat(calculateInsurance());
     const shipping = parseFloat(calculateShipping());
     const tax = parseFloat(calculateTax());
-    const total = (subtotal + shipping + tax).toFixed(2);
-    return total;
+    
+    return (subtotal + platformFee + customDuty + gst + insurance + shipping + tax).toFixed(2);
   };
 
   const formSections = [
@@ -274,25 +370,42 @@ const BuyNow = () => {
                 </div>
               </div>
               <div className="flex items-start gap-4 border-b border-gray-100 pb-6">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
+                {product?.image && (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                )}
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{product.name}</h3>
-                  <p className="text-gray-600">
-                    {product.specifications.technical.size}
-                  </p>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Quantity: {product.pricing[selectedPricing].moq} units
-                  </div>
-                  <div className="text-blue-600 font-semibold">
-                    {product.pricing[selectedPricing].price} per unit
-                  </div>
+                  <h3 className="font-semibold text-lg">{product?.name}</h3>
+                  {isNegotiatedDeal ? (
+                    <div className="mt-2">
+                      <div className="text-sm text-gray-500">
+                        Quantity: {dealDetails.finalQuantity} units
+                      </div>
+                      <div className="text-blue-600 font-semibold">
+                        ₹{dealDetails.finalPrice} per unit
+                      </div>
+                    </div>
+                  ) : (
+                    product?.pricing && (
+                      <div className="mt-2">
+                        <div className="text-sm text-gray-500">
+                          Quantity: {product.pricing[selectedPricing]?.moq || 0} units
+                        </div>
+                        <div className="text-blue-600 font-semibold">
+                          {product.pricing[selectedPricing]?.price || 0} per unit
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Show locked negotiated details if available */}
+            {isNegotiatedDeal && renderNegotiatedDetails()}
 
             {/* Form Sections with Enhanced Design */}
             {formSections.map((section) => (
@@ -538,29 +651,50 @@ const BuyNow = () => {
                   <FaCreditCard className="text-blue-600" />
                   Payment Details
                 </h3>
-                {/* Enhanced Price Breakdown */}
+                {/* Price Breakdown Section */}
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-gray-600">Base Price (per unit)</span>
+                    <span className="font-medium">₹{isNegotiatedDeal ? dealDetails.finalPrice : 0}</span>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">SubTotal ({isNegotiatedDeal ? dealDetails.finalQuantity : 0} units)</span>
                     <span className="font-medium">₹{calculateSubtotal()}</span>
                   </div>
+
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">
-                      Shipping ({formData.deliveryType})
-                    </span>
+                    <span className="text-gray-600">Platform Fee</span>
+                    <span className="font-medium">₹{calculatePlatformFee()}</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Custom Duty (5%)</span>
+                    <span className="font-medium">₹{calculateCustomDuty()}</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">GST (5%)</span>
+                    <span className="font-medium">₹{calculateGST()}</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Insurance (3%)</span>
+                    <span className="font-medium">₹{calculateInsurance()}</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Shipping ({formData.deliveryType})</span>
                     <span className="font-medium">₹{calculateShipping()}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax (18% GST)</span>
-                    <span className="font-medium">₹{calculateTax()}</span>
-                  </div>
+
                   <div className="border-t pt-4 mt-4">
                     <div className="flex justify-between text-lg font-bold">
-                      <span>Total</span>
+                      <span>Total Amount</span>
                       <span className="text-blue-600">₹{calculateTotal()}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
-                      * All prices are inclusive of taxes and shipping
+                      * All prices are inclusive of taxes and fees
                     </p>
                   </div>
                 </div>

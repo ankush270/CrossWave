@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import Chat from '../Chat';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const BuyerWishlist = () => {
   const [chats, setChats] = useState([]);
@@ -26,6 +27,8 @@ const BuyerWishlist = () => {
           return;
         }
 
+        console.log('Fetching data for user:', user.id);
+
         const [chatsResponse, statsResponse] = await Promise.all([
           axios.get(`http://localhost:5003/api/chats/buyer/${user.id}`, {
             headers: {
@@ -39,7 +42,6 @@ const BuyerWishlist = () => {
           })
         ]);
 
-        console.log("User data in BuyerWishlist:", user);
         console.log('Chats response:', chatsResponse.data);
         console.log('Stats response:', statsResponse.data);
         
@@ -49,6 +51,7 @@ const BuyerWishlist = () => {
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Failed to load data');
+        console.error('Full error:', err.response || err);
       } finally {
         setLoading(false);
       }
@@ -81,20 +84,26 @@ const BuyerWishlist = () => {
   };
 
   const handleProceedToBuy = (chat) => {
-    const lastNegotiation = chat.negotiations[chat.negotiations.length - 1];
-    const dealDetails = {
-      chatId: chat._id,
-      productId: chat.productId,
-      productName: chat.productName,
-      finalPrice: lastNegotiation.price,
-      finalQuantity: lastNegotiation.quantity,
-      sellerId: chat.sellerId,
-      buyerId: chat.buyerId
-    };
+    try {
+      const lastNegotiation = chat.negotiations[chat.negotiations.length - 1];
+      const dealDetails = {
+        chatId: chat._id,
+        productId: chat.productId,
+        productName: chat.productName,
+        finalPrice: lastNegotiation.price,
+        finalQuantity: lastNegotiation.quantity,
+        sellerId: chat.sellerId,
+        buyerId: chat.buyerId
+      };
 
-    navigate(`/buy-now/${chat.productId}`, { 
-      state: { dealDetails }
-    });
+      navigate(`/buy-now/${chat.productId}`, { 
+        state: { dealDetails }
+      });
+      toast.success('Proceeding to checkout...');
+    } catch (error) {
+      console.error('Error proceeding to buy:', error);
+      toast.error('Failed to proceed to checkout. Please try again.');
+    }
   };
 
   if (loading) {
@@ -150,7 +159,7 @@ const BuyerWishlist = () => {
             ))}
           </div>
         )}
-      </div>
+            </div>
 
       {/* Filter Tabs */}
       <div className="flex gap-2 bg-white p-2 rounded-lg shadow-sm">
@@ -194,11 +203,11 @@ const BuyerWishlist = () => {
               <div className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="space-y-4">
-                    <div>
+                  <div>
                       <h3 className="text-xl font-semibold text-gray-800">{chat.productName}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         {chat.status === 'accepted' ? (
-                          <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                             <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                               Deal Accepted
                             </span>
@@ -208,20 +217,20 @@ const BuyerWishlist = () => {
                             >
                               Proceed to Buy
                             </button>
-                          </div>
+                  </div>
                         ) : (
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                             chat.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
                             'bg-red-100 text-red-700'
                           }`}>
                             {chat.status.charAt(0).toUpperCase() + chat.status.slice(1)}
-                          </span>
+                    </span>
                         )}
-                        <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500">
                           Last updated: {new Date(chat.updatedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
+                    </span>
+                  </div>
+                </div>
 
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1">
@@ -234,7 +243,7 @@ const BuyerWishlist = () => {
                           <p className="text-lg font-semibold text-blue-600">
                             ₹{chat.negotiations[chat.negotiations.length - 1]?.price || chat.initialPrice}
                           </p>
-                        </div>
+                </div>
                       )}
                     </div>
                   </div>

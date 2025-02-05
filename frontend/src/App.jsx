@@ -96,7 +96,7 @@ const App = () => {
             <Route path="/seller/compliance" element={<ComplianceManager />} />
             
              */}
-             {/* <Route path="/seller/profile" element={<SellerProfile />} /> */}
+            {/* <Route path="/seller/profile" element={<SellerProfile />} /> */}
             {/* Shared Routes */}
             {/* <Route path="/logistics" element={<Logistics />} /> */}
             <Route path="/feedback" element={<FeedbackForm />} />
@@ -115,6 +115,14 @@ const App = () => {
             <Route path="/access-denied" element={<AccessDenied />} />
             <Route
               path="/product/:id/buy"
+              element={
+                <ErrorBoundary>
+                  <BuyNow />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/buy-now/:id"
               element={
                 <ErrorBoundary>
                   <BuyNow />

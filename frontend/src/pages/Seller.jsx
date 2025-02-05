@@ -125,9 +125,9 @@ const Seller = () => {
     },
     {
       id: 'messages',
-      title: 'Messages',
+      title: 'Messages & RFQs',
       icon: <FaComments />,
-      component: SellerMessages,
+      component: SellerRFQList,
       badge: '5'
     },
     {
@@ -135,13 +135,6 @@ const Seller = () => {
       title: 'Compliance',
       icon: <FaShieldAlt />,
       component: SellerCompliance,
-      badge: '2'
-    },
-    {
-      id: 'negotiations',
-      title: 'Negotiations',
-      icon: <FaComments />,
-      component: SellerRFQList,
       badge: '2'
     },
     {

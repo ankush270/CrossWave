@@ -5,17 +5,23 @@ let socketService = null;
 const chatController = {
     getBuyerChats: async (req, res) => {
         try {
-            console.log('getBuyerChats called');
             const { buyerId } = req.params;
-            console.log('Buyer ID:', buyerId);
+            console.log('Getting chats for buyer:', buyerId);
+            
             const chats = await Chat.find({ buyerId })
-                .sort({ updatedAt: -1 }) // Sort by most recent first
+                .sort({ updatedAt: -1 })
+                .lean()
                 .exec();
+            
             console.log('Found chats:', chats);
+            
+            if (!chats.length) {
+                console.log('No chats found for buyer:', buyerId);
+            }
+            
             res.json(chats);
-            console.log('Chats sent to client');
         } catch (error) {
-            console.error('Error fetching buyer chats:', error);
+            console.error('Error in getBuyerChats:', error);
             res.status(500).json({ 
                 message: 'Failed to fetch buyer chats', 
                 error: error.message 
@@ -180,15 +186,19 @@ const chatController = {
     getBuyerChatStats: async (req, res) => {
         try {
             const { buyerId } = req.params;
+            console.log('Getting stats for buyer:', buyerId);
+            
             const stats = {
                 total: await Chat.countDocuments({ buyerId }),
                 active: await Chat.countDocuments({ buyerId, status: 'active' }),
                 accepted: await Chat.countDocuments({ buyerId, status: 'accepted' }),
                 rejected: await Chat.countDocuments({ buyerId, status: 'rejected' })
             };
+            
+            console.log('Stats calculated:', stats);
             res.json(stats);
         } catch (error) {
-            console.error('Error fetching buyer chat stats:', error);
+            console.error('Error in getBuyerChatStats:', error);
             res.status(500).json({ 
                 message: 'Failed to fetch chat statistics', 
                 error: error.message 
