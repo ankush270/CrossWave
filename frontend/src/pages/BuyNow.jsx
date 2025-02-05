@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 import { productsData } from "../data/productsData";
 import axios from "axios";
+import { productAPI } from "../api/api.js";
 
 const BuyNow = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const BuyNow = () => {
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState(null);
 
-  const { selectedPricing = "standard" } = location.state || {};
+  const { selectedPricing } = location.state;
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -46,12 +47,21 @@ const BuyNow = () => {
   });
 
   useEffect(() => {
-    const foundProduct = productsData.find((p) => p.id === Number(id)); // Ensure ID comparison works
-    if (foundProduct) {
-      setProduct(foundProduct);
-    }
-    setLoading(false);
-  }, [id, productsData]);
+    const fetchProduct = async () => {
+      try {
+        const { data } = await productAPI.getProductById(id);
+        setProduct(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        navigate("/products"); // Redirect on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -68,6 +78,7 @@ const BuyNow = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    console.log(product);
 
     try {
       const { data } = await axios.post(
@@ -83,8 +94,11 @@ const BuyNow = () => {
             amount,
             currency: data.currency,
             product,
-            product_id: product.id,
+            product_id: product._id,
             seller_id: product.seller_id,
+            formData,
+            price: product.pricing[selectedPricing].price,
+            quantity: product.pricing[selectedPricing].moq,
             // order_details: details of order
           },
         });
@@ -99,11 +113,14 @@ const BuyNow = () => {
   const calculateSubtotal = () => {
     if (!product?.pricing?.[selectedPricing]) return 0;
 
-    const price = parseFloat(
-      product.pricing[selectedPricing].price.replace(/[^0-9.]/g, "")
-    );
+    const price = product.pricing[selectedPricing].price;
+    // Check if price is already a number
+    const priceValue =
+      typeof price === "number"
+        ? price
+        : parseFloat(price.replace(/[^0-9.]/g, ""));
     const quantity = parseInt(product.pricing[selectedPricing].moq);
-    return (price * quantity).toFixed(2);
+    return (priceValue * quantity).toFixed(2);
   };
 
   const calculateShipping = () => {
@@ -133,12 +150,12 @@ const BuyNow = () => {
   };
 
   const formSections = [
-    {
-      id: "company",
-      title: "Company Information",
-      icon: <FaBuilding className="text-blue-500" />,
-      description: "Enter your business details for billing and compliance",
-    },
+    // {
+    //   id: "company",
+    //   title: "Company Information",
+    //   icon: <FaBuilding className="text-blue-500" />,
+    //   description: "Enter your business details for billing and compliance",
+    // },
     {
       id: "contact",
       title: "Contact Information",
@@ -163,6 +180,7 @@ const BuyNow = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <p className="ml-4">Loading product details...</p>
       </div>
     );
   }

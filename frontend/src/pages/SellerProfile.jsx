@@ -116,7 +116,7 @@ const ThemeToggle = ({ isDarkMode, setIsDarkMode }) => (
     onClick={() => setIsDarkMode(!isDarkMode)}
     title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
   >
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="popLayout">
       {isDarkMode ? (
         <motion.div
           key="sun"

@@ -9,6 +9,7 @@ import "@aws-amplify/ui-react/styles.css";
 import awsexports from "../../aws-exports";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+// import prisma from "../../../../backend/src/config/prisma_db.js";
 
 Amplify.configure(awsexports);
 
@@ -16,7 +17,7 @@ const BASE_URL = "http://localhost:3000";
 
 export default function LivenessCheck() {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { user, role } = useAuth();
   const [loading, setLoading] = useState(true);
   const [sessionId, setSessionId] = useState(null);
   const [faceLivenessAlalysis, setFaceLivenessAlalysis] = useState(null);
@@ -48,7 +49,7 @@ export default function LivenessCheck() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ sessionId: sessionId }),
+      body: JSON.stringify({ sessionId: sessionId, userId: user.id }),
     });
 
     const data = await res.json();
@@ -57,6 +58,8 @@ export default function LivenessCheck() {
     setFaceLivenessAlalysis(data.body);
 
     if (data.results.Confidence > 50) {
+      // update in user doc
+
       alert("Verified!!!");
       navigate(`/`);
     } else {

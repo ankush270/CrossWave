@@ -6,18 +6,27 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  const [role, setRole] = useState(() => {
+    const storedRole = localStorage.getItem("role");
+    return storedRole || null;
+  });
   const [loading, setLoading] = useState(true);
 
   const checkAuthStatus = async () => {
     try {
       const {data} = await authAPI.getCurrentUser();
       setUser(data);
-      
+      localStorage.setItem("user", JSON.stringify(data));
     }catch (e) {
       console.error('Auth check failed:', e);
       setUser(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("role");
     } finally {
       setLoading(false);
     }
@@ -40,6 +49,8 @@ export const AuthProvider = ({ children }) => {
       console.log(data.logged_in_as);
       setUser(data.user);
       setRole(data.logged_in_as);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("role", data.logged_in_as);
       setLoading(false);
       return data.user
     }catch (e) {
@@ -52,6 +63,9 @@ export const AuthProvider = ({ children }) => {
     try{
       await authAPI.logout();
       setUser(null);
+      setRole(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("role");
     }catch (e) {
       console.error('Some error occurred:', e);
       throw e;
@@ -62,7 +76,9 @@ export const AuthProvider = ({ children }) => {
     try{
       const { data } = await authAPI.register(userData);
       setUser(data.user);
-      setRole(data.logged_in_as); 
+      setRole(data.logged_in_as);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("role", data.logged_in_as);
       return data.user;
     }catch (e) {
       console.error('Registration failed:', e);

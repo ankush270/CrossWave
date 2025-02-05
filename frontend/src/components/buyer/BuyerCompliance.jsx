@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDropzone } from "react-dropzone";
 import {
@@ -16,8 +16,12 @@ import {
   requiredDocumentsIndia,
   requiredDocumentsUAE,
 } from "../../constants/documents.js";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+// import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
+// import prisma from "../../../../backend/src/config/prisma_db.js";
 
 const BuyerCompliance = () => {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("overview");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState("");
@@ -28,6 +32,39 @@ const BuyerCompliance = () => {
 
   const documentList =
     selectedCountry === "india" ? requiredDocumentsIndia : requiredDocumentsUAE;
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/docs/${user.id}`); // Replace with your API URL
+      // const res = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const result = await response.json();
+      console.log(result);
+
+      // create uploadedDocs array from result.documents
+      const userDocs = [];
+      for (const doc in result.documents) {
+        userDocs.push({
+          id: doc._id,
+          name: doc,
+          status: doc.status,
+          verifiedAt: doc.verifiedAt,
+        });
+      }
+      console.log(userDocs);
+
+      setUploadedDocuments(userDocs);
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const complianceStats = [
     {
@@ -53,23 +90,6 @@ const BuyerCompliance = () => {
     },
   ];
 
-  const documents = [
-    {
-      id: 1,
-      name: "Business Registration",
-      status: "verified",
-      expiryDate: "2025-12-31",
-      lastUpdated: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Import License",
-      status: "pending",
-      expiryDate: "2024-12-31",
-      lastUpdated: "2024-02-01",
-    },
-  ];
-
   // const handleUploadClick = () => {
   //   setSelectedDocType('');
   //   setShowUploadModal(true);
@@ -89,7 +109,7 @@ const BuyerCompliance = () => {
   //         name: selectedDocType || file.name,
   //         status: 'pending',
   //         expiryDate: '2025-12-31',
-  //         lastUpdated: new Date().toISOString().split('T')[0],
+  //         verifiedAt: new Date().toISOString().split('T')[0],
   //         file: file
   //       };
   //       setUploadedDocuments(prev => [...prev, newDoc]);
@@ -101,7 +121,7 @@ const BuyerCompliance = () => {
   //   }, 300);
   // };
 
-  const handleFileUpload = (file) => {
+  const handleFileUpload = async (file) => {
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
@@ -114,27 +134,38 @@ const BuyerCompliance = () => {
         formData.append("files", file); // Ensure "files" is the key name
         formData.append("documentType", selectedDocType || file.name);
         // formData.append("expiryDate", "2025-12-31"); // Adjust as needed
-
+        console.log(formData);
         // API call
-        fetch("http://localhost:3000/docs/upload/17", {
+        fetch(`http://localhost:3000/docs/upload/${user.id}`, {
           method: "POST",
           body: formData,
         })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Upload successful:", data);
+          .then((response) => {
+            console.log(response);
+            return response.json();
+          })
+          .then(async (data) => {
+            console.log(data);
 
-            // Add document to uploaded list
-            const newDoc = {
-              id: Date.now(),
-              name: selectedDocType || file.name,
-              status: "pending",
-              expiryDate: "2025-12-31",
-              lastUpdated: new Date().toISOString().split("T")[0],
-              file: file,
-            };
-
-            setUploadedDocuments((prev) => [...prev, newDoc]);
+            if (data.error) {
+              console.log("Error Verifyinig document!!");
+              alert(
+                "We could not verify your document. Please try again or upload a better image."
+              );
+            } else {
+              console.log("Upload successful:", data);
+              fetchData();
+              // Add document to uploaded list
+              // const newDoc = {
+              //   id: Date.now(),
+              //   name: selectedDocType || file.name,
+              //   status: "VERIFIED",
+              //   // expiryDate: "2025-12-31",
+              //   verifiedAt: new Date().toISOString().split("T")[0],
+              //   file: file,
+              // };
+              // setUploadedDocuments((prev) => [...prev, newDoc]);
+            }
           })
           .catch((error) => console.error("Upload failed:", error))
           .finally(() => {
@@ -168,7 +199,7 @@ const BuyerCompliance = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {complianceStats.map((stat, index) => (
           <motion.div
             key={index}
@@ -197,7 +228,7 @@ const BuyerCompliance = () => {
             </div>
           </motion.div>
         ))}
-      </div>
+      </div> */}
 
       {/* Documents Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -228,7 +259,7 @@ const BuyerCompliance = () => {
           <div className="space-y-4">
             {documentList.map((doc) => {
               const isUploaded = uploadedDocuments.some(
-                (uploaded) => uploaded.name === doc.name
+                (uploaded) => uploaded.name === doc.id
               );
               return (
                 <div
@@ -287,7 +318,7 @@ const BuyerCompliance = () => {
                       <div>
                         <h4 className="font-medium">{doc.name}</h4>
                         <p className="text-sm text-gray-500">
-                          Last updated: {doc.lastUpdated}
+                          Last updated: {doc.verifiedAt}
                         </p>
                       </div>
                     </div>

@@ -16,7 +16,10 @@ const PayNow = () => {
   const currency = location.state?.currency;
   const product_id = location.state?.product_id;
   const seller_id = location.state?.seller_id;
-  const product = location.state?.product;
+  // const product = location.state?.product;
+  const price = location.state?.price;
+  const quantity = location.state?.quantity;
+  const formData = location.state?.formData;
   // const order_details = location.state?.order_details;
 
   console.log("amount : ", amount);
@@ -40,18 +43,49 @@ const PayNow = () => {
       );
       console.log("data :", data);
 
+      const orderData = {
+        buyer_id: user.id,
+        amount,
+        order_id,
+        currency,
+        product_id,
+        seller_id,
+        // price: product.price,
+        // order_details: order_details,
+        price,
+        quantity,
+        ...credentials,
+        contact_info: {
+          email: formData.email,
+          phone: formData.phone,
+          name: formData.contactName,
+        },
+        shiping_address: {
+          addressLine1: formData.addressLine1,
+          addressLine2: formData.addressLine2,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          pincode: formData.pincode,
+        },
+        billing_address: {
+          addressLine1: formData.addressLine1,
+          addressLine2: formData.addressLine2,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          pincode: formData.pincode,
+        },
+        delivery_preferences: {
+          deliveryType: formData.deliveryType,
+          specialInstructions: formData.specialInstructions,
+        },
+      };
+
+      console.log("Creating Order : ", orderData);
+
       if (data.success) {
-        const res = await axios.post("http://localhost:3000/order", {
-          buyer_id: user.id,
-          amount,
-          order_id,
-          currency,
-          product_id,
-          seller_id,
-          price: product.price,
-          // order_details: order_details,
-          ...credentials,
-        });
+        const res = await axios.post("http://localhost:3000/order", orderData);
         navigate("/payment-success"); // Redirect to success page
       } else {
         navigate("/payment-failure"); // Redirect to failure page

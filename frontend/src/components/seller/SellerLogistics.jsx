@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 import {
   FaTruck,
   FaWarehouse,
@@ -18,6 +19,7 @@ const SellerLogistics = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPickupModal, setShowPickupModal] = useState(false);
+  const [showCancelPickupModal, setShowCancelPickupModal] = useState(false);
   const [formData, setFormData] = useState({
     labelResponseOptions: "URL_ONLY",
     requestedShipment: {
@@ -108,6 +110,40 @@ const SellerLogistics = () => {
     },
   });
 
+  const [pickupFormData, setPickupFormData] = useState({
+    associatedAccountNumber: {
+      value: "XXX561073",
+    },
+    originDetail: {
+      pickupLocation: {
+        contact: {
+          personName: "",
+          phoneNumber: "",
+        },
+        address: {
+          streetLines: [""],
+          city: "",
+          stateOrProvinceCode: "",
+          postalCode: "",
+          countryCode: "US",
+        },
+      },
+      readyDateTimestamp: new Date().toISOString(),
+      customerCloseTime: "17:00:00",
+    },
+    carrierCode: "FDXE",
+  });
+
+  const [cancelPickupFormData, setCancelPickupFormData] = useState({
+    associatedAccountNumber: {
+      value: "XXX561073"
+    },
+    pickupConfirmationCode: "",
+    carrierCode: "FDXE",
+    scheduledDate: new Date().toISOString().split('T')[0],
+    location: ""
+  });
+
   const logisticsStats = [
     {
       title: "Active Shipments",
@@ -148,6 +184,7 @@ const SellerLogistics = () => {
       status: "in-transit",
       eta: "2024-02-25",
     },
+    
     // Add more shipments...
   ];
 
@@ -158,6 +195,46 @@ const SellerLogistics = () => {
     "&::-webkit-scrollbar": {
       display: "none" /* Chrome, Safari and Opera */,
     },
+  };
+
+  const handlePickupSubmit = (e) => {
+    e.preventDefault();
+    // Add your logic to submit pickup form
+    axios
+      .post("http://localhost:5000/logistics/create-pickup", pickupFormData)
+      .then((response) => {
+        console.log(response);
+        // Show success message or redirect to tracking page
+        setShowAddModal(false);
+
+        // Reset form data
+        setPickupFormData({
+          associatedAccountNumber: {
+            value: "XXX561073",
+          },
+          originDetail: {
+            pickupLocation: {
+              contact: {
+                personName: "",
+                phoneNumber: "",
+              },
+              address: {
+                streetLines: [""],
+                city: "",
+                stateOrProvinceCode: "",
+                postalCode: "",
+                countryCode: "US",
+              },
+            },
+            readyDateTimestamp: new Date().toISOString(),
+            customerCloseTime: "17:00:00",
+          },
+          carrierCode: "FDXE",
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const renderShipmentForm = () => (
@@ -174,6 +251,7 @@ const SellerLogistics = () => {
               <input
                 type="text"
                 placeholder="Recipient Name"
+                required
                 value={
                   formData.requestedShipment.recipients[0].contact.personName
                 }
@@ -204,6 +282,7 @@ const SellerLogistics = () => {
               <input
                 type="number"
                 placeholder="Phone Number"
+                required
                 value={
                   formData.requestedShipment.recipients[0].contact.phoneNumber
                 }
@@ -238,6 +317,7 @@ const SellerLogistics = () => {
               <input
                 type="text"
                 placeholder="Street Address"
+                required
                 value={
                   formData.requestedShipment.recipients[0].address
                     .streetLines[0]
@@ -269,6 +349,7 @@ const SellerLogistics = () => {
               <input
                 type="text"
                 placeholder="City"
+                required
                 value={formData.requestedShipment.recipients[0].address.city}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -297,6 +378,7 @@ const SellerLogistics = () => {
               <input
                 type="text"
                 placeholder="State Code"
+                required
                 value={
                   formData.requestedShipment.recipients[0].address
                     .stateOrProvinceCode
@@ -328,6 +410,7 @@ const SellerLogistics = () => {
               <input
                 type="text"
                 placeholder="Postal Code"
+                required
                 value={
                   formData.requestedShipment.recipients[0].address.postalCode
                 }
@@ -364,6 +447,8 @@ const SellerLogistics = () => {
               </label>
               <input
                 type="number"
+                placeholder="Package Weight (lbs)"
+                required
                 value={
                   formData.requestedShipment.requestedPackageLineItems[0].weight
                     .value
@@ -390,7 +475,6 @@ const SellerLogistics = () => {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            {/* Add service type and packaging type selects */}
           </div>
         </div>
 
@@ -470,6 +554,7 @@ const SellerLogistics = () => {
                     <input
                       type="text"
                       placeholder="Commodity description"
+                      required
                       value={commodity.description}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -499,6 +584,7 @@ const SellerLogistics = () => {
                     <input
                       type="text"
                       placeholder="Country Code (e.g., US)"
+                      required
                       value={commodity.countryOfManufacture}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -530,6 +616,7 @@ const SellerLogistics = () => {
                     </label>
                     <input
                       type="number"
+                      required
                       min="1"
                       value={commodity.quantity}
                       onChange={(e) =>
@@ -562,6 +649,7 @@ const SellerLogistics = () => {
                     </label>
                     <input
                       type="number"
+                      required
                       min="0"
                       step="0.01"
                       value={commodity.unitPrice.amount}
@@ -603,6 +691,7 @@ const SellerLogistics = () => {
                     </label>
                     <input
                       type="number"
+                      required
                       min="0"
                       step="0.1"
                       value={commodity.weight.value}
@@ -661,6 +750,343 @@ const SellerLogistics = () => {
     </form>
   );
 
+  const renderPickupForm = () => (
+    <form onSubmit={handlePickupSubmit} className="px-6 py-4">
+      <div className="space-y-6">
+        {/* Address Details */}
+        <div className="border rounded-lg p-4 space-y-4">
+          <h4 className="font-medium text-gray-900">Pickup Address</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contact Name
+              </label>
+              <input
+                type="text"
+                placeholder="Contact Name for Pickup"
+                required
+                value={
+                  pickupFormData.originDetail.pickupLocation.contact.personName
+                }
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      pickupLocation: {
+                        ...prev.originDetail.pickupLocation,
+                        contact: {
+                          ...prev.originDetail.pickupLocation.contact,
+                          personName: e.target.value,
+                        },
+                      },
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                required
+                value={
+                  pickupFormData.originDetail.pickupLocation.contact.phoneNumber
+                }
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      pickupLocation: {
+                        ...prev.originDetail.pickupLocation,
+                        contact: {
+                          ...prev.originDetail.pickupLocation.contact,
+                          phoneNumber: e.target.value,
+                        },
+                      },
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Street Address
+              </label>
+              <input
+                type="text"
+                placeholder="Street Address"
+                required
+                value={
+                  pickupFormData.originDetail.pickupLocation.address
+                    .streetLines[0]
+                }
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      pickupLocation: {
+                        ...prev.originDetail.pickupLocation,
+                        address: {
+                          ...prev.originDetail.pickupLocation.address,
+                          streetLines: [e.target.value],
+                        },
+                      },
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                City
+              </label>
+              <input
+                type="text"
+                placeholder="City"
+                required
+                value={pickupFormData.originDetail.pickupLocation.address.city}
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      pickupLocation: {
+                        ...prev.originDetail.pickupLocation,
+                        address: {
+                          ...prev.originDetail.pickupLocation.address,
+                          city: e.target.value,
+                        },
+                      },
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                State/Province Code
+              </label>
+              <input
+                type="text"
+                placeholder="State Code"
+                required
+                value={
+                  pickupFormData.originDetail.pickupLocation.address
+                    .stateOrProvinceCode
+                }
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      pickupLocation: {
+                        ...prev.originDetail.pickupLocation,
+                        address: {
+                          ...prev.originDetail.pickupLocation.address,
+                          stateOrProvinceCode: e.target.value,
+                        },
+                      },
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Postal Code
+              </label>
+              <input
+                type="text"
+                placeholder="Postal Code"
+                required
+                value={
+                  pickupFormData.originDetail.pickupLocation.address.postalCode
+                }
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      pickupLocation: {
+                        ...prev.originDetail.pickupLocation,
+                        address: {
+                          ...prev.originDetail.pickupLocation.address,
+                          postalCode: e.target.value,
+                        },
+                      },
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Timing Details */}
+        <div className="border rounded-lg p-4 space-y-4">
+          <h4 className="font-medium text-gray-900">Pickup Schedule</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Close Time
+              </label>
+              <input
+                type="time"
+                required
+                value={pickupFormData.originDetail.customerCloseTime}
+                onChange={(e) =>
+                  setPickupFormData((prev) => ({
+                    ...prev,
+                    originDetail: {
+                      ...prev.originDetail,
+                      customerCloseTime: e.target.value,
+                    },
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Actions */}
+      <div className="bg-white border-t px-6 py-4 mt-6 rounded-b-xl">
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={() => setShowPickupModal(false)}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            Schedule Pickup
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+
+  const cancelPickup = (e) => {
+    e.preventDefault();
+    axios.put('http://localhost:5000/logistics/cancel-pickup', cancelPickupFormData)
+      .then(response => {
+        console.log(response);
+        setShowCancelPickupModal(false);
+        // Reset form
+        setCancelPickupFormData({
+          associatedAccountNumber: {
+            value: "XXX561073"
+          },
+          pickupConfirmationCode: "",
+          carrierCode: "FDXE",
+          scheduledDate: new Date().toISOString().split('T')[0],
+          location: "NQAA"
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+  const renderCancelPickupForm = () => (
+    <form onSubmit={cancelPickup} className="px-6 py-4">
+      <div className="space-y-6">
+        <div className="border rounded-lg p-4 space-y-4">
+          <h4 className="font-medium text-gray-900">Cancel Pickup Details</h4>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pickup Confirmation Code
+              </label>
+              <input
+                type="text"
+                required
+                value={cancelPickupFormData.pickupConfirmationCode}
+                onChange={(e) =>
+                  setCancelPickupFormData(prev => ({
+                    ...prev,
+                    pickupConfirmationCode: e.target.value
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Scheduled Date
+              </label>
+              <input
+                type="date"
+                required
+                value={cancelPickupFormData.scheduledDate}
+                onChange={(e) =>
+                  setCancelPickupFormData(prev => ({
+                    ...prev,
+                    scheduledDate: e.target.value
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                required
+                value={cancelPickupFormData.location}
+                onChange={(e) =>
+                  setCancelPickupFormData(prev => ({
+                    ...prev,
+                    location: e.target.value
+                  }))
+                }
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Actions */}
+      <div className="bg-white border-t px-6 py-4 mt-6 rounded-b-xl">
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={() => setShowCancelPickupModal(false)}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            Close
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-red-500 text-white rounded-lg"
+          >
+            Cancel Pickup
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+
   return (
     <div className="relative min-h-screen">
       <DashboardBackground />
@@ -694,9 +1120,16 @@ const SellerLogistics = () => {
           <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}
             className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border `}
-            onClick={setShowPickupModal(true)}
+            onClick={() => setShowPickupModal(true)}
           >
             Create a new pickup
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.02, translateY: -5 }}
+            className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border `}
+            onClick={() => setShowCancelPickupModal(true)}
+          >
+            Cancel a exising pickup
           </motion.div>
         </div>
 
@@ -726,13 +1159,13 @@ const SellerLogistics = () => {
 
         {/* create pickup form */}
         <AnimatePresence>
-          {showAddModal && (
+          {showPickupModal && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto py-6"
-              onClick={() => setShowAddModal(false)}
+              onClick={() => setShowPickupModal(false)}
               style={scrollbarHiddenStyles}
             >
               <motion.div
@@ -742,7 +1175,31 @@ const SellerLogistics = () => {
                 className="bg-white rounded-xl w-full max-w-2xl mx-4 shadow-2xl mb-6"
                 onClick={(e) => e.stopPropagation()}
               >
-                {renderShipmentForm()}
+                {renderPickupForm()}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* cancel pickup form */}
+        <AnimatePresence>
+          {showCancelPickupModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto py-6"
+              onClick={() => setShowCancelPickupModal(false)}
+              style={scrollbarHiddenStyles}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white rounded-xl w-full max-w-2xl mx-4 shadow-2xl mb-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {renderCancelPickupForm()}
               </motion.div>
             </motion.div>
           )}
