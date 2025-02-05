@@ -30,7 +30,7 @@ export const getSellerAnalytics = async (req, res) => {
     // Fetch total revenue from delivered orders
     const totalRevenue = await prisma.order.aggregate({
       _sum: { price: true },
-      where: { seller_id: sellerId, status: "DELIVERED" },
+      where: { seller_id: sellerId },
     });
 
     // Fetch active shipments (Processing or Shipped)
@@ -38,9 +38,9 @@ export const getSellerAnalytics = async (req, res) => {
       where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
     });
 
-    // Fetch orders per day for the selected period
+    // Fetch orders per day along with revenue
     const rawOrdersPerDay = await prisma.$queryRaw`
-      SELECT DATE(created_at) as date, COUNT(id) as count 
+      SELECT DATE(created_at) as date, COUNT(id) as count, SUM(price) as revenue
       FROM "orders"
       WHERE seller_id = ${sellerId} AND created_at >= ${startDate}
       GROUP BY date
@@ -50,7 +50,12 @@ export const getSellerAnalytics = async (req, res) => {
     console.log("🔍 Raw Orders Per Day Query Result:", rawOrdersPerDay);
 
     // Convert query result into a map for fast lookup
-    const ordersMap = new Map(rawOrdersPerDay.map(order => [order.date.toISOString().split("T")[0], order.count]));
+    const ordersMap = new Map(
+       rawOrdersPerDay.map(order => [
+         order.date.toISOString().split("T")[0],
+         { count: order.count, revenue: order.revenue || 0 },
+       ])
+    );
 
     // Generate all days dynamically
     const ordersPerDay = [];
@@ -59,7 +64,12 @@ export const getSellerAnalytics = async (req, res) => {
       date.setDate(startDate.getDate() + i);
       const dateString = date.toISOString().split("T")[0];
 
-      ordersPerDay.push({ date: dateString, count: Number(ordersMap.get(dateString) || 0) });
+      const dayData = ordersMap.get(dateString) || { count: 0, revenue: 0 };
+      ordersPerDay.push({
+        date: dateString,
+        count: Number(dayData.count),
+        revenue: Number(dayData.revenue),
+      });
     }
 
     console.log("📊 Final Orders Per Day:", ordersPerDay);
@@ -83,7 +93,6 @@ export const getSellerAnalytics = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
 
 
 export const getBuyerAnalytics = async (req, res) => {
