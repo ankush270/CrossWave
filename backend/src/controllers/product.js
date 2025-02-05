@@ -61,6 +61,8 @@ export const addProduct = async (req, res, next) => {
 
 export const getProducts = async (req, res) => {
   try {
+    console.log("Hello");
+    
     const products = await Product.find({});
     if (!products || products.length === 0) {
       return res.status(404).json({ error: "No products found" });
@@ -105,8 +107,10 @@ export const removeProduct = async (req, res) => {
 
 export const getUserProduct = async (req, res, next) => {
   try {
-    const { sellerId } = req.params;
-    const products = await Product.find({ seller: sellerId });
+    const  sellerId  = req.id;
+    console.log("Seller : ", sellerId);
+    
+    const products = await Product.find({ seller_id: String(sellerId) });
     if (!products || products.length === 0) {
       return res.status(404).json({ error: "No products found" });
     }

@@ -1,7 +1,6 @@
 
 import { Product } from "../models/product.model.js";
 import prisma from "../config/prisma_db.js";
-import prisma from "../config/prisma_db.js";
 
 // Get seller analytics
 export const getSellerAnalytics =  async (req, res) => {
@@ -97,7 +96,6 @@ export const getSellerAnalytics =  async (req, res) => {
 export const getBuyerAnalytics = async (req, res) => {
   try {
     const buyerId = req.id;
-    const buyerId = req.id; // ✅ Ensure correct buyer ID
     const currentYear = new Date().getFullYear();
 
     // ✅ Active orders (Accepted)
