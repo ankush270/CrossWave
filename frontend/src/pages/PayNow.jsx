@@ -16,7 +16,9 @@ const PayNow = () => {
   const currency = location.state?.currency;
   const product_id = location.state?.product_id;
   const seller_id = location.state?.seller_id;
-  const product = location.state?.product;
+  // const product = location.state?.product;
+  const price = location.state?.price;
+  const quantity = location.state?.quantity;
   const formData = location.state?.formData;
   // const order_details = location.state?.order_details;
 
@@ -48,15 +50,17 @@ const PayNow = () => {
         currency,
         product_id,
         seller_id,
-        price: product.price,
+        // price: product.price,
         // order_details: order_details,
+        price,
+        quantity,
         ...credentials,
-        contactInfo: {
+        contact_info: {
           email: formData.email,
           phone: formData.phone,
           name: formData.contactName,
         },
-        shippingAddress: {
+        shiping_address: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2,
           city: formData.city,
@@ -64,7 +68,7 @@ const PayNow = () => {
           country: formData.country,
           pincode: formData.pincode,
         },
-        billingAddress: {
+        billing_address: {
           addressLine1: formData.addressLine1,
           addressLine2: formData.addressLine2,
           city: formData.city,
