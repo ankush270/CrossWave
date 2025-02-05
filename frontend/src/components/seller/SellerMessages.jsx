@@ -5,11 +5,12 @@ import {
   FaEllipsisV, FaRegStar, FaStar, FaCheck, FaCheckDouble 
 } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SellerMessages = () => {
   const [selectedChat, setSelectedChat] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
-
+  
   const {user} = useAuth();
   // const [userId , setUserId] = useEffect("");
   const [message, setMessage] = useState('');
@@ -21,7 +22,9 @@ const SellerMessages = () => {
 
     // hard coded
     const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
-    const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
+
+    console.log("user : ", user.id);
+    const sellerId = user.id;
 
    // Extract user Id from user
        useEffect(() => {
@@ -150,6 +153,11 @@ const SellerMessages = () => {
   if(loading){
     return <div>Loading....</div>
   }
+  
+  const scrollbarHiddenStyles = {
+    scrollbarWidth: "none", // Firefox
+    msOverflowStyle: "none", // IE & Edge
+  };
 
   return (
     <div className="relative h-screen">
@@ -176,19 +184,19 @@ const SellerMessages = () => {
               </div>
 
               {/* Chats List */}
-              <div className="overflow-y-auto h-[calc(100%-73px)] overflow-y-auto " style={scrollbarHiddenStyles}>
-                {chats.map((chat) => (
-                  <motion.div
-                    key={chat._id}
-                    whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
-                    className={`p-4 cursor-pointer border-b border-gray-100 ${
-                      selectedChat?.id === chat.id ? 'bg-blue-50' : ''
-                    }`}
-                    onClick={() => {
-                      setLoading(true);
-                      setSelectedChat(chat._id)
-                    }}
-                  >
+              <div className="overflow-y-auto h-[calc(100%-73px)]" style={scrollbarHiddenStyles}>
+                  {chats?.map((chat) => (
+                    <motion.div
+                      key={chat._id || chat.id} // Ensure key is valid
+                      whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
+                      className={`p-4 cursor-pointer border-b border-gray-100 ${
+                        selectedChat?._id === chat._id ? 'bg-blue-50' : ''
+                      }`}
+                      onClick={() => {
+                        setLoading(true);
+                        setSelectedChat(chat); // Store full chat object instead of just _id
+                      }}
+                    >
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <FaUserCircle className="text-4xl text-gray-400" />

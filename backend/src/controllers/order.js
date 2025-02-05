@@ -66,29 +66,41 @@ export const createOrder = async (req, res) => {
  * Get an order by ID
  */
 export const getOrderById = async (req, res) => {
+  console.log("Enter in get order using sellerID");
   try {
-    const { orderId } = req.params;
+    const  seller_Id  = req.params.sellerId;
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
+    console.log("Seller Id :", seller_Id);
+
+    if (!seller_Id) {
+      return res.status(400).json({
+        success: false,
+        error: "Seller ID is required",
+      });
+    }
+
+    const orders = await prisma.order.findMany({
+      where: { seller_id: seller_Id },
       include: {
         buyer_status: true,
         seller_status: true,
       },
     });
+   
+    console.log("total order : ", orders.length);
 
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: "Order not found",
+    if (orders.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
       });
     }
 
-    res.status(200).json(order);
+    res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Error fetching order: " + error.message,
+      error: "Error fetching orders: " + error.message,
     });
   }
 };

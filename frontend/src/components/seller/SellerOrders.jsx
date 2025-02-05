@@ -2,22 +2,28 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { FaSearch, FaFilter, FaSort, FaTruck, FaBox, FaClock } from "react-icons/fa";
+import { useAuth } from "../../contexts/AuthContext";
 
 const SellerOrders = () => {
   const [selectedTab, setSelectedTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [orders, setOrders] = useState([]);
+ 
+  const user = useAuth();
+
+  // console.log("current user:", user.user.id);
+
+  const sellerId = user.user.id;
 
   // Fetch Orders from Backend
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:3000/order/all-orders");
-      const result = await response.json();
+      const { data } = await axios.get(`http://localhost:3000/order/${sellerId}`);
 
-      if (result.success && Array.isArray(result.data)) {
-        setOrders(result.data);
+      if (data.success && Array.isArray(data.data)) {
+        setOrders(data.data);
       } else {
-        console.error("Unexpected API response:", result);
+        console.error("Unexpected API response:", data);
         setOrders([]);
       }
     } catch (error) {
