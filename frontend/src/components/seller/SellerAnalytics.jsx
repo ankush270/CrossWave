@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { FaChartLine, FaChartBar, FaChartPie, FaDownload, FaCalendar } from 'react-icons/fa';
+import { FaChartLine, FaChartBar, FaChartPie, FaDownload, FaCalendar, FaTruck, FaFileInvoiceDollar, FaBox } from 'react-icons/fa';
 import DashboardBackground from '../common/DashboardBackground';
 import {analyticsAPI} from "../../api/api.js";
 
@@ -10,6 +10,49 @@ const SellerAnalytics = () => {
   const [activeTab, setActiveTab] = useState('sales');
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
+
+  const statsCards = [
+    {
+      id: 'products',
+      title: 'Total Products',
+      value: '156',
+      change: '+12%',
+      trend: 'up',
+      icon: <FaBox />,
+      color: 'blue',
+      description: 'Active products in your inventory'
+    },
+    {
+      id: 'orders',
+      title: 'Total Orders',
+      value: '1,234',
+      change: '+23%',
+      trend: 'up',
+      icon: <FaFileInvoiceDollar />,
+      color: 'green',
+      description: 'Orders received this month'
+    },
+    {
+      id: 'revenue',
+      title: 'Revenue',
+      value: '₹12.4M',
+      change: '+18%',
+      trend: 'up',
+      icon: <FaChartLine />,
+      color: 'purple',
+      description: 'Total revenue this month'
+    },
+    {
+      id: 'shipments',
+      title: 'Active Shipments',
+      value: '89',
+      change: '-5%',
+      trend: 'down',
+      icon: <FaTruck />,
+      color: 'orange',
+      description: 'Shipments in transit'
+    }
+  ];
 
   useEffect(() => {
     const fetchSellerAnalytics = async () => {
@@ -117,6 +160,66 @@ const SellerAnalytics = () => {
             </motion.button>
           </div>
         </div>
+
+          {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {statsCards.map((card, index) => (
+                    <motion.div
+                      key={card.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ 
+                        scale: 1.02,
+                        transition: { duration: 0.2 }
+                      }}
+                      // onHoverStart={() => setHoveredStat(card.id)}
+                      // onHoverEnd={() => setHoveredStat(null)}
+                      className="relative bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+                    >
+                      {/* Background Pattern */}
+                      <div className="absolute inset-0 opacity-5">
+                        <div className="absolute inset-0 bg-gradient-to-br from-black to-transparent" />
+                        <div className="w-24 h-24 absolute -right-6 -bottom-6 text-black transform rotate-12">
+                          {card.icon}
+                        </div>
+                      </div>
+        
+                      <div className="relative">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-sm text-gray-600">{card.title}</p>
+                            <h3 className="text-2xl font-bold mt-1">{card.value}</h3>
+                            <span className={`text-sm ${
+                              card.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                            }`}>
+                              {card.change}
+                            </span>
+                          </div>
+                          <div className={`p-3 bg-${card.color}-50 rounded-lg`}>
+                            <span className={`text-${card.color}-500 text-xl`}>
+                              {card.icon}
+                            </span>
+                          </div>
+                        </div>
+        
+                        {/* Hover Description */}
+                        {/* <AnimatePresence>
+                          {hoveredStat === card.id && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              className="absolute inset-0 bg-gradient-to-b from-white/95 to-white/95 backdrop-blur-sm flex items-center justify-center p-4 text-center"
+                            >
+                              <p className="text-gray-600">{card.description}</p>
+                            </motion.div>
+                          )}
+                        </AnimatePresence> */}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
 
         {/* Analytics Tabs */}
         <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-gray-100">

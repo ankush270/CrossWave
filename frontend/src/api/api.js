@@ -41,6 +41,12 @@ export const productAPI = {
     return api.post('/product/add',productData)
   },
 
+  getUserProduct:(userId)=>{
+
+    return api.get('/product/user/get')
+
+  },
+
   getProducts: ()=>{
     return api.get('/product/get')
   },
