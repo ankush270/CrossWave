@@ -8,17 +8,18 @@ import { createLogistics } from "./logistics.js";
 export const createOrder = async (req, res) => {
   try {
     const data = req.body;
+    console.log("OrderData : ", req.body);
 
     const order = await prisma.order.create({
       data: {
         buyer_id: data.buyer_id,
         seller_id: data.seller_id,
-        product_id: data.product_id,
+        product_id: data.product_id, ////
         quote_id: data.quote_id,
         // logistics_id: data.logistics_id,
         // payment_id: data.payment_id,
-        quantity: data.quantity,
-        price: data.price,
+        quantity: data.quantity, ////
+        price: data.price, ////
         status: data.status || "PENDING",
         shiping_address: data.shiping_address,
         billing_address: data.billing_address,

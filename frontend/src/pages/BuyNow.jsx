@@ -51,9 +51,10 @@ const BuyNow = () => {
       try {
         const { data } = await productAPI.getProductById(id);
         setProduct(data);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching product:", error);
-        navigate('/products'); // Redirect on error
+        navigate("/products"); // Redirect on error
       } finally {
         setLoading(false);
       }
@@ -77,6 +78,7 @@ const BuyNow = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    console.log(product);
 
     try {
       const { data } = await axios.post(
@@ -94,6 +96,7 @@ const BuyNow = () => {
             product,
             product_id: product.id,
             seller_id: product.seller_id,
+            formData,
             // order_details: details of order
           },
         });
@@ -110,7 +113,10 @@ const BuyNow = () => {
 
     const price = product.pricing[selectedPricing].price;
     // Check if price is already a number
-    const priceValue = typeof price === 'number' ? price : parseFloat(price.replace(/[^0-9.]/g, ""));
+    const priceValue =
+      typeof price === "number"
+        ? price
+        : parseFloat(price.replace(/[^0-9.]/g, ""));
     const quantity = parseInt(product.pricing[selectedPricing].moq);
     return (priceValue * quantity).toFixed(2);
   };
