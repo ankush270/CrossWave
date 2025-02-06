@@ -114,7 +114,6 @@ export const getBuyerAnalytics = async (req, res) => {
     // Pending RFCs
     const pendingRFCs = await prisma.order.count({
       where: { buyer_id: buyerId, status: "PENDING" }
-      where: { buyer_id: buyerId, status: "PENDING" }
     });
 
     // ✅ In-transit orders
@@ -146,11 +145,6 @@ export const getBuyerAnalytics = async (req, res) => {
 
     console.log(orders);
 
-    const purchaseVolume = orders.reduce((acc, order) => {
-      const month = order.created_at.toISOString().slice(0, 7);
-      acc[month] = (acc[month] || 0) + order.quantity;
-      return acc;
-    }, {});
 
     const purchaseVolumeData = Object.entries(purchaseVolume).map(([month, quantity]) => ({ month, quantity }));
 

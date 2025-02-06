@@ -16,13 +16,11 @@ import {verifyUser} from "../middlewares/order.js"
 
 const router = express.Router();
 
-router.post('/add',authMiddleware, verifyUser ,addProduct);
-router.get('/getId/:id', authMiddleware,getProductById)
+router.post('/add',authMiddleware,addProduct);
 router.get('/get',authMiddleware,getProducts);
 router.delete('/delete/:productId',authMiddleware,removeProduct);
-router.get('/get/:sellerId',getUserProduct);
-router.get('/get-product/:seller_id', authMiddleware,getProductBySellerId);
+router.get('/user/get',authMiddleware,getUserProduct);
+router.get('/getId/:id', authMiddleware,getProductById);
 router.post('/update/:productId',authMiddleware,updateProduct);
-
 
 export default router;

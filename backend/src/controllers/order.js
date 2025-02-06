@@ -249,6 +249,8 @@ export const getAllOrders = async (req, res) => {
 /**
  * Update an order
  */
+
+
 import axios from 'axios';
 
 const RAZORPAY_USERNAME = 'rzp_test_wqW0Rfkhr0ZOcw';
@@ -316,25 +318,25 @@ export const updateOrder = async (req, res) => {
     if (amountToRelease > 0) {
       const response =  await releasePaymentToSeller(order, amountToRelease);
       if(response){
-         console.log("payment has done!", response);
+        console.log("payment has done!", response);
       }
     }
 
     // Update order status
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
-      data: updateData,
+      data: { status },
     });
 
     res.status(200).json(updatedOrder);
   } catch (error) {
+    console.error('Error updating order:', error);
     res.status(500).json({
       success: false,
-      error: "Error updating order: " + error.message,
+      error: 'Error updating order: ' + error.message,
     });
   }
 };
-
 /**
  * Delete an order
  */
