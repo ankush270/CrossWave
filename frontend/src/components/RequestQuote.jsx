@@ -1,47 +1,131 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaFileContract } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaTimes, FaFileContract, FaSpinner } from "react-icons/fa";
+import axios from "axios";
+// import { useAuth } from "../contexts/AuthContext.jsx";
 
-const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
+const RequestQuote = ({
+  product,
+  isOpen,
+  onClose,
+  currentUser,
+  productSellerId,
+}) => {
   const [formData, setFormData] = useState({
-    productId: product?.id || '',
-    productName: product?.name || '',
-    initialPrice: '',
-    quantity: '',
-    requirements: '',
+    productId: product?._id || "",
+    productName: product?.name || "",
+    initialPrice: "",
+    quantity: "",
+    requirements: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  // const { user } = useAuth();
+  // currentUser = user;
+
+  // Add debug log when component mounts or props change
+  useEffect(() => {
+    console.log("RequestQuote Props:", {
+      product,
+      currentUser,
+      isOpen,
+    });
+  }, [product, currentUser, isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!currentUser) {
-      setError('Please login to submit a quote request');
+
+    // Validate all required data
+    if (!currentUser?.id) {
+      console.error("Missing user ID:", currentUser);
+      setError("Please login to submit a quote request");
+      return;
+    }
+    console.log("Product Seller ID:", product.sellerId);
+    if (!product?.sellerId) {
+      console.error("Missing seller ID:", product);
+      setError("Cannot identify seller. Please try again later.");
       return;
     }
 
-    setError('');
-    
-    const chatData = {
-      productId: formData.productId,
-      productName: formData.productName,
-      initialPrice: formData.initialPrice,
-      buyerId: currentUser.id,
-      sellerId: product.sellerId,
-      status: 'active',
-      negotiations: [{
-        price: formData.initialPrice,
-        quantity: formData.quantity,
-        requirements: formData.requirements,
-        proposedBy: {
-          userId: currentUser.id,
-          role: 'buyer'
-        }
-      }]
-    };
+    if (!product?._id) {
+      console.error("Missing product ID:", product);
+      setError("Product information is incomplete. Please try again later.");
+      return;
+    }
 
-    console.log('Chat initiated:', chatData);
-    onClose();
+    // Prevent self-quoting
+    if (currentUser.id === product.sellerId) {
+      setError("You cannot request a quote for your own product");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      // Log debug information
+      console.log("Creating chat with:", {
+        currentUser,
+        product,
+        formData,
+      });
+
+      const chatData = {
+        productId: product._id,
+        productName: product.name,
+        initialPrice: parseFloat(formData.initialPrice),
+        sellerId: product.sellerId,
+        buyerId: currentUser.id,
+        status: "active",
+        negotiations: [
+          {
+            price: parseFloat(formData.initialPrice),
+            quantity: parseInt(formData.quantity),
+            requirements: formData.requirements,
+            proposedBy: {
+              userId: currentUser.id,
+              role: "buyer",
+            },
+          },
+        ],
+      };
+
+      console.log("Sending chat data:", chatData);
+
+      const response = await axios.post(
+        "http://localhost:5003/api/chats/create",
+        chatData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          timeout: 5000,
+        }
+      );
+
+      console.log("Response:", response.data);
+
+      if (response.data) {
+        onClose();
+        alert("Quote request submitted successfully!");
+      }
+    } catch (err) {
+      console.error("Error details:", {
+        message: err.message,
+        response: err.response?.data,
+        data: err.response?.data,
+        currentUser: currentUser,
+        productSellerId: product.sellerId,
+      });
+      setError(
+        err.response?.data?.message ||
+          "Failed to create quote request. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -83,7 +167,9 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
               />
               <div>
                 <h3 className="font-semibold">{product.name}</h3>
-                <p className="text-sm text-gray-600">MOQ: {product.moq} units</p>
+                <p className="text-sm text-gray-600">
+                  MOQ: {product.moq} units
+                </p>
               </div>
             </div>
 
@@ -95,7 +181,9 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
                 type="number"
                 required
                 value={formData.initialPrice}
-                onChange={(e) => setFormData({ ...formData, initialPrice: parseFloat(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, initialPrice: e.target.value })
+                }
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your proposed price"
                 min="0"
@@ -112,7 +200,9 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
                 required
                 min={product.moq}
                 value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, quantity: e.target.value })
+                }
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`Min ${product.moq} units`}
               />
@@ -125,7 +215,9 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
               <textarea
                 required
                 value={formData.requirements}
-                onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, requirements: e.target.value })
+                }
                 rows="4"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Specify your requirements, specifications, and any other details..."
@@ -137,15 +229,25 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
                 type="button"
                 onClick={onClose}
                 className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
+                disabled={loading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!currentUser}
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                disabled={!currentUser || loading}
               >
-                {currentUser ? 'Submit Quote Request' : 'Login to Submit'}
+                {loading ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Submitting...
+                  </>
+                ) : currentUser ? (
+                  "Submit Quote Request"
+                ) : (
+                  "Login to Submit"
+                )}
               </button>
             </div>
           </form>
@@ -155,4 +257,4 @@ const RequestQuote = ({ product, isOpen, onClose, currentUser }) => {
   );
 };
 
-export default RequestQuote; 
+export default RequestQuote;

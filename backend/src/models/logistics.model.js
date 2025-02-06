@@ -2,6 +2,10 @@ import mongoose, { Schema } from "mongoose";
 
 const logisticsSchema = new Schema(
   {
+    seller_id: {
+      type: String,
+      // required: true,
+    },
     transactionId: {
       type: String,
       //required: true,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaPlus,
@@ -14,8 +14,11 @@ import {
 } from "react-icons/fa";
 import DashboardBackground from "../common/DashboardBackground";
 import AddProductModal from "./AddProductModal";
+import { productAPI } from "../../api/api";
+import {useAuth} from "./../../contexts/AuthContext.jsx"
 
 const SellerProducts = () => {
+  const {user} = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -23,6 +26,7 @@ const SellerProducts = () => {
   const [view, setView] = useState("grid");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [loading,setLoading]=useState(true)
   const [products, setProducts] = useState([
     {
       id: 1,
@@ -65,6 +69,24 @@ const SellerProducts = () => {
     },
   });
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try{
+        const { data } = await productAPI.getUserProduct();
+        for(let d of data){
+          d['price'] = d["pricing"]["standard"]["price"];
+        }
+        console.log(data);
+        console.log(data[0].pricing.standard)
+        setProducts(data);
+      }catch (e) {
+        console.log("An error occurred while fetching: " + e.message);
+      }finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
+  }, [])
   const categories = [
     "All Categories",
     "Electronics",
@@ -342,7 +364,7 @@ const SellerProducts = () => {
                 <div>
                   <div className="relative h-48 bg-gray-100">
                     <img
-                      src={product.image}
+                      src={product.images}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />
@@ -397,7 +419,7 @@ const SellerProducts = () => {
                 // List View
                 <div className="flex items-center p-4">
                   <img
-                    src={product.image}
+                    src={product.images}
                     alt={product.name}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
@@ -406,7 +428,7 @@ const SellerProducts = () => {
                     <p className="text-gray-600">{product.category}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-blue-600">₹{product.price}</p>
+                    {/* <p className="font-bold text-blue-600">₹{product.pricing.standard.price}</p> */}
                     <p className="text-sm text-gray-600">
                       {product.stock} in stock
                     </p>

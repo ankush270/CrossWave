@@ -5,12 +5,18 @@ import {
   FaBox,
   FaChartLine,
   FaPlus,
+  FaFileAlt,
   FaComments,
+  FaCog,
   FaTruck,
   FaSearch,
   FaBell,
+  FaEllipsisV,
+  FaStore,
+  FaShoppingCart,
   FaFileInvoiceDollar,
   FaShieldAlt,
+  FaUser,
   FaSignOutAlt,
   FaTachometerAlt,
   FaAngleDown,
@@ -35,20 +41,22 @@ import {
   Tooltip,
   Legend,
   Filler,
-  ArcElement,
-} from "chart.js";
-import { Line, Doughnut } from "react-chartjs-2";
-import SellerDashboard from "../components/seller/SellerDashboard";
-import SellerProducts from "../components/seller/SellerProducts";
-import SellerOrders from "../components/seller/SellerOrders";
-import SellerAnalytics from "../components/seller/SellerAnalytics";
-import SellerLogistics from "../components/seller/SellerLogistics";
-import SellerCompliance from "../components/seller/SellerCompliance";
-import SellerMessages from "../components/seller/SellerMessages";
-import SellerProfile from "../components/seller/SellerProfile";
-import NotificationsPanel from "../components/ui/NotificationsPanel";
-import FloatingActions from "../components/ui/FloatingActions";
+  ArcElement
+} from 'chart.js'
+import { Line, Doughnut } from 'react-chartjs-2'
+import SellerDashboard from '../components/seller/SellerDashboard'
+import SellerProducts from '../components/seller/SellerProducts'
+import SellerOrders from '../components/seller/SellerOrders'
+import SellerAnalytics from '../components/seller/SellerAnalytics'
+import SellerLogistics from '../components/seller/SellerLogistics'
+import SellerCompliance from '../components/seller/SellerCompliance'
+import SellerMessages from '../components/seller/SellerMessages'
+import SellerProfile from '../components/seller/SellerProfile'
+import NotificationsPanel from '../components/ui/NotificationsPanel'
+import FloatingActions from '../components/ui/FloatingActions'
+import {useAuth} from "../contexts/AuthContext.jsx";
 import EKYC from "./EKYC";
+import SellerRFQList from "../components/seller/SellerRFQList";
 
 // Register ChartJS components
 ChartJS.register(
@@ -73,11 +81,14 @@ const scrollbarHiddenStyles = {
 };
 
 const Seller = () => {
-  const [activeSection, setActiveSection] = useState("dashboard");
-
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('dashboard')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const navigate = useNavigate();
+  const [loading, isLoading] = useState(true);
+  const { user, role } = useAuth();
 
   const menuItems = [
     {
@@ -119,6 +130,13 @@ const Seller = () => {
       title: "Analytics",
       icon: <FaChartLine />,
       component: SellerAnalytics,
+    },
+    {
+      id: "negotiations",
+      title: "Negotiations",
+      icon: <FaHandshake />,
+      component: SellerRFQList,
+      badge: "1",
     },
     {
       id: "messages",
@@ -309,7 +327,7 @@ const Seller = () => {
                   : "border-white/30 bg-white/10"
               }`}
             >
-              <motion.h1
+              {/* <motion.h1
                 className={`text-2xl font-bold ${
                   isDarkMode
                     ? "bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
@@ -318,7 +336,7 @@ const Seller = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 CrossWave
-              </motion.h1>
+              </motion.h1> */}
             </div>
 
             {/* Profile Quick View */}
@@ -341,14 +359,14 @@ const Seller = () => {
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                 </div>
                 <div>
-                  <h3 className="font-medium">John's Electronics</h3>
+                  <h3 className="font-medium">{user.profile?.name || "John's Company"}</h3>
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-sm ${
                         isDarkMode ? "text-gray-400" : "text-gray-500"
                       }`}
                     >
-                      Premium Buyer
+                      {role}
                     </span>
                     <FaAngleDown
                       className={isDarkMode ? "text-gray-400" : "text-gray-500"}
