@@ -9,6 +9,9 @@ import {
   FaLaptop,
   FaMemory,
   FaMicrochip,
+  FaShieldAlt,
+  FaCheckCircle,
+  FaUserCheck,
 } from "react-icons/fa";
 // import { productsData } from '../data/productsData';
 import ProductGallery from "../components/product/ProductGallery";
@@ -18,7 +21,7 @@ import ProductTabs from "../components/product/ProductTabs";
 import RequestQuote from "../components/RequestQuote";
 import Chat from "../components/Chat";
 import { productAPI } from "../api/api.js";
-import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
+// import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
 
 const Product = () => {
   const { id } = useParams();
@@ -59,101 +62,101 @@ const Product = () => {
   }
 
   // Add this function at the top of your component to calculate all fees
-  const calculatePriceBreakdown = (basePrice, quantity) => {
-    const unitPrice = parseFloat(basePrice.replace(/[^0-9.]/g, ""));
-    const subtotal = unitPrice * quantity;
+  // const calculatePriceBreakdown = (basePrice, quantity) => {
+  //   const unitPrice = parseFloat(basePrice.replace(/[^0-9.]/g, ""));
+  //   const subtotal = unitPrice * quantity;
 
-    return {
-      unitPrice: unitPrice,
-      subtotal: subtotal,
-      platformFee: 20 * quantity, // 20 rupees per unit
-      customDuty: subtotal * 0.05, // 5% of subtotal
-      gst: subtotal * 0.05, // 5% of subtotal
-      insurance: subtotal * 0.03, // 3% of subtotal
-      total: subtotal + 20 * quantity + subtotal * 0.13, // Total including all fees
-    };
-  };
+  //   return {
+  //     unitPrice: unitPrice,
+  //     subtotal: subtotal,
+  //     platformFee: 20 * quantity, // 20 rupees per unit
+  //     customDuty: subtotal * 0.05, // 5% of subtotal
+  //     gst: subtotal * 0.05, // 5% of subtotal
+  //     insurance: subtotal * 0.03, // 3% of subtotal
+  //     total: subtotal + 20 * quantity + subtotal * 0.13, // Total including all fees
+  //   };
+  // };
 
   // Add this after the pricing tiers section
 
   // Add this check for the image gallery
-  const renderImageGallery = () => {
-    if (!product.images || product.images.length === 0) {
-      return (
-        <div className="aspect-w-1 aspect-h-1 rounded-2xl overflow-hidden bg-white shadow-lg">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      );
-    }
+  // const renderImageGallery = () => {
+  //   if (!product.images || product.images.length === 0) {
+  //     return (
+  //       <div className="aspect-w-1 aspect-h-1 rounded-2xl overflow-hidden bg-white shadow-lg">
+  //         <img
+  //           src={product.image}
+  //           alt={product.name}
+  //           className="w-full h-full object-cover"
+  //         />
+  //       </div>
+  //     );
+  //   }
 
-    return (
-      <>
-        <div className="aspect-w-1 aspect-h-1 rounded-2xl overflow-hidden bg-white shadow-lg">
-          <img
-            src={product.images[selectedImage]}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
+  //   return (
+  //     <>
+  //       <div className="aspect-w-1 aspect-h-1 rounded-2xl overflow-hidden bg-white shadow-lg">
+  //         <img
+  //           src={product.images[selectedImage]}
+  //           alt={product.name}
+  //           className="w-full h-full object-cover"
+  //         />
+  //       </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          {product.images.map((image, index) => (
-            <motion.button
-              key={index}
-              className={`aspect-w-1 aspect-h-1 rounded-lg overflow-hidden ${
-                selectedImage === index ? "ring-2 ring-blue-500" : ""
-              }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedImage(index)}
-            >
-              <img
-                src={image}
-                alt={`View ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </motion.button>
-          ))}
-        </div>
-      </>
-    );
-  };
+  //       <div className="grid grid-cols-4 gap-4">
+  //         {product.images.map((image, index) => (
+  //           <motion.button
+  //             key={index}
+  //             className={`aspect-w-1 aspect-h-1 rounded-lg overflow-hidden ${
+  //               selectedImage === index ? "ring-2 ring-blue-500" : ""
+  //             }`}
+  //             whileHover={{ scale: 1.05 }}
+  //             whileTap={{ scale: 0.95 }}
+  //             onClick={() => setSelectedImage(index)}
+  //           >
+  //             <img
+  //               src={image}
+  //               alt={`View ${index + 1}`}
+  //               className="w-full h-full object-cover"
+  //             />
+  //           </motion.button>
+  //         ))}
+  //       </div>
+  //     </>
+  //   );
+  // };
 
   // Add this helper function to safely handle arrays
-  const renderArrayValue = (value) => {
-    if (Array.isArray(value)) {
-      return value.join(", ");
-    }
-    return value.toString();
-  };
+  // const renderArrayValue = (value) => {
+  //   if (Array.isArray(value)) {
+  //     return value.join(", ");
+  //   }
+  //   return value.toString();
+  // };
 
   // In the specifications section, update the rendering:
-  const renderSpecifications = (specs, title) => {
-    if (!specs) return null;
+  // const renderSpecifications = (specs, title) => {
+  //   if (!specs) return null;
 
-    return (
-      <div>
-        <h3 className="text-lg font-semibold mb-4">{title}</h3>
-        <dl className="space-y-2">
-          {Object.entries(specs).map(([key, value]) => (
-            <div
-              key={key}
-              className="flex justify-between py-2 border-b border-gray-100"
-            >
-              <dt className="text-gray-600 capitalize">
-                {key.replace(/([A-Z])/g, " $1").trim()}
-              </dt>
-              <dd className="font-medium">{renderArrayValue(value)}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    );
-  };
+  //   return (
+  //     <div>
+  //       <h3 className="text-lg font-semibold mb-4">{title}</h3>
+  //       <dl className="space-y-2">
+  //         {Object.entries(specs).map(([key, value]) => (
+  //           <div
+  //             key={key}
+  //             className="flex justify-between py-2 border-b border-gray-100"
+  //           >
+  //             <dt className="text-gray-600 capitalize">
+  //               {key.replace(/([A-Z])/g, " $1").trim()}
+  //             </dt>
+  //             <dd className="font-medium">{renderArrayValue(value)}</dd>
+  //           </div>
+  //         ))}
+  //       </dl>
+  //     </div>
+  //   );
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -226,7 +229,7 @@ const Product = () => {
         <div className="grid lg:grid-cols-2 gap-12 mb-12">
           {/* Image Gallery */}
           <motion.div
-            className="space-y-4 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
+            className="space-y-4  backdrop-blur-sm rounded-2xl p-6 shadow-lg"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
@@ -245,12 +248,63 @@ const Product = () => {
           >
             <ProductInfo product={product} />
 
+            {/* Add this after Product Info and before Pricing Tiers */}
+            <div className="flex items-center justify-between gap-4 py-4 border-t border-b border-gray-200/50">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center gap-2"
+              >
+                <FaShieldAlt className="text-blue-500" />
+                <span className="text-sm text-gray-600">Verified Supplier</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="flex items-center gap-2"
+              >
+                <FaCheckCircle className="text-green-500" />
+                <span className="text-sm text-gray-600">Quality Assured</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-2"
+              >
+                <FaUserCheck className="text-blue-500" />
+                <span className="text-sm text-gray-600">Secure Payment</span>
+              </motion.div>
+            </div>
+
             {/* Pricing Tiers */}
             <PricingTiers
               product={product}
               selectedPricing={selectedPricing}
               setPricingTier={setPricingTier}
             />
+
+            {/* Add this before Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-blue-50/50 rounded-lg p-4 border border-blue-100"
+            >
+              <div className="flex items-start gap-3">
+                <div className="text-blue-500 mt-1">
+                  <FaShieldAlt className="text-xl" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-blue-900">Buyer Protection</h4>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Get full refund if the item is not as described or if is not delivered
+                  </p>
+                </div>
+              </div>
+            </motion.div>
 
             {/* Action Buttons */}
             <div className="flex gap-4 mt-6">

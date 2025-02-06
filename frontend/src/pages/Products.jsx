@@ -5,7 +5,7 @@ import {
   FaFilter, FaSearch, FaSort, FaMicrochip, FaMemory, FaServer,
   FaLaptop, FaMobile, FaNetworkWired, FaStar, FaGlobe, FaBox,
   FaShoppingCart, FaHeart, FaChartLine, FaDollarSign, FaCertificate,
-  FaHome, FaTv, FaBlender, FaFan, FaCamera, FaTimes
+  FaHome, FaTv, FaBlender, FaFan, FaCamera, FaTimes, FaShieldAlt, FaUserLock, FaHandshake, FaHistory, FaFileContract, FaLock
 } from 'react-icons/fa'
 // import { productsData } from '../data/productsData'
 import ProductCard from '../components/products/ProductCard'
@@ -167,10 +167,43 @@ const Products = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Global Electronics Trading Hub
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-6">
               Source premium electronics from verified manufacturers worldwide. 
               B2B marketplace for quality electronic components and devices.
             </p>
+            
+            {/* Added Motto Section */}
+            <div className="flex items-center justify-center gap-8 mt-8 max-w-3xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex items-center gap-3 px-4 py-2 bg-white/50 rounded-xl backdrop-blur-sm"
+              >
+                <FaShieldAlt className="text-blue-500 text-xl" />
+                <span className="text-gray-800 font-medium">Quality Assured</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex items-center gap-3 px-4 py-2 bg-white/50 rounded-xl backdrop-blur-sm"
+              >
+                <FaHandshake className="text-blue-500 text-xl" />
+                <span className="text-gray-800 font-medium">Straight from Manufacturers or Wholesalers</span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-center gap-3 px-4 py-2 bg-white/50 rounded-xl backdrop-blur-sm"
+              >
+                <FaGlobe className="text-blue-500 text-xl" />
+                <span className="text-gray-800 font-medium">Global Reach</span>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
 

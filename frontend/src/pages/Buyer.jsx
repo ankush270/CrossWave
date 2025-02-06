@@ -81,13 +81,13 @@ const Buyer = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    {
-      id: "profile",
-      title: "Profile & Settings",
-      icon: <FaUserCog />,
-      component: BuyerProfile,
-      badge: null,
-    },
+    // {
+    //   id: "profile",
+    //   title: "Profile & Settings",
+    //   icon: <FaUserCog />,
+    //   component: BuyerProfile,
+    //   badge: null,
+    // },
     {
       id: "Logistics",
       title: "Logistics",
@@ -138,13 +138,13 @@ const Buyer = () => {
       component: BuyerMessages,
       badge: "5",
     },
-    {
-      id: "contracts",
-      title: "Contracts & Docs",
-      icon: <FaFileContract />,
-      component: BuyerContracts,
-      badge: "3",
-    },
+    // {
+    //   id: "contracts",
+    //   title: "Contracts & Docs",
+    //   icon: <FaFileContract />,
+    //   component: BuyerContracts,
+    //   badge: "3",
+    // },
     {
       id: "compliance",
       title: "Compliance",
@@ -152,13 +152,13 @@ const Buyer = () => {
       component: BuyerCompliance,
       badge: "2",
     },
-    {
-      id: "profile",
-      title: "Profile & Settings",
-      icon: <FaUserCog />,
-      component: BuyerProfile,
-      badge: null,
-    },
+    // {
+    //   id: "profile",
+    //   title: "Profile & Settings",
+    //   icon: <FaUserCog />,
+    //   component: BuyerProfile,
+    //   badge: null,
+    // },
   ];
 
   const notifications = [
@@ -298,7 +298,7 @@ const Buyer = () => {
                   whileHover={{ y: -2 }}
                   className="flex items-center space-x-3 cursor-pointer"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                >
+                > 
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
                       J

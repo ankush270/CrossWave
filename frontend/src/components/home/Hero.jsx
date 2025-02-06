@@ -114,10 +114,35 @@ const Hero = () => {
               Experience
             </motion.h1>
 
+            {/* Enhanced Trust Quote Section - Moved up and redesigned */}
+            <motion.div
+              variants={itemVariants}
+              className="my-8 p-6 bg-gradient-to-r from-blue-900/40 to-purple-900/40 rounded-xl border border-blue-500/20 backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <FaShieldAlt className="text-2xl text-blue-400" />
+                <h3 className="text-xl font-bold text-blue-300">Our Promise</h3>
+              </div>
+              <p className="text-lg italic text-gray-200">
+                "What sets us apart is our unwavering commitment to transparency and trust. 
+                Every partnership we forge, every transaction we facilitate, and every piece of data 
+                we handle is backed by our dedication to absolute integrity and security."
+              </p>
+              <div className="mt-3 flex items-center justify-between">
+                <p className="text-sm font-semibold text-blue-300">
+                  - The CrossWave Promise
+                </p>
+                <div className="flex items-center gap-2">
+                  <FaRegCheckCircle className="text-green-400" />
+                  <span className="text-sm text-green-400">Verified Commitment</span>
+                </div>
+              </div>
+            </motion.div>
+
             {/* Enhanced Features List */}
             <motion.div
               variants={itemVariants}
-              className="space-y-3"
+              className="space-y-3 flex gap-5 "
             >
               {[
                 { icon: <FaRegCheckCircle />, text: "Verified Global Partners" },
@@ -177,7 +202,7 @@ const Hero = () => {
             </motion.div>
 
             {/* Enhanced Stats */}
-            <motion.div
+            {/* <motion.div
               variants={itemVariants}
               className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-700"
             >
@@ -193,8 +218,8 @@ const Hero = () => {
                 >
                   <motion.div
                     className="text-blue-400 text-2xl mb-2"
-                    animate={{ rotateY: 360 }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    animate={{ rotateY: 360, x:70 }}
+                    transition={{ duration: 2 , }}
                   >
                     {stat.icon}
                   </motion.div>
@@ -207,7 +232,7 @@ const Hero = () => {
                   <div className="text-sm text-gray-400">{stat.label}</div>
                 </motion.div>
               ))}
-            </motion.div>
+            </motion.div> */}
           </div>
 
           {/* Enhanced Right Content - Image */}

@@ -51,7 +51,7 @@ const BuyNow = () => {
       try {
         const { data } = await productAPI.getProductById(id);
         setProduct(data);
-        console.log(data);
+
       } catch (error) {
         console.error("Error fetching product:", error);
         navigate("/products"); // Redirect on error
@@ -109,7 +109,8 @@ const BuyNow = () => {
       console.error("Error during payment request:", e);
     }
   };
-
+  
+   
   const calculateSubtotal = () => {
     if (!product?.pricing?.[selectedPricing]) return 0;
 
