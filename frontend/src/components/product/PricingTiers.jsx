@@ -19,6 +19,7 @@ const PricingTiers = ({ product, selectedPricing, setPricingTier }) => {
             onClick={() => setPricingTier(tier)}
           >
             <div className="font-semibold capitalize mb-2">{tier}</div>
+
             <div className="text-2xl font-bold text-blue-600 mb-2">{details.price}</div>
             <div className="text-sm text-gray-600">MOQ: {details.moq}</div>
           </motion.button>
