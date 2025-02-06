@@ -19,6 +19,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext.jsx";
 // import Document from "../../../../backend/src/microservices/DocUpload/models/document.model.js";
 // import prisma from "../../../../backend/src/config/prisma_db.js";
+import { toast } from "sonner";
 
 const BuyerCompliance = () => {
   const { user } = useAuth();
@@ -128,7 +129,9 @@ const BuyerCompliance = () => {
       setUploadProgress(progress);
       if (progress >= 100) {
         clearInterval(interval);
-
+        const toastId = toast.loading("Verifying Document...", {
+          duration: Infinity,
+        });
         // Prepare form data
         const formData = new FormData();
         formData.append("files", file); // Ensure "files" is the key name
@@ -149,11 +152,19 @@ const BuyerCompliance = () => {
 
             if (data.error) {
               console.log("Error Verifyinig document!!");
-              alert(
-                "We could not verify your document. Please try again or upload a better image."
+              toast.error(
+                "We could not verify your document. Please try again or upload a better image.",
+                { id: toastId, duration: 5000 }
               );
+              // alert(
+              //   "We could not verify your document. Please try again or upload a better image."
+              // );
             } else {
               console.log("Upload successful:", data);
+              toast.success("Document Verified", {
+                id: toastId,
+                duration: 3000,
+              });
               fetchData();
               // Add document to uploaded list
               // const newDoc = {
@@ -167,7 +178,13 @@ const BuyerCompliance = () => {
               // setUploadedDocuments((prev) => [...prev, newDoc]);
             }
           })
-          .catch((error) => console.error("Upload failed:", error))
+          .catch((error) => {
+            console.error("Upload failed:", error);
+            toast.error(
+              "We could not verify your document. Please try again or upload a better image.",
+              { id: toastId, duration: 5000 }
+            );
+          })
           .finally(() => {
             setShowUploadModal(false);
             setUploadProgress(0);

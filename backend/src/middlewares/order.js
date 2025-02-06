@@ -1,56 +1,61 @@
 import prisma from "../config/prisma_db.js";
 
-export const verifyBuyer = async (req, res, next) => {
+export const verifyUser = async (req, res, next) => {
   try {
-    const { buyer_id } = req.body;
-    console.log("buyer_id : ", buyer_id);
-
-    // Check if buyer_id is provided
-    if (!buyer_id) {
+    // const { user_id } = req.body;
+    // console.log("user_id : ", user_id);
+    const user_id = req.id;
+    // Check if user_id is provided
+    if (!user_id) {
       return res.status(400).json({
         success: false,
-        error: "buyer_id is required.",
+        error: "user_id is required.",
       });
     }
 
     // Fetch buyer details to check KYC and document status
-    const buyer = await prisma.user.findUnique({
-      where: { id: buyer_id },
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
       select: {
         is_kyc_done: true,
         is_personal_docs_done: true,
-        is_business_docs_done: true,
+        is_company_docs_done: true,
       },
     });
 
     // If buyer not found
-    if (!buyer) {
+    if (!user) {
       return res.status(404).json({
         success: false,
-        error: "Buyer not found.",
+        error: "user not found.",
       });
     }
 
-    // Check if all required buyer fields are true
+    console.log(user);
+
+    // Check if all required user fields are true
     if (
-      !buyer.is_kyc_done ||
-      !buyer.is_personal_docs_done ||
-      !buyer.is_business_docs_done
+      !user.is_kyc_done ||
+      // !user.is_personal_docs_done ||
+      !user.is_company_docs_done
     ) {
       return res.status(400).json({
         success: false,
         error:
-          "Buyer is not verified. Ensure KYC, personal, and business documents are completed.",
+          "user is not verified. Ensure KYC is done and documents are uploaded.",
       });
     }
-    console.log("buyer verified");
+    console.log("user verified");
 
-    // If buyer passes the checks, proceed to the next middleware/controller
+    // If user passes the checks, proceed to the next middleware/controller
     next();
+    // return res.status(200).json({
+    //   success: true,
+    // });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Error verifying buyer: " + error.message,
+      error: "Error verifying user: " + error.message,
     });
   }
 };

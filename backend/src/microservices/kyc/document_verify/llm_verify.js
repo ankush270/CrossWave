@@ -67,66 +67,174 @@ function getSystemInstruction(documentType) {
   return `You are an AI document verifier specialized in ${documentType} documents. Analyze the provided image and determine whether it is a valid ${documentType}. Return a JSON object strictly following the schema: {verified: BOOLEAN}.`;
 }
 
-export async function LLMverifyDocument(filePath, documentType) {
-  const referenceFilePath = path.join(
-    __dirname,
-    "Test Docs",
-    `${documentType}.jpg`
-  );
-  const referenceUploadResult = await uploadToGemini(
-    referenceFilePath,
-    "image/jpg"
-  );
-  const referenceFileContent = {
-    fileData: {
-      fileUri: referenceUploadResult.uri,
-      mimeType: referenceUploadResult.mimeType,
-    },
-  };
-  // Assume the image is a JPG. Adjust the MIME type if needed.
-  const mimeType = "image/jpg";
+// export async function LLMverifyDocument(filePath, documentType, retries = 5) {
+//   try {
+//     const referenceFilePath = path.join(
+//       __dirname,
+//       "Test Docs",
+//       `${documentType}.jpg`
+//     );
 
-  // Upload the document image
-  const uploadResult = await uploadToGemini(filePath, mimeType);
+//     const referenceUploadResult = await uploadToGemini(
+//       referenceFilePath,
+//       "image/jpg"
+//     );
+//     const referenceFileContent = {
+//       fileData: {
+//         fileUri: referenceUploadResult.uri,
+//         mimeType: referenceUploadResult.mimeType,
+//       },
+//     };
+//     // Assume the image is a JPG. Adjust the MIME type if needed.
+//     const mimeType = "image/jpg";
 
-  // Wrap the uploaded file info to pass as content
-  const userFileContent = {
-    fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
-  };
+//     // Upload the document image
+//     const uploadResult = await uploadToGemini(filePath, mimeType);
 
-  // Create a dedicated generative model instance with the tailored system instruction
-  const docModel = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: getSystemInstruction(documentType),
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: docSchema,
-    },
-  });
+//     // Wrap the uploaded file info to pass as content
+//     const userFileContent = {
+//       fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
+//     };
 
-  // One-shot prompting: pass a text instruction along with the file data.
-  console.log(process.env.GEMINI_API_KEY)
-  const result = await docModel.generateContent({
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `You are an AI document verifier specialized in ${documentType} documents. Below is a reference image showing what a valid ${documentType} should look like.`,
-          },
-          referenceFileContent,
-          {
-            text: `Now, please verify the following uploaded ${documentType} document. Return a JSON object strictly following the schema: {verified: BOOLEAN}.`,
-          },
-          userFileContent,
-        ],
+//     // Create a dedicated generative model instance with the tailored system instruction
+//     const docModel = genAI.getGenerativeModel({
+//       model: "gemini-1.5-flash",
+//       systemInstruction: getSystemInstruction(documentType),
+//       generationConfig: {
+//         responseMimeType: "application/json",
+//         responseSchema: docSchema,
+//       },
+//     });
+
+//     // One-shot prompting: pass a text instruction along with the file data.
+//     console.log(process.env.GEMINI_API_KEY);
+//     const result = await docModel.generateContent({
+//       contents: [
+//         {
+//           role: "user",
+//           parts: [
+//             {
+//               text: `You are an AI document verifier specialized in ${documentType} documents. Below is a reference image showing what a valid ${documentType} should look like.`,
+//             },
+//             referenceFileContent,
+//             {
+//               text: `Now, please verify the following uploaded ${documentType} document. Return a JSON object strictly following the schema: {verified: BOOLEAN}.`,
+//             },
+//             userFileContent,
+//           ],
+//         },
+//       ],
+//     });
+//     if (!result.response.text()) {
+//       console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+//     }
+
+//     // Parse and return the JSON response from the model
+//     const outputText = result.response.text();
+//     return JSON.parse(outputText);
+//   } catch (error) {
+//     console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+//     console.log(error);
+//   }
+// }
+
+export async function LLMverifyDocument(filePath, documentType, retries = 5) {
+  async function retryAsync(fn, maxRetries, delayMs = 1000) {
+    let attempts = 0;
+
+    while (attempts < maxRetries) {
+      console.log(`Making attempt ${attempts + 1} of ${maxRetries}`);
+      try {
+        return await fn();
+      } catch (error) {
+        attempts++;
+        console.log(
+          `Attempt ${attempts} failed with error: ${error.status || ""} - ${
+            error.statusText || error.message
+          }`
+        );
+
+        if (attempts >= maxRetries) throw error;
+
+        // Exponential backoff: wait (delayMs * attempts) before retrying
+        await new Promise((resolve) => setTimeout(resolve, delayMs * attempts));
+      }
+    }
+  }
+
+  try {
+    const referenceFilePath = path.join(
+      __dirname,
+      "Test Docs",
+      `${documentType}.jpg`
+    );
+
+    const referenceUploadResult = await retryAsync(
+      () => uploadToGemini(referenceFilePath, "image/jpg"),
+      Math.min(retries, 3) // Limit retries for individual uploads
+    );
+
+    const referenceFileContent = {
+      fileData: {
+        fileUri: referenceUploadResult.uri,
+        mimeType: referenceUploadResult.mimeType,
       },
-    ],
-  });
+    };
 
-  // Parse and return the JSON response from the model
-  const outputText = result.response.text();
-  return JSON.parse(outputText);
+    const mimeType = "image/jpg";
+
+    const uploadResult = await retryAsync(
+      () => uploadToGemini(filePath, mimeType),
+      Math.min(retries, 3)
+    );
+
+    const userFileContent = {
+      fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
+    };
+
+    console.log(process.env.GEMINI_API_KEY);
+
+    const docModel = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: getSystemInstruction(documentType),
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: docSchema,
+      },
+    });
+
+    const result = await retryAsync(
+      () =>
+        docModel.generateContent({
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `You are an AI document verifier specialized in ${documentType} documents. Below is a reference image showing what a valid ${documentType} should look like.`,
+                },
+                referenceFileContent,
+                {
+                  text: `Now, please verify the following uploaded ${documentType} document. Return a JSON object strictly following the schema: {verified: BOOLEAN}.`,
+                },
+                userFileContent,
+              ],
+            },
+          ],
+        }),
+      retries // Remaining retries for content generation
+    );
+
+    // if (!result.response.text()) {
+    //   console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    // }
+
+    return JSON.parse(result.response.text());
+  } catch (error) {
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    console.log(error);
+    return { verified: false };
+  }
 }
 
 /*

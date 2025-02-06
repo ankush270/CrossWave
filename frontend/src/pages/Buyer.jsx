@@ -471,8 +471,7 @@ const Buyer = () => {
           {/* Main Content with margin */}
           <main className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
             <div className="max-w-7xl mx-auto">
-              {/* <AnimatePresence mode="wait"> */}
-              <AnimatePresence mode="popLayout">
+              <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}
                   initial={{ opacity: 0, y: 20 }}

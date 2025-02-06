@@ -142,8 +142,7 @@ const Settings = () => {
         isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
       }`}
     >
-      {/* <AnimatePresence mode="wait"> */}
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="wait">
         {isDarkMode ? (
           <motion.div
             key="moon"
