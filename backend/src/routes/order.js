@@ -1,22 +1,26 @@
 import express from "express";
 import {
   createOrder,
-  getOrderById,
+  getOrderBySellerId,
   getOrdersByUserIdAndRole,
   updateOrder,
   deleteOrder,
+  getAllOrders,
+  getOrderByBuyerId,
 } from "../controllers/order.js";
-import { verifyBuyer } from "../middlewares/order.js";
+import { verifyUser } from "../middlewares/order.js";
 
 const router = express.Router();
 
-// Apply `verifyBuyer` middleware before `createOrder`
+// Apply `verifyUser` middleware before `createOrder`
 router.post("/", createOrder);
-// router.post("/", verifyBuyer, createOrder);
+// router.post("/", verifyUser, createOrder);
 
-router.get("/:orderId", getOrderById);
-router.get("/user/:userId", getOrdersByUserIdAndRole);
+router.get("/get/all-orders", getAllOrders);
+router.get("/:sellerId", getOrderBySellerId);
+router.get("/get-buyer-order/:buyerId", getOrderByBuyerId);
 router.put("/:orderId", updateOrder);
 router.delete("/:orderId", deleteOrder);
+router.get("/user/:userId", getOrdersByUserIdAndRole);
 
 export default router;

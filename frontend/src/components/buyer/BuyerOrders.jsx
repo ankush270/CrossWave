@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaSearch, FaFilter, FaSort, FaEye, FaDownload, FaPrint,
   FaShippingFast, FaBox, FaMoneyBillWave, FaExclamationTriangle,
   FaCheckCircle, FaTruck, FaClock
 } from 'react-icons/fa';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
+import { productAPI } from '../../api/api';
 
 const BuyerOrders = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,32 +15,139 @@ const BuyerOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [dateRange, setDateRange] = useState('all');
+  const [productName, setProductName] = useState([])
+  // for getting product details
+  const getProductName = async (productId) => {
+    console.log("Product ID:", productId);
+    
+    try {
+      const response = await productAPI.getProductById(productId);
+      console.log("API Response:", response);
+      if(response.data.error)return "Demo"
+      const productName = response?.data?.name || null;
+      console.log("Returning Product Name:", productName);
+      
+      return productName; 
+    } catch (e) {
+      console.error("An error occurred while fetching:", e.message);
+      return "Demo";
+    }
+  };
 
+  const fetchProductNames = async (orders) => {
+    if (!orders || orders.length === 0) return;
+  
+    try {
+      const productIds = orders.map(order => order.product_id); // Extract product IDs
+      const productNamesArray = await Promise.all(productIds.map(id => getProductName(id))); // Fetch all names in parallel
+  
+      console.log("Fetched Product Names:", productNamesArray);
+      setProductName(productNamesArray); // Store product names in state
+    } catch (error) {
+      console.error("Error fetching product names:", error);
+    }
+  };
+  
+  
+  //end.........
+  // get order by buyer id and update order status
+  const [selectedTab, setSelectedTab] = useState("all");
+  const [buyerOrders, setBuyerOrders] = useState([]);
+
+  const user = useAuth();
+
+  console.log("buyer Id:", user.user.id);
+
+  const buyerId = user.user.id;
+  
+  // Fetch Orders from Backend
+  const fetchOrders = async () => {
+    console.log("Fetching buyer orders...");
+    try {
+      const { data } = await axios.get(`http://localhost:3000/order/get-buyer-order/${buyerId}`);
+  
+      console.log("Buyer Orders:", data);
+  
+      if (data.success && Array.isArray(data.data)) {
+        setBuyerOrders(data.data);
+        fetchProductNames(data.data); // Fetch product names after setting orders
+      } else {
+        console.error("Unexpected API response:", data);
+        setBuyerOrders([]);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      setBuyerOrders([]);
+    }
+  };
+  
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  // Update Order Status
+  const updateOrderStatus = async (orderId, newStatus) => {
+    if (!newStatus) return;
+    try {
+      await axios.put(`http://localhost:3000/order/${orderId}`, { status: newStatus });
+      fetchOrders(); // Refresh orders after update
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
+  };
+
+  //end ...................
+
+  const countShippedOrders = (buyerOrders) => {
+    if (!Array.isArray(buyerOrders)) {
+      throw new Error("Invalid input: buyerOrders should be an array");
+    }
+  
+    return buyerOrders.filter(order => order.status === "SHIPPED").length;
+  };
+  const countPendingOrders = (buyerOrders) => {
+    if (!Array.isArray(buyerOrders)) {
+      throw new Error("Invalid input: buyerOrders should be an array");
+    }
+  
+    return buyerOrders.filter(order => order.status === "PENDING").length;
+  };
+  const totalValue = (buyerOrders) => {
+    if (!Array.isArray(buyerOrders)) {
+      throw new Error("Invalid input: buyerOrders should be an array");
+    }
+    let total = 0;
+    for(let i of buyerOrders){
+       total += i.price;
+    }
+    return total;
+  }
+  
   const stats = [
     {
       title: 'Total Orders',
-      value: '156',
+      value: buyerOrders.length,
       icon: <FaBox />,
       color: 'blue',
       change: '+12%'
     },
     {
       title: 'In Transit',
-      value: '23',
+      value: countShippedOrders(buyerOrders),
       icon: <FaTruck />,
       color: 'green',
       change: '+5%'
     },
     {
       title: 'Pending',
-      value: '8',
+      value: countPendingOrders(buyerOrders),
       icon: <FaClock />,
       color: 'yellow',
       change: '-2%'
     },
     {
       title: 'Total Value',
-      value: '₹8.5M',
+      value: `₹${totalValue(buyerOrders)}`,
       icon: <FaMoneyBillWave />,
       color: 'purple',
       change: '+18%'
@@ -174,7 +284,7 @@ const BuyerOrders = () => {
                 <th className="text-left py-3 px-4">Order ID</th>
                 <th className="text-left py-3 px-4">Date</th>
                 <th className="text-left py-3 px-4">Product</th>
-                <th className="text-left py-3 px-4">Supplier</th>
+             
                 <th className="text-left py-3 px-4">Quantity</th>
                 <th className="text-left py-3 px-4">Amount</th>
                 <th className="text-left py-3 px-4">Status</th>
@@ -182,7 +292,7 @@ const BuyerOrders = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {buyerOrders.map((order,index) => (
                 <motion.tr
                   key={order.id}
                   initial={{ opacity: 0 }}
@@ -191,38 +301,31 @@ const BuyerOrders = () => {
                   className="border-t border-gray-100"
                 >
                   <td className="py-3 px-4 font-medium">{order.id}</td>
-                  <td className="py-3 px-4">{order.date}</td>
-                  <td className="py-3 px-4">{order.product}</td>
-                  <td className="py-3 px-4">{order.supplier}</td>
+                  <td className="py-3 px-4">{new Date(order.created_at).toISOString().split("T")[0]}</td>
+
+                  <td className="py-3 px-4">{productName[index]}</td>
+                 
                   <td className="py-3 px-4">{order.quantity}</td>
-                  <td className="py-3 px-4">{order.amount}</td>
+                  <td className="py-3 px-4">{order.price}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
                       {order.status}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => {
-                          setSelectedOrder(order);
-                          setShowOrderDetails(true);
+                      <button
+                        onClick={async () => {
+                          await updateOrderStatus(order.id, "DELIVERED");
+                          order.status = "DELIVERED"; // Update UI optimistically
                         }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                        disabled={order.status === "DELIVERED"}
+                        className={`p-2 text-white rounded ${
+                          order.status === "DELIVERED" ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700"
+                        }`}
                       >
-                        <FaEye />
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="p-2 text-gray-600 hover:bg-gray-50 rounded-full"
-                      >
-                        <FaPrint />
-                      </motion.button>
-                    </div>
-                  </td>
+                        {order.status === "DELIVERED" ? "Delivered" : "Mark as Delivered"}
+                      </button>
+                    </td>
                 </motion.tr>
               ))}
             </tbody>

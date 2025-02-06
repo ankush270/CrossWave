@@ -276,11 +276,11 @@ const Product = () => {
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
       />
-      {/*<Chat */}
+      {/* <Chat */}
       {/*  product={product}*/}
       {/*  isOpen={showChatModal}*/}
       {/*  onClose={() => setShowChatModal(false)}*/}
-      {/*/>*/}
+      {/*/> */}
     </div>
   );
 };

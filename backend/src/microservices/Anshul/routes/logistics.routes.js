@@ -6,8 +6,6 @@ const router = Router();
 
 router.route('/create-shipment').post(logisticsAuth,createShipment)
 router.route('/cancel-shipment').put(logisticsAuth,cancelShipment)
-// router.route('/get-async-ship').post(logisticsAuth,getAsyncShipment)
-// router.route('/verify-shipment').post(logisticsAuth,verifyShipment)
 router.route('/return-shipment').post(logisticsAuth,returnShipment)
 router.route('/create-pickup').post(logisticsAuth,createPickup)
 router.route('/cancel-pickup').put(logisticsAuth,cancelPickup)

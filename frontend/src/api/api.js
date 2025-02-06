@@ -46,7 +46,12 @@ export const productAPI = {
   },
 
   getProductById:(id)=>{
-    return api.get('/product/getId/'+id);
+    try {
+      return api.get('/product/getId/'+id);
+    } catch (error) {
+      return {}
+    }
+    
   }
 }
 

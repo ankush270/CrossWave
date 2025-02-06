@@ -15,8 +15,11 @@ import {
 import { productsData } from "../data/productsData";
 import axios from "axios";
 import { productAPI } from "../api/api.js";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import { toast } from "sonner";
 
 const BuyNow = () => {
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,6 +84,14 @@ const BuyNow = () => {
     console.log(product);
 
     try {
+      // const verifyBuyer
+      console.log(user);
+      if (!user.is_kyc_done || !user.is_company_docs_done) {
+        return toast.error(
+          "Please complete KYC and upload all the documents before proceeding",
+          { duration: 5000 }
+        );
+      }
       const { data } = await axios.post(
          "http://localhost:3000/payment/create-payment",
          { amount }

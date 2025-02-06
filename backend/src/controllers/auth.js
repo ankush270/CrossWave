@@ -158,6 +158,9 @@ export const getCurrentUser = async (req, res) => {
       email: true,
       is_buyer: true,
       is_seller: true,
+      is_kyc_done: true,
+      is_personal_docs_done: true,
+      is_company_docs_done: true,
       profile: true,
     },
   });

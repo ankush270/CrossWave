@@ -4,128 +4,140 @@ const logisticsSchema = new Schema(
   {
     transactionId: {
       type: String,
-      required: true,
+      //required: true,
     },
     isCancelled: {
       type: Boolean,
       default: false,
     },
+    customerName: {
+      type: String,
+      // //required: true,
+    },
+    product: {
+      type: String,
+      // //required: true,
+    },
+    destination: {
+      type: String,
+      // //required: true,
+    },
     trackingNumber: {
       type: String,
-      required: true,
+      //required: true,
     },
     shipmentDocuments: {
       type: [String],
-      required: true,
+      //required: true,
     },
     carrierCode: {
       type: String,
-      required: true,
+      //required: true,
     },
     serviceId: {
       type: String,
-      required: true,
+      //required: true,
     },
     serviceType: {
       type: String,
-      required: true,
+      //required: true,
     },
     serviceCategory: {
       type: String,
-      required: true,
+      //required: true,
     },
     totalBillingWeight: {
       units: {
         type: String,
         enum: ["LB", "KG"],
-        required: true,
+        //required: true,
       },
       value: {
         type: Number,
-        required: true,
+        //required: true,
       },
     },
     surcharges: [
       {
         surchargeType: {
           type: String,
-          required: true,
+          //required: true,
         },
         level: {
           type: String,
-          required: true,
+          //required: true,
         },
         amount: {
           type: Number,
-          required: true,
+          //required: true,
         },
         description: {
           type: String,
-          // required: true,
+          // //required: true,
         },
       },
     ],
     totalBaseCharge: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalFreightDiscounts: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalNetFreight: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalSurcharges: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalNetFedExCharge: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalTaxes: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalNetCharge: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalRebates: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalDutiesAndTaxes: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalAncillaryFeesAndTaxes: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalDutiesTaxesAndFees: {
       type: Number,
-      required: true,
+      //required: true,
     },
     totalNetChargeWithDutiesAndTaxes: {
       type: Number,
-      required: true,
+      //required: true,
     },
     trackingIds: [
       {
         trackingIdType: {
           type: String,
-          required: true,
+          //required: true,
         },
         formId: {
           type: String,
-          required: true,
+          //required: true,
         },
         trackingNumber: {
           type: String,
-          required: true,
+          //required: true,
         },
       },
     ],
