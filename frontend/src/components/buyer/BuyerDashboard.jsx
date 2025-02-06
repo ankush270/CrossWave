@@ -32,12 +32,19 @@ const BuyerDashboard = () => {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
   // Sample data for charts
+  const sortedPurchaseVolume = [...analytics.purchaseVolume].sort((a, b) => {
+    const [monthA, yearA] = a.month.split("-").map(Number);
+    const [monthB, yearB] = b.month.split("-").map(Number);
+
+    return yearA !== yearB ? yearA - yearB : monthA - monthB;
+  });
+
   const purchaseData = {
-    labels: analytics.purchaseVolume.map((entry) => entry.month),
+    labels: sortedPurchaseVolume.map((entry) => entry.month),
     datasets: [
       {
         label: "Purchase Volume",
-        data: analytics.purchaseVolume.map((entry) => entry.quantity),
+        data: sortedPurchaseVolume.map((entry) => entry.quantity),
         borderColor: "rgb(59, 130, 246)",
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         fill: true,
@@ -45,6 +52,7 @@ const BuyerDashboard = () => {
       },
     ],
   };
+
 
   const categoryData = {
     labels: analytics.productCategories.map((entry) => entry.category),
@@ -65,28 +73,28 @@ const BuyerDashboard = () => {
   const stats = [
     {
       title: 'Active Orders',
-      value: '12',
+      value: analytics.activeOrders,
       change: '+8%',
       icon: <FaShoppingCart />,
       color: 'blue'
     },
     {
       title: 'Pending RFQs',
-      value: '8',
+      value: analytics.pendingRFCs,
       change: '+12%',
       icon: <FaBoxOpen />,
       color: 'green'
     },
     {
       title: 'In Transit',
-      value: '5',
+      value: analytics.inTransitOrders,
       change: '-3%',
       icon: <FaTruck />,
       color: 'purple'
     },
     {
       title: 'Total Spent',
-      value: '₹2.4M',
+      value: `₹${analytics.totalSpend}`,
       change: '+15%',
       icon: <FaChartLine />,
       color: 'orange'

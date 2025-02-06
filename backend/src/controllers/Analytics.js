@@ -1,6 +1,7 @@
 
 import { Product } from "../models/product.model.js";
 import prisma from "../config/prisma_db.js";
+import mongoose from "mongoose";
 
 export const getSellerAnalytics = async (req, res) => {
   try {
@@ -119,7 +120,7 @@ export const getBuyerAnalytics = async (req, res) => {
     // Total spend
     const totalSpend = await prisma.order.aggregate({
       _sum: { price: true },
-      where: { buyer_id: buyerId, status: "DELIVERED" },
+      where: { buyer_id: buyerId },
     });
 
     // Purchase volume by month (quantity)
@@ -127,6 +128,8 @@ export const getBuyerAnalytics = async (req, res) => {
       where: { buyer_id: buyerId, created_at: { gte: new Date(`${currentYear}-01-01`) } },
       select: { created_at: true, quantity: true }
     });
+
+    console.log(orders);
 
     const purchaseVolume = orders.reduce((acc, order) => {
       const month = order.created_at.toISOString().slice(0, 7);
@@ -142,10 +145,32 @@ export const getBuyerAnalytics = async (req, res) => {
       select: { product_id: true }
     });
 
+    const productIdsArray = productIds.map(p => new mongoose.Types.ObjectId(p.product_id));
+
     const productCategories = await Product.aggregate([
-      { $match: { _id: { $in: productIds.map(p => p.product_id) } } },
-      { $group: { _id: "$category", count: { $sum: 1 } } },
+      {
+        $match: {
+          _id: { $in: productIdsArray }, // Convert product_id (String) to ObjectId
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          latestProductDate: { $max: "$createdAt" } // Track latest product creation date
+        },
+      },
+      {
+        $addFields: {
+          latestProductDate: { $toDate: "$latestProductDate" } // ✅ Ensure it's a Date type
+        }
+      },
+      {
+        $sort: { latestProductDate: 1 } // ✅ Sort in ascending order (Oldest to Newest)
+      }
     ]);
+
+    console.log(productCategories);
 
     res.json({
       activeOrders,
