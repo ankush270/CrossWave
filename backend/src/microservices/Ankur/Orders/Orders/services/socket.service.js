@@ -33,13 +33,13 @@ class SocketService {
                     console.log(`Socket ${socket.id} left chat: ${chatId}`);
                     // Acknowledge leave
                     socket.emit('left_chat', chatId);
-        } catch (error) {
+                } catch (error) {
                     console.error('Error leaving chat:', error);
                 }
             });
 
-            socket.on('disconnect', (reason) => {
-                console.log('Client disconnected:', socket.id, 'Reason:', reason);
+            socket.on('disconnect', () => {
+                console.log('Client disconnected:', socket.id);
             });
         });
 
@@ -56,6 +56,33 @@ class SocketService {
             this.io.to(chatId).emit('chat_updated', updatedChat);
         } catch (error) {
             console.error('Error emitting chat update:', error);
+        }
+    }
+
+    emitNewChat(chat) {
+        if (this.io) {
+            this.io.emit('new-chat', chat);
+            console.log('Emitted new chat:', chat._id);
+        } else {
+            console.warn('Socket.io not initialized');
+        }
+    }
+
+    emitNegotiation(chat) {
+        if (this.io) {
+            this.io.emit(`chat-${chat._id}-negotiation`, chat);
+        }
+    }
+
+    emitDealAccepted(chat) {
+        if (this.io) {
+            this.io.emit(`chat-${chat._id}-accepted`, chat);
+        }
+    }
+
+    emitDealRejected(chat) {
+        if (this.io) {
+            this.io.emit(`chat-${chat._id}-rejected`, chat);
         }
     }
 }

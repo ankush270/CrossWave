@@ -5,7 +5,7 @@ const pickupSchema = new Schema({
     type: Date,
     required: true,
   },
-  location: {
+  country: {
     type: String,
     required: true,
   },
@@ -13,6 +13,10 @@ const pickupSchema = new Schema({
     type: String,
     required: true,
   },
+  seller_id:{
+    type: String,
+    // required: true,
+  }
 });
 
 export const Pickup = mongoose.model("Pickup", pickupSchema);

@@ -2,141 +2,274 @@ import axios from "axios";
 import { Logistics } from "../models/logistics.model.js";
 import { Pickup } from "../models/pickup.model.js";
 
+// Add these mappings at the top of the file
+const countryMapping = {
+  'India': 'IN',
+  'United Arab Emirates': 'AE',
+  'United States': 'US',
+  'China': 'CN',
+  'Japan': 'JP',
+  'United Kingdom': 'GB',
+  // Common variations
+  'in': 'IN',
+  'ind': 'IN',
+  'ae': 'AE',
+  'uae': 'AE',
+  'us': 'US',
+  'usa': 'US',
+  'uk': 'GB',
+  'cn': 'CN',
+  'jp': 'JP',
+  // Already in code format
+  'IN': 'IN',
+  'AE': 'AE',
+  'US': 'US',
+  'GB': 'GB',
+  'CN': 'CN',
+  'JP': 'JP'
+};
+
+const indianStatesMapping = {
+  // Full names to codes
+  'Andhra Pradesh': 'AP',
+  'Arunachal Pradesh': 'AR',
+  'Assam': 'AS',
+  'Bihar': 'BR',
+  'Chhattisgarh': 'CG',
+  'Goa': 'GA',
+  'Gujarat': 'GJ',
+  'Haryana': 'HR',
+  'Himachal Pradesh': 'HP',
+  'Jharkhand': 'JH',
+  'Karnataka': 'KA',
+  'Kerala': 'KL',
+  'Madhya Pradesh': 'MP',
+  'Maharashtra': 'MH',
+  'Manipur': 'MN',
+  'Meghalaya': 'ML',
+  'Mizoram': 'MZ',
+  'Nagaland': 'NL',
+  'Odisha': 'OD',
+  'Punjab': 'PB',
+  'Rajasthan': 'RJ',
+  'Sikkim': 'SK',
+  'Tamil Nadu': 'TN',
+  'Telangana': 'TS',
+  'Tripura': 'TR',
+  'Uttar Pradesh': 'UP',
+  'Uttarakhand': 'UK',
+  'West Bengal': 'WB',
+  // Union Territories
+  'Andaman and Nicobar Islands': 'AN',
+  'Chandigarh': 'CH',
+  'Dadra and Nagar Haveli and Daman and Diu': 'DH',
+  'Delhi': 'DL',
+  'Jammu and Kashmir': 'JK',
+  'Ladakh': 'LA',
+  'Lakshadweep': 'LD',
+  'Puducherry': 'PY',
+  // Common variations
+  'AP': 'AP',
+  'AR': 'AR',
+  'AS': 'AS',
+  'BR': 'BR',
+  'CG': 'CG',
+  'GA': 'GA',
+  'GJ': 'GJ',
+  'HR': 'HR',
+  'HP': 'HP',
+  'JH': 'JH',
+  'KA': 'KA',
+  'KL': 'KL',
+  'MP': 'MP',
+  'MH': 'MH',
+  'MN': 'MN',
+  'ML': 'ML',
+  'MZ': 'MZ',
+  'NL': 'NL',
+  'OD': 'OD',
+  'PB': 'PB',
+  'RJ': 'RJ',
+  'SK': 'SK',
+  'TN': 'TN',
+  'TS': 'TS',
+  'TR': 'TR',
+  'UP': 'UP',
+  'UK': 'UK',
+  'WB': 'WB'
+};
+
+const uaeStatesMapping = {
+  // Emirates
+  'Abu Dhabi': 'AZ',
+  'Ajman': 'AJ',
+  'Dubai': 'DU',
+  'Fujairah': 'FU',
+  'Ras Al Khaimah': 'RK',
+  'Sharjah': 'SH',
+  'Umm Al Quwain': 'UQ',
+  // Common variations
+  'AZ': 'AZ',
+  'AJ': 'AJ',
+  'DU': 'DU',
+  'FU': 'FU',
+  'RK': 'RK',
+  'SH': 'SH',
+  'UQ': 'UQ',
+  // Alternative names
+  'Abu Zaby': 'AZ',
+  'Dubayy': 'DU',
+  'Al Fujayrah': 'FU',
+  'Ras al Khaymah': 'RK',
+  'Ash Shariqah': 'SH',
+  'Umm al Qaywayn': 'UQ'
+};
+
 export const createShipment = async (req, res, next) => {
-  console.log("shipment.data.transactionId");
   try {
     const { body } = req;
-    console.log(JSON.stringify(req.body, null, 2));
+    console.log("Original Request body:", JSON.stringify(body, null, 2));
 
-    // console.log(body.requestedShipment.recipients);
+    // Create a deep copy of the request body
+    let modifiedBody = JSON.parse(JSON.stringify(body));
+
+    // Update recipient's state code and address
+    modifiedBody.requestedShipment.recipients = modifiedBody.requestedShipment.recipients.map(recipient => {
+      const stateOrProvince = recipient.address.stateOrProvinceCode;
+      let stateCode;
+
+      if (recipient.address.countryCode === 'IN') {
+        stateCode = indianStatesMapping[stateOrProvince] || stateOrProvince;
+      }else {
+        stateCode = uaeStatesMapping[stateOrProvince] || stateOrProvince;
+      }
+
+      return {
+        ...recipient,
+        address: {
+          ...recipient.address,
+          stateOrProvinceCode: stateCode.toUpperCase()
+        }
+        };
+    });
+
+    // Update both recipient's address and commodity country codes
+    modifiedBody.requestedShipment.customsClearanceDetail.commodities = 
+      modifiedBody.requestedShipment.customsClearanceDetail.commodities.map(commodity => {
+        const countryName = commodity.countryOfManufacture;
+        const countryCode = countryMapping[countryName] || countryName;
+        
+        return {
+          ...commodity,
+          countryOfManufacture: countryCode.toUpperCase()
+        };
+    });
+
+    console.log("Modified Request body:", JSON.stringify(modifiedBody, null, 2));
 
     const accessToken = req.shipmentAuthToken;
     if (!accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    // console.log("Authorized");
 
-    const shipment = await axios.post(
-      // "https://developer.fedex.com/api/en-us/catalog/ship/v1/ship/v1/shipments",
-      "https://apis-sandbox.fedex.com/ship/v1/shipments",
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-          "x-locale": "en_US",
-          "x-xustomer-transaction-id": "624deea6-b709-470c-8c39-4b5511281492",
-        },
-      }
-    );
-    // console.log(shipment);
+    let shipment;
+    try {
+      shipment = await axios.post(
+        "https://apis-sandbox.fedex.com/ship/v1/shipments",
+        modifiedBody,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (axiosError) {
+      console.error("FedEx API Error:", {
+        status: axiosError.response?.status,
+        data: axiosError.response?.data?.errors,
+      });
+      return res.status(axiosError.response?.status || 500).json({
+        success: false,
+        message: "Failed to create shipment with FedEx",
+        error: axiosError.response?.data || axiosError.message
+      });
+    }
 
-    // const shipment = null;
     const data = shipment?.data?.output?.transactionShipments[0];
     if (!data) {
-      throw new Error("Failed to create shipment");
+      console.error("Invalid response from FedEx:", shipment?.data);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid response from FedEx API"
+      });
     }
-    // // console.log(data);
-
+    console.log(req.params);
+    
     const newShipment = new Logistics({
-      seller_id: req.body.seller_id,
-      /**customerName: {
-      type: String,
-      // required: true,
-    },
-    product: {
-      type: String,
-      // required: true,
-    },
-    destination: {
-      type: String,
-      // required: true,
-    }, */
+      seller_id: req.params.id,
       customerName: body.requestedShipment.recipients[0].contact.personName,
-      // product:
-      // body.requestedShipment.customsClearanceDetail.commodities.name || "N/A",
       destination: body.requestedShipment.recipients[0].address.city,
       transactionId: shipment.data.transactionId,
-
       trackingNumber: data.masterTrackingNumber,
-
       carrierCode: data?.completedShipmentDetail?.carrierCode,
-
       serviceId: data.completedShipmentDetail?.serviceDescription?.serviceId,
-
       serviceType: data.serviceType,
-
       serviceCategory: data.serviceCategory,
-
       totalBillingWeight:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalBillingWeight,
-
       surcharges:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.surcharges,
-
       totalBaseCharge:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalBaseCharge,
-
       totalNetCharge:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalNetCharge,
-
       totalFreightDiscounts:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalFreightDiscounts,
-
       totalNetFreight:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalNetFreight,
-
       totalSurcharges:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalSurcharges,
-
       totalNetFedExCharge:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalNetFedExCharge,
-
       totalTaxes:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalTaxes,
-
       totalRebates:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalRebates,
-
       totalDutiesAndTaxes:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalDutiesAndTaxes,
-
       totalAncillaryFeesAndTaxes:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalAncillaryFeesAndTaxes,
-
       totalDutiesTaxesAndFees:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalDutiesTaxesAndFees,
-
       totalNetChargeWithDutiesAndTaxes:
         data.completedShipmentDetail?.shipmentRating?.shipmentRateDetails[0]
           ?.totalNetChargeWithDutiesAndTaxes,
-
       trackingIds:
         data.completedShipmentDetail?.completedPackageDetails[0]?.trackingIds,
     });
 
-    const result = await newShipment.save();
+    await newShipment.save();
 
     res.status(201).json({
       success: true,
-      result: "result",
+      result: newShipment
     });
   } catch (error) {
-    // console.log(error);
-
+    console.error("Server Error:", error);
     next(error);
   }
 };
@@ -160,7 +293,7 @@ export const getShipments = async (req, res) => {
       data: shipments,
     });
   } catch {
-    console.error("Error validating access token:", error);
+    // console.error("Error validating access token:", error);
     res.status(500).json({
       success: false,
       message: "Failed to validate access token",
@@ -310,30 +443,71 @@ export const returnShipment = async (req, res) => {
 };
 
 export const createPickup = async (req, res) => {
-  const accessToken = req.shipmentAuthToken;
-  if (!accessToken) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const { body } = req;
-  console.log(body);
-
   try {
-    const pickup = await axios.post(
-      "https://apis-sandbox.fedex.com/pickup/v1/pickups",
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const accessToken = req.shipmentAuthToken;
+    if (!accessToken) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    const newPickup = await new Pickup({
+    const { body } = req;
+    console.log("Original Pickup Request Body:", JSON.stringify(body, null, 2));
+
+    // Create a deep copy of the request body
+    let modifiedBody = JSON.parse(JSON.stringify(body));
+
+    // Update pickup location's state code based on country
+    const countryCode = modifiedBody.originDetail.pickupLocation.address.countryCode;
+    const stateOrProvince = modifiedBody.originDetail.pickupLocation.address.stateOrProvinceCode;
+    
+    let stateCode;
+    if (countryCode === 'IN') {
+      stateCode = indianStatesMapping[stateOrProvince] || 'MP'; // Default to MP for Madhya Pradesh
+    } else if (countryCode === 'AE') {
+      stateCode = uaeStatesMapping[stateOrProvince] || stateOrProvince;
+    }
+
+    // Update the state code in the request body
+    modifiedBody.originDetail.pickupLocation.address.stateOrProvinceCode = stateCode.toUpperCase();
+
+    console.log("Modified Pickup Request Body:", JSON.stringify(modifiedBody, null, 2));
+
+    let pickup;
+    try {
+      pickup = await axios.post(
+        "https://apis-sandbox.fedex.com/pickup/v1/pickups",
+        modifiedBody,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (axiosError) {
+      console.error("FedEx Pickup API Error:", {
+        status: axiosError.response?.status,
+        data: axiosError.response?.data?.errors,
+      });
+      return res.status(axiosError.response?.status || 500).json({
+        success: false,
+        message: "Failed to create pickup with FedEx",
+        error: axiosError.response?.data || axiosError.message
+      });
+    }
+
+    if (!pickup.data?.output?.pickupConfirmationCode) {
+      console.error("Invalid pickup response from FedEx:", pickup?.data);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid response from FedEx Pickup API"
+      });
+    }
+
+    const newPickup = new Pickup({
       confirmationCode: pickup.data.output.pickupConfirmationCode,
-      location: pickup.data.output.location,
+      country: pickup.data.output.location,
       pickup_date: body.originDetail.readyDateTimestamp.split("T")[0],
+      seller_id:req.params.id
     });
 
     await newPickup.save();
@@ -343,7 +517,12 @@ export const createPickup = async (req, res) => {
       data: pickup.data.output,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Server Error in createPickup:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while creating pickup",
+      error: error.message
+    });
   }
 };
 
@@ -353,6 +532,9 @@ export const cancelPickup = async (req, res) => {
     if (!accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+
+    console.log("Anshul");
+    
 
     const { pickupConfirmationCode, location, scheduledDate } = req.body;
     const { body } = req;
@@ -365,8 +547,8 @@ export const cancelPickup = async (req, res) => {
     // Find the pickup in database
     const result = await Pickup.findOne({
       confirmationCode: pickupConfirmationCode,
-      location: location,
-      scheduledDate: scheduledDate,
+      country: location,
+      pickup_date: scheduledDate,
     });
 
     if (!result) {
@@ -385,6 +567,8 @@ export const cancelPickup = async (req, res) => {
       }
     );
 
+    console.log(result._id);
+    
     // Delete the pickup from database after successful cancellation
     await Pickup.findByIdAndDelete(result._id);
 
