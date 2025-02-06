@@ -37,10 +37,10 @@ const SellerLogistics = () => {
         },
         address: {
           streetLines: ["nkl"],
-          city: "ghj",
-          stateOrProvinceCode: "yb",
-          postalCode: "45678",
-          countryCode: "xa",
+          city: "Memphis",
+          stateOrProvinceCode: "TN",
+          postalCode: "38116",
+          countryCode: "US",
         },
       },
       recipients: [
@@ -54,7 +54,7 @@ const SellerLogistics = () => {
             city: "",
             stateOrProvinceCode: "",
             postalCode: "",
-            countryCode: "ax",
+            countryCode: "IN",
           },
         },
       ],
@@ -119,7 +119,7 @@ const SellerLogistics = () => {
 
   const [pickupFormData, setPickupFormData] = useState({
     associatedAccountNumber: {
-      value: "XXX561073",
+      value: "740561073",
     },
     originDetail: {
       pickupLocation: {
@@ -132,7 +132,7 @@ const SellerLogistics = () => {
           city: "",
           stateOrProvinceCode: "",
           postalCode: "",
-          countryCode: "US",
+          countryCode: "IN",
         },
       },
       readyDateTimestamp: new Date().toISOString(),
@@ -143,7 +143,7 @@ const SellerLogistics = () => {
 
   const [cancelPickupFormData, setCancelPickupFormData] = useState({
     associatedAccountNumber: {
-      value: "XXX561073",
+      value: "740561073",
     },
     pickupConfirmationCode: "",
     carrierCode: "FDXE",
@@ -227,6 +227,8 @@ const SellerLogistics = () => {
     trackingNumber: "",
   });
 
+  console.log(pickupFormData);
+
   const logisticsStats = [
     {
       title: "Active Shipments",
@@ -261,10 +263,10 @@ const SellerLogistics = () => {
 
   useEffect(() => {
     // Fetch shipments
-    console.log("User ID: ", user.id);
+    console.log("User ID: ", user?.id);
 
     axios
-      .get(`http://localhost:3000/logistics/shipments/${user.id}`)
+      .get(`http://localhost:3000/logistics/shipments/${user?.id}`)
       .then((response) => {
         setShipments(response.data);
         console.log(shipments);
@@ -287,11 +289,13 @@ const SellerLogistics = () => {
     e.preventDefault();
     // Add your logic to submit pickup form
     console.log(pickupFormData);
-    pickupFormData.seller_id = user.id;
     const toastId = toast.loading("Creating Pickup...", { duration: Infinity });
 
     axios
-      .post("http://localhost:3000/logistics/create-pickup", pickupFormData)
+      .post(
+        `http://localhost:3000/logistics/create-pickup/${user?.id}`,
+        pickupFormData
+      )
       .then((response) => {
         console.log(response);
         // Show success message or redirect to tracking page
@@ -301,7 +305,7 @@ const SellerLogistics = () => {
         // Reset form data
         setPickupFormData({
           associatedAccountNumber: {
-            value: "XXX561073",
+            value: "740561073",
           },
           originDetail: {
             pickupLocation: {
@@ -314,7 +318,7 @@ const SellerLogistics = () => {
                 city: "",
                 stateOrProvinceCode: "",
                 postalCode: "",
-                countryCode: "US",
+                countryCode: "IN",
               },
             },
             readyDateTimestamp: new Date().toISOString(),
@@ -379,7 +383,7 @@ const SellerLogistics = () => {
     });
     try {
       const response = await axios.post(
-        "http://localhost:3000/logistics/create-shipment",
+        `http://localhost:3000/logistics/create-shipment/${user?.id}`,
         formData
       );
       toast.success("Shipment Created!!", { id: toastId, duration: 3000 });
@@ -390,15 +394,15 @@ const SellerLogistics = () => {
         requestedShipment: {
           shipper: {
             contact: {
-              personName: "",
-              phoneNumber: "",
+              personName: "ash",
+              phoneNumber: "1122334455",
             },
             address: {
-              streetLines: [""],
-              city: "",
-              stateOrProvinceCode: "",
-              postalCode: "",
-              countryCode: "",
+              streetLines: ["nkl"],
+              city: "Memphis",
+              stateOrProvinceCode: "TN",
+              postalCode: "38116",
+              countryCode: "US",
             },
           },
           recipients: [
@@ -412,7 +416,7 @@ const SellerLogistics = () => {
                 city: "",
                 stateOrProvinceCode: "",
                 postalCode: "",
-                countryCode: "",
+                countryCode: "IN",
               },
             },
           ],
@@ -1425,12 +1429,12 @@ const SellerLogistics = () => {
         // Reset form
         setCancelPickupFormData({
           associatedAccountNumber: {
-            value: "XXX561073",
+            value: "740561073",
           },
           pickupConfirmationCode: "",
           carrierCode: "FDXE",
           scheduledDate: new Date().toISOString().split("T")[0],
-          location: "NQAA",
+          location: "",
         });
       })
       .catch((error) => {
@@ -1611,7 +1615,7 @@ const SellerLogistics = () => {
             className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center`}
             onClick={() => setShowCancelPickupModal(true)}
           >
-            Cancel an exising pickup
+            Cancel an existing pickup
           </motion.div>
           {/* <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}

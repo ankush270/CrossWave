@@ -18,6 +18,7 @@ import Products from "./pages/Products";
 import ErrorBoundary from "./components/ErrorBoundary";
 import BuyNow from "./pages/BuyNow";
 import {AuthProvider, useAuth} from "./contexts/AuthContext.jsx";
+
 import Kyc from "./components/kyc/Kyc";
 import PayNow from "./pages/PayNow.jsx";
 import PaymentSuccess from "./pages/PaymentSuccess.jsx";
@@ -45,64 +46,65 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 };
 
 
+
 const App = () => {
   // Routes where Navbar and Footer should be hidden
   const hiddenNavbarRoutes = [
     "/login",
     "/signup",
-    "/buyer/*",
-    "/seller/*",
-    "/products",
+    // "/buyer/*",
+    // "/seller/*",
+    // "/products",
     "/buyer/payments",
     "/logistics",
     "/feedback",
     "/settings",
     "/help",
     "/admin",
-    "/kyc",
+    // "/kyc",
     "/pay-now",
     "/paymet-success",
     "/paymet-failure",
-    "/product/:id"
+    "/product/:id",
   ];
 
   return (
     <Router>
       <AuthProvider>
-      <div className="min-h-screen flex flex-col">
-        <Toaster position="top-right" richColors closeButton/>
-        {/* Navbar will show on all pages except specified routes */}
-        <Routes>
-          {hiddenNavbarRoutes.map((path) => (
-            <Route key={path} path={path} element={null} />
-          ))}
-          <Route path="*" element={<Navbar />} />
-        </Routes>
-
-        {/* Main Content */}
-        <main className="flex-grow">
+        <div className="min-h-screen flex flex-col">
+          <Toaster position="top-right" richColors closeButton />
+          {/* Navbar will show on all pages except specified routes */}
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/kyc" element={<Kyc />} />
-            <Route
-              path="/product/:id"
-              element={
-                <ErrorBoundary>
-                  <Product />
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <ErrorBoundary>
-                  <Products />
-                </ErrorBoundary>
-              }
-            />
+            {hiddenNavbarRoutes.map((path) => (
+              <Route key={path} path={path} element={null} />
+            ))}
+            <Route path="*" element={<Navbar />} />
+          </Routes>
+
+          {/* Main Content */}
+          <main className="flex-grow">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/kyc" element={<Kyc />} />
+              <Route
+                path="/product/:id"
+                element={
+                  <ErrorBoundary>
+                    <Product />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/products"
+                element={
+                  <ErrorBoundary>
+                    <Products />
+                  </ErrorBoundary>
+                }
+              />
 
             {/* Buyer Routes */}
             <Route path="/buyer/dashboard" element={<ProtectedRoute requiredRole={"buyer"}><Buyer /></ProtectedRoute>} />
@@ -110,51 +112,55 @@ const App = () => {
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<ProtectedRoute requiredRole={"seller"}><Seller /></ProtectedRoute>} />
             {/* <Route path="/seller/products" element={<SellerProducts />} />
+
             <Route path="/seller/payments" element={<Payments />} />
             <Route path="/seller/logistics" element={<SellerLogistics />} />
             <Route path="/seller/analytics" element={<SellerAnalytics />} />
             <Route path="/seller/compliance" element={<ComplianceManager />} />
             
              */}
-             {/* <Route path="/seller/profile" element={<SellerProfile />} /> */}
-            {/* Shared Routes */}
-            {/* <Route path="/logistics" element={<Logistics />} /> */}
-            <Route path="/feedback" element={<FeedbackForm />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/pay-now" element={<PayNow/>}></Route>
-            <Route path="/payment-success" element={<PaymentSuccess/>}></Route>
-            <Route path="/pay-failure" element={<PaymentFailure/>}></Route>
+              {/* <Route path="/seller/profile" element={<SellerProfile />} /> */}
+              {/* Shared Routes */}
+              {/* <Route path="/logistics" element={<Logistics />} /> */}
+              <Route path="/feedback" element={<FeedbackForm />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/pay-now" element={<PayNow />}></Route>
+              <Route
+                path="/payment-success"
+                element={<PaymentSuccess />}
+              ></Route>
+              <Route path="/pay-failure" element={<PaymentFailure />}></Route>
 
-            {/* Add Help Center Route */}
-            <Route path="/help" element={<HelpCenter />} />
+              {/* Add Help Center Route */}
+              <Route path="/help" element={<HelpCenter />} />
 
-            {/* Admin Route */}
-            <Route path="/admin" element={<AdminPanel />} />
+              {/* Admin Route */}
+              <Route path="/admin" element={<AdminPanel />} />
 
-            {/* Error Pages */}
-            <Route path="/access-denied" element={<AccessDenied />} />
-            <Route
-              path="/product/:id/buy"
-              element={
-                <ErrorBoundary>
-                  <BuyNow />
-                </ErrorBoundary>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
+              {/* Error Pages */}
+              <Route path="/access-denied" element={<AccessDenied />} />
+              <Route
+                path="/product/:id/buy"
+                element={
+                  <ErrorBoundary>
+                    <BuyNow />
+                  </ErrorBoundary>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
 
-            {/* Add more routes here */}
+              {/* Add more routes here */}
+            </Routes>
+          </main>
+
+          {/* Footer will show on all pages except specified routes */}
+          <Routes>
+            {hiddenNavbarRoutes.map((path) => (
+              <Route key={path} path={path} element={null} />
+            ))}
+            {/* <Route path="*" element={<Footer />} /> */}
           </Routes>
-        </main>
-
-        {/* Footer will show on all pages except specified routes */}
-        <Routes>
-          {hiddenNavbarRoutes.map((path) => (
-            <Route key={path} path={path} element={null} />
-          ))}
-          <Route path="*" element={<Footer />} />
-        </Routes>
-      </div>
+        </div>
       </AuthProvider>
     </Router>
   );

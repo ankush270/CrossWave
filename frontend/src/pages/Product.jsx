@@ -11,6 +11,7 @@ import RequestQuote from '../components/RequestQuote';
 import Chat from '../components/Chat';
 import {productAPI} from "../api/api.js";
 import PriceBreakdown from "../components/product/PriceBreakdown.jsx";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 const Product = () => {
   const { id } = useParams();
@@ -23,8 +24,9 @@ const Product = () => {
   const [showChatModal, setShowChatModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  console.log(JSON.stringify(product))
 
+  console.log(JSON.stringify(product));
+  const currentUser = useAuth().user;
   useEffect(() => {
     const fetchCurrentProduct = async () => {
       try{
@@ -56,6 +58,7 @@ const Product = () => {
     const unitPrice = parseFloat(basePrice.replace(/[^0-9.]/g, ''));
     const subtotal = unitPrice * quantity;
     
+
     return {
       unitPrice: unitPrice,
       subtotal: subtotal,
@@ -271,11 +274,24 @@ const Product = () => {
       </div>
 
       {/* Modals */}
-      <RequestQuote 
+
+      <RequestQuote
+        product={{
+          _id: product._id,
+          name: product.name,
+          sellerId: product.seller_id,
+          moq: product.moq,
+          image: product.image || product.images?.[0],
+        }}
+        isOpen={showQuoteModal}
+        onClose={() => setShowQuoteModal(false)}
+        currentUser={currentUser}
+      />
+      {/* <RequestQuote
         product={product}
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
-      />
+      /> */}
       {/* <Chat */}
       {/*  product={product}*/}
       {/*  isOpen={showChatModal}*/}

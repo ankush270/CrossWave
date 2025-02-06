@@ -56,6 +56,7 @@ import NotificationsPanel from '../components/ui/NotificationsPanel'
 import FloatingActions from '../components/ui/FloatingActions'
 import {useAuth} from "../contexts/AuthContext.jsx";
 import EKYC from "./EKYC";
+import SellerRFQList from "../components/seller/SellerRFQList";
 
 // Register ChartJS components
 ChartJS.register(
@@ -129,6 +130,13 @@ const Seller = () => {
       title: "Analytics",
       icon: <FaChartLine />,
       component: SellerAnalytics,
+    },
+    {
+      id: "negotiations",
+      title: "Negotiations",
+      icon: <FaHandshake />,
+      component: SellerRFQList,
+      badge: "1",
     },
     {
       id: "messages",
@@ -319,7 +327,7 @@ const Seller = () => {
                   : "border-white/30 bg-white/10"
               }`}
             >
-              <motion.h1
+              {/* <motion.h1
                 className={`text-2xl font-bold ${
                   isDarkMode
                     ? "bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
@@ -328,7 +336,7 @@ const Seller = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 CrossWave
-              </motion.h1>
+              </motion.h1> */}
             </div>
 
             {/* Profile Quick View */}

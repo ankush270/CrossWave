@@ -53,7 +53,7 @@ const chatSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected'],
+        enum: ['active', 'accepted', 'rejected'],
         default: 'active'
     },
     negotiations: [negotiationSchema],
