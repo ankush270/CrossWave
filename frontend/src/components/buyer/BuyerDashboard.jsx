@@ -1,68 +1,100 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaShoppingCart, FaBoxOpen, FaTruck, FaChartLine,
   FaCalendarAlt, FaGlobe, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
 import { Line, Doughnut } from 'react-chartjs-2';
+import {analyticsAPI} from "../../api/api.js";
 
 const BuyerDashboard = () => {
+  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+    const fetchBuyerAnalytics = async () => {
+      setLoading(true); // Show loading while fetching new data
+      try {
+        const { data } = await analyticsAPI.getBuyerAnalytics();
+        console.log(data);
+        setAnalytics(data);
+      } catch (e) {
+        console.log("An error occurred: ", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBuyerAnalytics();
+  }, []);
+
+  if (loading || !analytics) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
   // Sample data for charts
+  const sortedPurchaseVolume = [...analytics.purchaseVolume].sort((a, b) => {
+    const [monthA, yearA] = a.month.split("-").map(Number);
+    const [monthB, yearB] = b.month.split("-").map(Number);
+
+    return yearA !== yearB ? yearA - yearB : monthA - monthB;
+  });
+
   const purchaseData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: sortedPurchaseVolume.map((entry) => entry.month),
     datasets: [
       {
-        label: 'Purchase Volume',
-        data: [65, 59, 80, 81, 56, 95],
+        label: "Purchase Volume",
+        data: sortedPurchaseVolume.map((entry) => entry.quantity),
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
         fill: true,
-        borderColor: 'rgb(59, 130, 246)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4
-      }
-    ]
+        tension: 0.4,
+      },
+    ],
   };
 
+
   const categoryData = {
-    labels: ['Semiconductors', 'PCB Components', 'Display Units', 'Power Supplies', 'Others'],
+    labels: analytics.productCategories.map((entry) => entry.category),
     datasets: [
       {
-        data: [35, 25, 20, 15, 5],
+        data: analytics.productCategories.map((entry) => entry.count),
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(168, 85, 247, 0.8)',
-          'rgba(249, 115, 22, 0.8)',
-          'rgba(107, 114, 128, 0.8)'
-        ]
-      }
-    ]
+          "rgba(59, 130, 246, 0.8)",
+          "rgba(34, 197, 94, 0.8)",
+          "rgba(168, 85, 247, 0.8)",
+          "rgba(249, 115, 22, 0.8)",
+          "rgba(107, 114, 128, 0.8)"
+        ],
+      },
+    ],
   };
 
   const stats = [
     {
       title: 'Active Orders',
-      value: '12',
+      value: analytics.activeOrders,
       change: '+8%',
       icon: <FaShoppingCart />,
       color: 'blue'
     },
     {
       title: 'Pending RFQs',
-      value: '8',
+      value: analytics.pendingRFCs,
       change: '+12%',
       icon: <FaBoxOpen />,
       color: 'green'
     },
     {
       title: 'In Transit',
-      value: '5',
+      value: analytics.inTransitOrders,
       change: '-3%',
       icon: <FaTruck />,
       color: 'purple'
     },
     {
       title: 'Total Spent',
-      value: '₹2.4M',
+      value: `₹${analytics.totalSpend}`,
       change: '+15%',
       icon: <FaChartLine />,
       color: 'orange'

@@ -1,6 +1,7 @@
 
 import { Product } from "../models/product.model.js";
 import prisma from "../config/prisma_db.js";
+import mongoose from "mongoose";
 
 // Get seller analytics
 export const getSellerAnalytics =  async (req, res) => {
@@ -32,7 +33,7 @@ export const getSellerAnalytics =  async (req, res) => {
     // Fetch total revenue from delivered orders
     const totalRevenue = await prisma.order.aggregate({
       _sum: { price: true },
-      where: { seller_id: sellerId, status: "DELIVERED" },
+      where: { seller_id: sellerId },
     });
 
     // Fetch active shipments (Processing or Shipped)
@@ -41,9 +42,9 @@ export const getSellerAnalytics =  async (req, res) => {
       where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
     });
 
-    // Fetch orders per day for the selected period
+    // Fetch orders per day along with revenue
     const rawOrdersPerDay = await prisma.$queryRaw`
-      SELECT DATE(created_at) as date, COUNT(id) as count 
+      SELECT DATE(created_at) as date, COUNT(id) as count, SUM(price) as revenue
       FROM "orders"
       WHERE seller_id = ${sellerId} AND created_at >= ${startDate}
       GROUP BY date
@@ -53,7 +54,12 @@ export const getSellerAnalytics =  async (req, res) => {
     console.log("🔍 Raw Orders Per Day Query Result:", rawOrdersPerDay);
 
     // Convert query result into a map for fast lookup
-    const ordersMap = new Map(rawOrdersPerDay.map(order => [order.date.toISOString().split("T")[0], order.count]));
+    const ordersMap = new Map(
+       rawOrdersPerDay.map(order => [
+         order.date.toISOString().split("T")[0],
+         { count: order.count, revenue: order.revenue || 0 },
+       ])
+    );
 
     // Generate all days dynamically
     const ordersPerDay = [];
@@ -62,7 +68,12 @@ export const getSellerAnalytics =  async (req, res) => {
       date.setDate(startDate.getDate() + i);
       const dateString = date.toISOString().split("T")[0];
 
-      ordersPerDay.push({ date: dateString, count: Number(ordersMap.get(dateString) || 0) });
+      const dayData = ordersMap.get(dateString) || { count: 0, revenue: 0 };
+      ordersPerDay.push({
+        date: dateString,
+        count: Number(dayData.count),
+        revenue: Number(dayData.revenue),
+      });
     }
 
     console.log("📊 Final Orders Per Day:", ordersPerDay);
@@ -89,10 +100,7 @@ export const getSellerAnalytics =  async (req, res) => {
 };
 
 
-
-
-
-
+// Backend: Modify getBuyerAnalytics API
 export const getBuyerAnalytics = async (req, res) => {
   try {
     const buyerId = req.id;
@@ -103,20 +111,21 @@ export const getBuyerAnalytics = async (req, res) => {
       where: { buyer_id: buyerId, status: "PROCESSING" }
     });
 
-    // ✅ Pending RFCs (Fix status to match enum)
+    // Pending RFCs
     const pendingRFCs = await prisma.order.count({
+      where: { buyer_id: buyerId, status: "PENDING" }
       where: { buyer_id: buyerId, status: "PENDING" }
     });
 
-    // ✅ In-transit orders (shipped but not delivered)
+    // ✅ In-transit orders
     const inTransitOrders = await prisma.order.count({
       where: { buyer_id: buyerId, status: "SHIPPED" }
     });
 
-    // ✅ Total spend (sum of prices of all completed orders)
+    // Total spend
     const totalSpend = await prisma.order.aggregate({
       _sum: { price: true },
-      where: { buyer_id: buyerId, status: "DELIVERED" },
+      where: { buyer_id: buyerId },
     });
 
     // ✅ Purchase volume by month (Fix Prisma `groupBy` issue with raw SQL)
@@ -129,30 +138,66 @@ export const getBuyerAnalytics = async (req, res) => {
     `;
 
     // ✅ Fetch product categories correctly
+    // Purchase volume by month (quantity)
+    const orders = await prisma.order.findMany({
+      where: { buyer_id: buyerId, created_at: { gte: new Date(`${currentYear}-01-01`) } },
+      select: { created_at: true, quantity: true }
+    });
+
+    console.log(orders);
+
+    const purchaseVolume = orders.reduce((acc, order) => {
+      const month = order.created_at.toISOString().slice(0, 7);
+      acc[month] = (acc[month] || 0) + order.quantity;
+      return acc;
+    }, {});
+
+    const purchaseVolumeData = Object.entries(purchaseVolume).map(([month, quantity]) => ({ month, quantity }));
+
+    // Bought categories
     const productIds = await prisma.order.findMany({
       where: { buyer_id: buyerId },
       select: { product_id: true }
     });
 
+    const productIdsArray = productIds.map(p => new mongoose.Types.ObjectId(p.product_id));
+
     const productCategories = await Product.aggregate([
-      { $match: { _id: { $in: productIds.map(p => new ObjectId(p.product_id)) } } }, // ✅ Convert IDs to ObjectId
-      { $group: { _id: "$category", count: { $sum: 1 } } },
+      {
+        $match: {
+          _id: { $in: productIdsArray }, // Convert product_id (String) to ObjectId
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          latestProductDate: { $max: "$createdAt" } // Track latest product creation date
+        },
+      },
+      {
+        $addFields: {
+          latestProductDate: { $toDate: "$latestProductDate" } // ✅ Ensure it's a Date type
+        }
+      },
+      {
+        $sort: { latestProductDate: 1 } // ✅ Sort in ascending order (Oldest to Newest)
+      }
     ]);
+
+    console.log(productCategories);
 
     res.json({
       activeOrders,
       pendingRFCs,
       inTransitOrders,
       totalSpend: totalSpend._sum.price || 0,
-      purchaseVolume: purchaseVolume.map(order => ({
-        month: order.month,
-        quantity: order.quantity,
-      })),
-      productCategories,
+      purchaseVolume: purchaseVolumeData,
+      productCategories: productCategories.map(c => ({ category: c._id, count: c.count }))
     });
-
   } catch (error) {
     console.error("❌ Error in getBuyerAnalytics:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
