@@ -6,13 +6,13 @@ import {
   updateOrder,
   deleteOrder,
 } from "../controllers/order.js";
-import { verifyBuyer } from "../middlewares/order.js";
+import { verifyUser } from "../middlewares/order.js";
 
 const router = express.Router();
 
-// Apply `verifyBuyer` middleware before `createOrder`
+// Apply `verifyUser` middleware before `createOrder`
 router.post("/", createOrder);
-// router.post("/", verifyBuyer, createOrder);
+// router.post("/", verifyUser, createOrder);
 
 router.get("/:orderId", getOrderById);
 router.get("/user/:userId", getOrdersByUserIdAndRole);

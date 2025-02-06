@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import {
@@ -12,8 +12,11 @@ import {
   FaShippingFast,
 } from "react-icons/fa";
 import DashboardBackground from "../common/DashboardBackground";
+import { toast } from "sonner";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 
 const SellerLogistics = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("shipments");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -22,20 +25,22 @@ const SellerLogistics = () => {
   const [showCancelPickupModal, setShowCancelPickupModal] = useState(false);
   // const [showReturnShipmentModal, setShowReturnShipmentModal] = useState(false);
   const [showCancelShipmentModal, setShowCancelShipmentModal] = useState(false);
+  const [shipments, setShipments] = useState([]);
+
   const [formData, setFormData] = useState({
     labelResponseOptions: "URL_ONLY",
     requestedShipment: {
       shipper: {
         contact: {
-          personName: "",
-          phoneNumber: "",
+          personName: "ash",
+          phoneNumber: "1122334455",
         },
         address: {
-          streetLines: [""],
-          city: "",
-          stateOrProvinceCode: "",
-          postalCode: "",
-          countryCode: "",
+          streetLines: ["nkl"],
+          city: "ghj",
+          stateOrProvinceCode: "yb",
+          postalCode: "45678",
+          countryCode: "xa",
         },
       },
       recipients: [
@@ -49,7 +54,7 @@ const SellerLogistics = () => {
             city: "",
             stateOrProvinceCode: "",
             postalCode: "",
-            countryCode: "",
+            countryCode: "ax",
           },
         },
       ],
@@ -233,6 +238,7 @@ const SellerLogistics = () => {
     {
       title: "In Warehouse",
       value: "156",
+
       icon: <FaWarehouse />,
       color: "green",
       change: "+12",
@@ -253,18 +259,20 @@ const SellerLogistics = () => {
     },
   ];
 
-  const shipments = [
-    {
-      id: "SHP001",
-      product: "Premium Headphones",
-      customer: "John Doe",
-      destination: "Mumbai, India",
-      status: "in-transit",
-      eta: "2024-02-25",
-    },
+  useEffect(() => {
+    // Fetch shipments
+    console.log("User ID: ", user.id);
 
-    // Add more shipments...
-  ];
+    axios
+      .get(`http://localhost:3000/logistics/shipments/${user.id}`)
+      .then((response) => {
+        setShipments(response.data);
+        console.log(shipments);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   // Add this CSS at the beginning of your component
   const scrollbarHiddenStyles = {
@@ -278,12 +286,17 @@ const SellerLogistics = () => {
   const handlePickupSubmit = (e) => {
     e.preventDefault();
     // Add your logic to submit pickup form
+    console.log(pickupFormData);
+    pickupFormData.seller_id = user.id;
+    const toastId = toast.loading("Creating Pickup...", { duration: Infinity });
+
     axios
-      .post("http://localhost:5000/logistics/create-pickup", pickupFormData)
+      .post("http://localhost:3000/logistics/create-pickup", pickupFormData)
       .then((response) => {
         console.log(response);
         // Show success message or redirect to tracking page
-        setShowAddModal(false);
+        setShowPickupModal(false);
+        toast.success("Pickup Created!!", { id: toastId, duration: 3000 });
 
         // Reset form data
         setPickupFormData({
@@ -311,6 +324,10 @@ const SellerLogistics = () => {
         });
       })
       .catch((error) => {
+        toast.error("There was some error. Please try again!!", {
+          id: toastId,
+          duration: 3000,
+        });
         console.log(error);
       });
   };
@@ -319,7 +336,7 @@ const SellerLogistics = () => {
   //   e.preventDefault();
   //   try {
   //     const response = await axios.post(
-  //       "http://localhost:5000/logistics/return-shipment",
+  //       "http://localhost:3000/logistics/return-shipment",
   //       returnShipmentData
   //     );
   //     console.log(response.data);
@@ -331,11 +348,15 @@ const SellerLogistics = () => {
 
   const handleCancelShipmentSubmit = async (e) => {
     e.preventDefault();
+    const toastId = toast.loading("Cancelling Shipment...", {
+      duration: Infinity,
+    });
     try {
       const response = await axios.put(
-        "http://localhost:5000/logistics/cancel-shipment",
+        "http://localhost:3000/logistics/cancel-shipment",
         cancelShipmentData
       );
+      toast.success("Shipment Cancelled!!", { id: toastId, duration: 3000 });
       console.log(response.data);
       setShowCancelShipmentModal(false);
       setCancelShipmentData((prev) => ({
@@ -343,12 +364,127 @@ const SellerLogistics = () => {
         trackingNumber: "",
       }));
     } catch (error) {
+      toast.error("Could not cancel shipment. Please try again!", {
+        id: toastId,
+        duration: 3000,
+      });
       console.error("Error canceling shipment:", error);
     }
   };
 
+  const handleShipment = async (e) => {
+    e.preventDefault();
+    const toastId = toast.loading("Creating Shipment...", {
+      duration: Infinity,
+    });
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/logistics/create-shipment",
+        formData
+      );
+      toast.success("Shipment Created!!", { id: toastId, duration: 3000 });
+      setShowAddModal(false);
+      setFormData((prev) => ({
+        ...prev,
+        labelResponseOptions: "URL_ONLY",
+        requestedShipment: {
+          shipper: {
+            contact: {
+              personName: "",
+              phoneNumber: "",
+            },
+            address: {
+              streetLines: [""],
+              city: "",
+              stateOrProvinceCode: "",
+              postalCode: "",
+              countryCode: "",
+            },
+          },
+          recipients: [
+            {
+              contact: {
+                personName: "",
+                phoneNumber: "",
+              },
+              address: {
+                streetLines: [""],
+                city: "",
+                stateOrProvinceCode: "",
+                postalCode: "",
+                countryCode: "",
+              },
+            },
+          ],
+          shipDatestamp: new Date().toISOString().split("T")[0],
+          serviceType: "INTERNATIONAL_PRIORITY",
+          packagingType: "YOUR_PACKAGING",
+          pickupType: "USE_SCHEDULED_PICKUP",
+          shippingChargesPayment: {
+            paymentType: "SENDER",
+          },
+          labelSpecification: {
+            imageType: "PDF",
+            labelStockType: "PAPER_85X11_TOP_HALF_LABEL",
+          },
+          customsClearanceDetail: {
+            dutiesPayment: {
+              paymentType: "SENDER",
+            },
+            commodities: [
+              {
+                description: "",
+                countryOfManufacture: "",
+                quantity: 1,
+                quantityUnits: "PCS",
+                unitPrice: {
+                  amount: 0,
+                  currency: "USD",
+                },
+                customsValue: {
+                  amount: 0,
+                  currency: "USD",
+                },
+                weight: {
+                  units: "LB",
+                  value: 0,
+                },
+              },
+            ],
+          },
+          shippingDocumentSpecification: {
+            shippingDocumentTypes: ["COMMERCIAL_INVOICE"],
+            commercialInvoiceDetail: {
+              documentFormat: {
+                stockType: "PAPER_LETTER",
+                docType: "PDF",
+              },
+            },
+          },
+          requestedPackageLineItems: [
+            {
+              weight: {
+                units: "LB",
+                value: 0,
+              },
+            },
+          ],
+        },
+        accountNumber: {
+          value: "740561073",
+        },
+      }));
+    } catch (error) {
+      toast.error("An error occurred. Please try again!!", {
+        id: toastId,
+        duration: 3000,
+      });
+      console.log(error);
+    }
+  };
+
   const renderShipmentForm = () => (
-    <form className="px-6 py-4">
+    <form onSubmit={handleShipment} className="px-6 py-4">
       <div className="space-y-6">
         {/* Recipient Details */}
         <div className="border rounded-lg p-4 space-y-4">
@@ -390,7 +526,7 @@ const SellerLogistics = () => {
                 Phone Number
               </label>
               <input
-                type="number"
+                type="tel"
                 placeholder="Phone Number"
                 required
                 value={
@@ -761,7 +897,7 @@ const SellerLogistics = () => {
                       type="number"
                       required
                       min="0"
-                      step="0.01"
+                      // step="1"
                       value={commodity.unitPrice.amount}
                       onChange={(e) => {
                         const amount = Number(e.target.value);
@@ -1280,7 +1416,7 @@ const SellerLogistics = () => {
     e.preventDefault();
     axios
       .put(
-        "http://localhost:5000/logistics/cancel-pickup",
+        "http://localhost:3000/logistics/cancel-pickup",
         cancelPickupFormData
       )
       .then((response) => {
@@ -1475,7 +1611,7 @@ const SellerLogistics = () => {
             className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center`}
             onClick={() => setShowCancelPickupModal(true)}
           >
-            Cancel a exising pickup
+            Cancel an exising pickup
           </motion.div>
           {/* <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}
@@ -1687,48 +1823,52 @@ const SellerLogistics = () => {
                 </tr>
               </thead>
               <tbody>
-                {shipments.map((shipment) => (
-                  <motion.tr
-                    key={shipment.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.05)" }}
-                    className="border-t"
-                  >
-                    <td className="py-3 px-4">{shipment.id}</td>
-                    <td className="py-3 px-4">{shipment.product}</td>
-                    <td className="py-3 px-4">{shipment.customer}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-1">
-                        <FaMapMarkerAlt className="text-red-500" />
-                        {shipment.destination}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm ${
-                          shipment.status === "in-transit"
-                            ? "bg-blue-100 text-blue-600"
-                            : shipment.status === "delivered"
-                            ? "bg-green-100 text-green-600"
-                            : "bg-yellow-100 text-yellow-600"
-                        }`}
-                      >
-                        {shipment.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{shipment.eta}</td>
-                    <td className="py-3 px-4">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        Track
-                      </motion.button>
-                    </td>
-                  </motion.tr>
-                ))}
+                {shipments &&
+                  shipments.length > 0 &&
+                  shipments.map((shipment) => (
+                    <motion.tr
+                      key={shipment.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      whileHover={{
+                        backgroundColor: "rgba(59, 130, 246, 0.05)",
+                      }}
+                      className="border-t"
+                    >
+                      <td className="py-3 px-4">{shipment.id}</td>
+                      <td className="py-3 px-4">{shipment.product}</td>
+                      <td className="py-3 px-4">{shipment.customer}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <FaMapMarkerAlt className="text-red-500" />
+                          {shipment.destination}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-sm ${
+                            shipment.status === "in-transit"
+                              ? "bg-blue-100 text-blue-600"
+                              : shipment.status === "delivered"
+                              ? "bg-green-100 text-green-600"
+                              : "bg-yellow-100 text-yellow-600"
+                          }`}
+                        >
+                          {shipment.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">{shipment.eta}</td>
+                      <td className="py-3 px-4">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          Track
+                        </motion.button>
+                      </td>
+                    </motion.tr>
+                  ))}
               </tbody>
             </table>
           </div>

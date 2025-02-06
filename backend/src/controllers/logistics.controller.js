@@ -3,31 +3,59 @@ import { Logistics } from "../models/logistics.model.js";
 import { Pickup } from "../models/pickup.model.js";
 
 export const createShipment = async (req, res, next) => {
+  console.log("shipment.data.transactionId");
   try {
     const { body } = req;
+    console.log(JSON.stringify(req.body, null, 2));
+
+    // console.log(body.requestedShipment.recipients);
 
     const accessToken = req.shipmentAuthToken;
     if (!accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+    // console.log("Authorized");
 
     const shipment = await axios.post(
+      // "https://developer.fedex.com/api/en-us/catalog/ship/v1/ship/v1/shipments",
       "https://apis-sandbox.fedex.com/ship/v1/shipments",
       body,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
+          "x-locale": "en_US",
+          "x-xustomer-transaction-id": "624deea6-b709-470c-8c39-4b5511281492",
         },
       }
     );
+    // console.log(shipment);
 
+    // const shipment = null;
     const data = shipment?.data?.output?.transactionShipments[0];
     if (!data) {
       throw new Error("Failed to create shipment");
     }
+    // // console.log(data);
 
     const newShipment = new Logistics({
+      seller_id: req.body.seller_id,
+      /**customerName: {
+      type: String,
+      // required: true,
+    },
+    product: {
+      type: String,
+      // required: true,
+    },
+    destination: {
+      type: String,
+      // required: true,
+    }, */
+      customerName: body.requestedShipment.recipients[0].contact.personName,
+      // product:
+      // body.requestedShipment.customsClearanceDetail.commodities.name || "N/A",
+      destination: body.requestedShipment.recipients[0].address.city,
       transactionId: shipment.data.transactionId,
 
       trackingNumber: data.masterTrackingNumber,
@@ -101,14 +129,42 @@ export const createShipment = async (req, res, next) => {
     });
 
     const result = await newShipment.save();
-    // console.log(shipment.data.transactionId);
 
     res.status(201).json({
       success: true,
-      result,
+      result: "result",
     });
   } catch (error) {
+    // console.log(error);
+
     next(error);
+  }
+};
+
+export const getShipments = async (req, res) => {
+  try {
+    const accessToken = req.shipmentAuthToken;
+    if (!accessToken) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const seller_id = req.params.id;
+
+    const shipments = await Logistics.find({ seller_id });
+    if (!shipments) {
+      return res.status(404).json({ message: "No shipments found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: shipments,
+    });
+  } catch {
+    console.error("Error validating access token:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to validate access token",
+    });
   }
 };
 
@@ -277,7 +333,7 @@ export const createPickup = async (req, res) => {
     const newPickup = await new Pickup({
       confirmationCode: pickup.data.output.pickupConfirmationCode,
       location: pickup.data.output.location,
-      scheduledDate: body.originDetail.readyDateTimestamp.split("T")[0],
+      pickup_date: body.originDetail.readyDateTimestamp.split("T")[0],
     });
 
     await newPickup.save();
