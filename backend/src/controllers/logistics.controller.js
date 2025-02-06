@@ -4,125 +4,125 @@ import { Pickup } from "../models/pickup.model.js";
 
 // Add these mappings at the top of the file
 const countryMapping = {
-  'India': 'IN',
-  'United Arab Emirates': 'AE',
-  'United States': 'US',
-  'China': 'CN',
-  'Japan': 'JP',
-  'United Kingdom': 'GB',
+  India: "IN",
+  "United Arab Emirates": "AE",
+  "United States": "US",
+  China: "CN",
+  Japan: "JP",
+  "United Kingdom": "GB",
   // Common variations
-  'in': 'IN',
-  'ind': 'IN',
-  'ae': 'AE',
-  'uae': 'AE',
-  'us': 'US',
-  'usa': 'US',
-  'uk': 'GB',
-  'cn': 'CN',
-  'jp': 'JP',
+  in: "IN",
+  ind: "IN",
+  ae: "AE",
+  uae: "AE",
+  us: "US",
+  usa: "US",
+  uk: "GB",
+  cn: "CN",
+  jp: "JP",
   // Already in code format
-  'IN': 'IN',
-  'AE': 'AE',
-  'US': 'US',
-  'GB': 'GB',
-  'CN': 'CN',
-  'JP': 'JP'
+  IN: "IN",
+  AE: "AE",
+  US: "US",
+  GB: "GB",
+  CN: "CN",
+  JP: "JP",
 };
 
 const indianStatesMapping = {
   // Full names to codes
-  'Andhra Pradesh': 'AP',
-  'Arunachal Pradesh': 'AR',
-  'Assam': 'AS',
-  'Bihar': 'BR',
-  'Chhattisgarh': 'CG',
-  'Goa': 'GA',
-  'Gujarat': 'GJ',
-  'Haryana': 'HR',
-  'Himachal Pradesh': 'HP',
-  'Jharkhand': 'JH',
-  'Karnataka': 'KA',
-  'Kerala': 'KL',
-  'Madhya Pradesh': 'MP',
-  'Maharashtra': 'MH',
-  'Manipur': 'MN',
-  'Meghalaya': 'ML',
-  'Mizoram': 'MZ',
-  'Nagaland': 'NL',
-  'Odisha': 'OD',
-  'Punjab': 'PB',
-  'Rajasthan': 'RJ',
-  'Sikkim': 'SK',
-  'Tamil Nadu': 'TN',
-  'Telangana': 'TS',
-  'Tripura': 'TR',
-  'Uttar Pradesh': 'UP',
-  'Uttarakhand': 'UK',
-  'West Bengal': 'WB',
+  "Andhra Pradesh": "AP",
+  "Arunachal Pradesh": "AR",
+  Assam: "AS",
+  Bihar: "BR",
+  Chhattisgarh: "CG",
+  Goa: "GA",
+  Gujarat: "GJ",
+  Haryana: "HR",
+  "Himachal Pradesh": "HP",
+  Jharkhand: "JH",
+  Karnataka: "KA",
+  Kerala: "KL",
+  "Madhya Pradesh": "MP",
+  Maharashtra: "MH",
+  Manipur: "MN",
+  Meghalaya: "ML",
+  Mizoram: "MZ",
+  Nagaland: "NL",
+  Odisha: "OD",
+  Punjab: "PB",
+  Rajasthan: "RJ",
+  Sikkim: "SK",
+  "Tamil Nadu": "TN",
+  Telangana: "TS",
+  Tripura: "TR",
+  "Uttar Pradesh": "UP",
+  Uttarakhand: "UK",
+  "West Bengal": "WB",
   // Union Territories
-  'Andaman and Nicobar Islands': 'AN',
-  'Chandigarh': 'CH',
-  'Dadra and Nagar Haveli and Daman and Diu': 'DH',
-  'Delhi': 'DL',
-  'Jammu and Kashmir': 'JK',
-  'Ladakh': 'LA',
-  'Lakshadweep': 'LD',
-  'Puducherry': 'PY',
+  "Andaman and Nicobar Islands": "AN",
+  Chandigarh: "CH",
+  "Dadra and Nagar Haveli and Daman and Diu": "DH",
+  Delhi: "DL",
+  "Jammu and Kashmir": "JK",
+  Ladakh: "LA",
+  Lakshadweep: "LD",
+  Puducherry: "PY",
   // Common variations
-  'AP': 'AP',
-  'AR': 'AR',
-  'AS': 'AS',
-  'BR': 'BR',
-  'CG': 'CG',
-  'GA': 'GA',
-  'GJ': 'GJ',
-  'HR': 'HR',
-  'HP': 'HP',
-  'JH': 'JH',
-  'KA': 'KA',
-  'KL': 'KL',
-  'MP': 'MP',
-  'MH': 'MH',
-  'MN': 'MN',
-  'ML': 'ML',
-  'MZ': 'MZ',
-  'NL': 'NL',
-  'OD': 'OD',
-  'PB': 'PB',
-  'RJ': 'RJ',
-  'SK': 'SK',
-  'TN': 'TN',
-  'TS': 'TS',
-  'TR': 'TR',
-  'UP': 'UP',
-  'UK': 'UK',
-  'WB': 'WB'
+  AP: "AP",
+  AR: "AR",
+  AS: "AS",
+  BR: "BR",
+  CG: "CG",
+  GA: "GA",
+  GJ: "GJ",
+  HR: "HR",
+  HP: "HP",
+  JH: "JH",
+  KA: "KA",
+  KL: "KL",
+  MP: "MP",
+  MH: "MH",
+  MN: "MN",
+  ML: "ML",
+  MZ: "MZ",
+  NL: "NL",
+  OD: "OD",
+  PB: "PB",
+  RJ: "RJ",
+  SK: "SK",
+  TN: "TN",
+  TS: "TS",
+  TR: "TR",
+  UP: "UP",
+  UK: "UK",
+  WB: "WB",
 };
 
 const uaeStatesMapping = {
   // Emirates
-  'Abu Dhabi': 'AZ',
-  'Ajman': 'AJ',
-  'Dubai': 'DU',
-  'Fujairah': 'FU',
-  'Ras Al Khaimah': 'RK',
-  'Sharjah': 'SH',
-  'Umm Al Quwain': 'UQ',
+  "Abu Dhabi": "AZ",
+  Ajman: "AJ",
+  Dubai: "DU",
+  Fujairah: "FU",
+  "Ras Al Khaimah": "RK",
+  Sharjah: "SH",
+  "Umm Al Quwain": "UQ",
   // Common variations
-  'AZ': 'AZ',
-  'AJ': 'AJ',
-  'DU': 'DU',
-  'FU': 'FU',
-  'RK': 'RK',
-  'SH': 'SH',
-  'UQ': 'UQ',
+  AZ: "AZ",
+  AJ: "AJ",
+  DU: "DU",
+  FU: "FU",
+  RK: "RK",
+  SH: "SH",
+  UQ: "UQ",
   // Alternative names
-  'Abu Zaby': 'AZ',
-  'Dubayy': 'DU',
-  'Al Fujayrah': 'FU',
-  'Ras al Khaymah': 'RK',
-  'Ash Shariqah': 'SH',
-  'Umm al Qaywayn': 'UQ'
+  "Abu Zaby": "AZ",
+  Dubayy: "DU",
+  "Al Fujayrah": "FU",
+  "Ras al Khaymah": "RK",
+  "Ash Shariqah": "SH",
+  "Umm al Qaywayn": "UQ",
 };
 
 export const createShipment = async (req, res, next) => {
@@ -134,38 +134,44 @@ export const createShipment = async (req, res, next) => {
     let modifiedBody = JSON.parse(JSON.stringify(body));
 
     // Update recipient's state code and address
-    modifiedBody.requestedShipment.recipients = modifiedBody.requestedShipment.recipients.map(recipient => {
-      const stateOrProvince = recipient.address.stateOrProvinceCode;
-      let stateCode;
+    modifiedBody.requestedShipment.recipients =
+      modifiedBody.requestedShipment.recipients.map((recipient) => {
+        const stateOrProvince = recipient.address.stateOrProvinceCode;
+        let stateCode;
 
-      if (recipient.address.countryCode === 'IN') {
-        stateCode = indianStatesMapping[stateOrProvince] || stateOrProvince;
-      }else {
-        stateCode = uaeStatesMapping[stateOrProvince] || stateOrProvince;
-      }
-
-      return {
-        ...recipient,
-        address: {
-          ...recipient.address,
-          stateOrProvinceCode: stateCode.toUpperCase()
+        if (recipient.address.countryCode === "IN") {
+          stateCode = indianStatesMapping[stateOrProvince] || stateOrProvince;
+        } else {
+          stateCode = uaeStatesMapping[stateOrProvince] || stateOrProvince;
         }
+
+        return {
+          ...recipient,
+          address: {
+            ...recipient.address,
+            stateOrProvinceCode: stateCode.toUpperCase(),
+          },
         };
-    });
+      });
 
     // Update both recipient's address and commodity country codes
-    modifiedBody.requestedShipment.customsClearanceDetail.commodities = 
-      modifiedBody.requestedShipment.customsClearanceDetail.commodities.map(commodity => {
-        const countryName = commodity.countryOfManufacture;
-        const countryCode = countryMapping[countryName] || countryName;
-        
-        return {
-          ...commodity,
-          countryOfManufacture: countryCode.toUpperCase()
-        };
-    });
+    modifiedBody.requestedShipment.customsClearanceDetail.commodities =
+      modifiedBody.requestedShipment.customsClearanceDetail.commodities.map(
+        (commodity) => {
+          const countryName = commodity.countryOfManufacture;
+          const countryCode = countryMapping[countryName] || countryName;
 
-    console.log("Modified Request body:", JSON.stringify(modifiedBody, null, 2));
+          return {
+            ...commodity,
+            countryOfManufacture: countryCode.toUpperCase(),
+          };
+        }
+      );
+
+    console.log(
+      "Modified Request body:",
+      JSON.stringify(modifiedBody, null, 2)
+    );
 
     const accessToken = req.shipmentAuthToken;
     if (!accessToken) {
@@ -192,7 +198,7 @@ export const createShipment = async (req, res, next) => {
       return res.status(axiosError.response?.status || 500).json({
         success: false,
         message: "Failed to create shipment with FedEx",
-        error: axiosError.response?.data || axiosError.message
+        error: axiosError.response?.data || axiosError.message,
       });
     }
 
@@ -201,13 +207,15 @@ export const createShipment = async (req, res, next) => {
       console.error("Invalid response from FedEx:", shipment?.data);
       return res.status(400).json({
         success: false,
-        message: "Invalid response from FedEx API"
+        message: "Invalid response from FedEx API",
       });
     }
-    console.log(req.params);
-    
+    console.log(body.requestedShipment.customsClearanceDetail.commodities[0].description);
+
     const newShipment = new Logistics({
       seller_id: req.params.id,
+      product:
+        body.requestedShipment.customsClearanceDetail.commodities[0].description,
       customerName: body.requestedShipment.recipients[0].contact.personName,
       destination: body.requestedShipment.recipients[0].address.city,
       transactionId: shipment.data.transactionId,
@@ -266,7 +274,7 @@ export const createShipment = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      result: newShipment
+      result: newShipment,
     });
   } catch (error) {
     console.error("Server Error:", error);
@@ -456,20 +464,26 @@ export const createPickup = async (req, res) => {
     let modifiedBody = JSON.parse(JSON.stringify(body));
 
     // Update pickup location's state code based on country
-    const countryCode = modifiedBody.originDetail.pickupLocation.address.countryCode;
-    const stateOrProvince = modifiedBody.originDetail.pickupLocation.address.stateOrProvinceCode;
-    
+    const countryCode =
+      modifiedBody.originDetail.pickupLocation.address.countryCode;
+    const stateOrProvince =
+      modifiedBody.originDetail.pickupLocation.address.stateOrProvinceCode;
+
     let stateCode;
-    if (countryCode === 'IN') {
-      stateCode = indianStatesMapping[stateOrProvince] || 'MP'; // Default to MP for Madhya Pradesh
-    } else if (countryCode === 'AE') {
+    if (countryCode === "IN") {
+      stateCode = indianStatesMapping[stateOrProvince] || "MP"; // Default to MP for Madhya Pradesh
+    } else if (countryCode === "AE") {
       stateCode = uaeStatesMapping[stateOrProvince] || stateOrProvince;
     }
 
     // Update the state code in the request body
-    modifiedBody.originDetail.pickupLocation.address.stateOrProvinceCode = stateCode.toUpperCase();
+    modifiedBody.originDetail.pickupLocation.address.stateOrProvinceCode =
+      stateCode.toUpperCase();
 
-    console.log("Modified Pickup Request Body:", JSON.stringify(modifiedBody, null, 2));
+    console.log(
+      "Modified Pickup Request Body:",
+      JSON.stringify(modifiedBody, null, 2)
+    );
 
     let pickup;
     try {
@@ -491,7 +505,7 @@ export const createPickup = async (req, res) => {
       return res.status(axiosError.response?.status || 500).json({
         success: false,
         message: "Failed to create pickup with FedEx",
-        error: axiosError.response?.data || axiosError.message
+        error: axiosError.response?.data || axiosError.message,
       });
     }
 
@@ -499,7 +513,7 @@ export const createPickup = async (req, res) => {
       console.error("Invalid pickup response from FedEx:", pickup?.data);
       return res.status(400).json({
         success: false,
-        message: "Invalid response from FedEx Pickup API"
+        message: "Invalid response from FedEx Pickup API",
       });
     }
 
@@ -507,7 +521,7 @@ export const createPickup = async (req, res) => {
       confirmationCode: pickup.data.output.pickupConfirmationCode,
       country: pickup.data.output.location,
       pickup_date: body.originDetail.readyDateTimestamp.split("T")[0],
-      seller_id:req.params.id
+      seller_id: req.params.id,
     });
 
     await newPickup.save();
@@ -521,7 +535,7 @@ export const createPickup = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Internal server error while creating pickup",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -534,7 +548,6 @@ export const cancelPickup = async (req, res) => {
     }
 
     console.log("Anshul");
-    
 
     const { pickupConfirmationCode, location, scheduledDate } = req.body;
     const { body } = req;
@@ -568,7 +581,7 @@ export const cancelPickup = async (req, res) => {
     );
 
     console.log(result._id);
-    
+
     // Delete the pickup from database after successful cancellation
     await Pickup.findByIdAndDelete(result._id);
 

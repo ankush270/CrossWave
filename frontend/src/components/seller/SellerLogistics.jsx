@@ -263,18 +263,18 @@ const SellerLogistics = () => {
 
   useEffect(() => {
     // Fetch shipments
-    console.log("User ID: ", user?.id);
+    console.log("User ID: ", user?.id);    
 
     axios
       .get(`http://localhost:3000/logistics/shipments/${user?.id}`)
       .then((response) => {
-        setShipments(response.data);
-        console.log(shipments);
+        setShipments(response.data.data);
+        console.log("shipments: ",response.data.data);
       })
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  },[]);
 
   // Add this CSS at the beginning of your component
   const scrollbarHiddenStyles = {
@@ -292,10 +292,7 @@ const SellerLogistics = () => {
     const toastId = toast.loading("Creating Pickup...", { duration: Infinity });
 
     axios
-      .post(
-        `http://localhost:3000/logistics/create-pickup/${user?.id}`,
-        pickupFormData
-      )
+      .post(`http://localhost:3000/logistics/create-pickup/${user?.id}`, pickupFormData)
       .then((response) => {
         console.log(response);
         // Show success message or redirect to tracking page
@@ -1615,7 +1612,7 @@ const SellerLogistics = () => {
             className={`bg-white/80 backdrop-blur-lg p-6 rounded-xl shadow-lg border text-center`}
             onClick={() => setShowCancelPickupModal(true)}
           >
-            Cancel an existing pickup
+            Cancel an exising pickup
           </motion.div>
           {/* <motion.div
             whileHover={{ scale: 1.02, translateY: -5 }}
@@ -1822,8 +1819,6 @@ const SellerLogistics = () => {
                   <th className="text-left py-3 px-4">Customer</th>
                   <th className="text-left py-3 px-4">Destination</th>
                   <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">ETA</th>
-                  <th className="text-left py-3 px-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1839,9 +1834,9 @@ const SellerLogistics = () => {
                       }}
                       className="border-t"
                     >
-                      <td className="py-3 px-4">{shipment.id}</td>
+                      <td className="py-3 px-4">{shipment.trackingNumber}</td>
                       <td className="py-3 px-4">{shipment.product}</td>
-                      <td className="py-3 px-4">{shipment.customer}</td>
+                      <td className="py-3 px-4">{shipment.customerName}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1">
                           <FaMapMarkerAlt className="text-red-500" />
@@ -1858,18 +1853,8 @@ const SellerLogistics = () => {
                               : "bg-yellow-100 text-yellow-600"
                           }`}
                         >
-                          {shipment.status}
+                          {"in-transit"}
                         </span>
-                      </td>
-                      <td className="py-3 px-4">{shipment.eta}</td>
-                      <td className="py-3 px-4">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          Track
-                        </motion.button>
                       </td>
                     </motion.tr>
                   ))}
