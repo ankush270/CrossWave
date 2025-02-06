@@ -12,7 +12,7 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,7 +70,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted:", { ...formData, role: selectedRole });
-    const toastId = toast.loading("Logging in...", { duration: Infinity});
+    const toastId = toast.loading("Logging in...", { duration: Infinity });
 
     try {
       await register({
@@ -78,12 +78,15 @@ const SignUp = () => {
         role: selectedRole,
         phone: String(10000000 * Math.random()),
       });
-      toast.success("Registered Successfully", { id: toastId});
+      toast.success("Registered Successfully", { id: toastId, duration: 3000 });
       navigate("/");
     } catch (e) {
       setError(e.response?.data?.error || "Failed to register");
       console.log("Error occurred during registration: ", e);
-      toast.error(e.response?.data?.error || "An error occurred.", { id: toastId})
+      toast.error(e.response?.data?.error || "An error occurred.", {
+        id: toastId,
+        duration: 3000,
+      });
     }
   };
 

@@ -1,57 +1,64 @@
-import React, { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
-import { 
-  FaEnvelope, FaLock,FaShoppingBag, FaStore, FaEye, FaEyeSlash 
-} from 'react-icons/fa'
-import {useAuth} from "../contexts/AuthContext.jsx";
-import {toast} from "sonner";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaEnvelope,
+  FaLock,
+  FaShoppingBag,
+  FaStore,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import { toast } from "sonner";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState(null)
-  
-  const [selectedRole, setSelectedRole] = useState('');
-const [formData, setFormData] = useState({
-  email: '',
-  password: '',
-  role: '', 
-});
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [selectedRole, setSelectedRole] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: "",
+  });
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleRoleClick = (id) => {
     setSelectedRole(id);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      role: id, 
+      role: id,
     }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
-    const toastId = toast.loading("Logging in...", { duration: Infinity});
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    const toastId = toast.loading("Logging in...", { duration: Infinity });
 
-    try{
+    try {
       await login(formData.email, formData.password, formData.role);
-      toast.success("Logged In", { id: toastId});
-      navigate('/');
-    }catch (e) {
-      setError(e.response?.data?.error || 'Failed to login');
-      console.log('Error occurred: ' , e);
-      toast.error(e.response?.data?.error || "An error occurred.", { id: toastId})
+      toast.success("Logged In", { id: toastId, duration: 3000 });
+      navigate("/");
+    } catch (e) {
+      setError(e.response?.data?.error || "Failed to login");
+      console.log("Error occurred: ", e);
+      toast.error(e.response?.data?.error || "An error occurred.", {
+        id: toastId,
+        duration: 3000,
+      });
     }
-
-  }
+  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4">
@@ -59,7 +66,7 @@ const [formData, setFormData] = useState({
         {/* Left Section - Illustration & Info */}
         <div className="relative hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-600 p-12 items-center justify-center overflow-hidden">
           {/* Animated Background Elements */}
-          <motion.div 
+          <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -71,19 +78,19 @@ const [formData, setFormData] = useState({
                 key={i}
                 className="absolute w-64 h-64 border border-white/20 rounded-full"
                 style={{
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
+                  left: "50%",
+                  top: "50%",
+                  transform: "translate(-50%, -50%)",
                 }}
                 animate={{
                   scale: [1 + i * 0.2, 1.2 + i * 0.2, 1 + i * 0.2],
                   rotate: [0, 360],
-                  opacity: [0.3, 0.5, 0.3]
+                  opacity: [0.3, 0.5, 0.3],
                 }}
                 transition={{
                   duration: 10 + i * 2,
                   repeat: Infinity,
-                  ease: "linear"
+                  ease: "linear",
                 }}
               />
             ))}
@@ -107,7 +114,7 @@ const [formData, setFormData] = useState({
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "easeInOut",
-                  delay: Math.random() * 2
+                  delay: Math.random() * 2,
                 }}
               />
             ))}
@@ -123,7 +130,7 @@ const [formData, setFormData] = useState({
               transition={{
                 duration: 8,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
             />
             <motion.div
@@ -137,7 +144,7 @@ const [formData, setFormData] = useState({
                 duration: 8,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: 1
+                delay: 1,
               }}
             />
           </motion.div>
@@ -149,26 +156,27 @@ const [formData, setFormData] = useState({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <motion.h2 
+              <motion.h2
                 className="text-4xl font-bold text-white mb-6"
-                animate={{ 
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 }}
-                transition={{ 
+                transition={{
                   duration: 5,
                   repeat: Infinity,
-                  ease: "linear"
+                  ease: "linear",
                 }}
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0.8), rgba(255,255,255,1))',
-                  backgroundSize: '200% 100%',
-                  backgroundClip: 'text',
+                  backgroundImage:
+                    "linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0.8), rgba(255,255,255,1))",
+                  backgroundSize: "200% 100%",
+                  backgroundClip: "text",
                 }}
               >
                 Welcome Back!
               </motion.h2>
-              
-              <motion.p 
+
+              <motion.p
                 className="text-lg text-blue-100 mb-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -193,20 +201,17 @@ const [formData, setFormData] = useState({
                   transition={{
                     duration: 8,
                     repeat: Infinity,
-                    ease: "linear"
+                    ease: "linear",
                   }}
                 />
-                
+
                 {/* Custom SVG Illustration */}
                 <motion.div
                   className="relative w-full h-full rounded-full overflow-hidden border-4 border-white/20 backdrop-blur-sm flex items-center justify-center"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <svg 
-                    viewBox="0 0 200 200" 
-                    className="w-40 h-40"
-                  >
+                  <svg viewBox="0 0 200 200" className="w-40 h-40">
                     {/* Animated Circle Background */}
                     <motion.circle
                       cx="100"
@@ -215,14 +220,14 @@ const [formData, setFormData] = useState({
                       fill="none"
                       stroke="rgba(255,255,255,0.2)"
                       strokeWidth="2"
-                      animate={{ 
+                      animate={{
                         rotate: [0, 360],
                         scale: [1, 1.1, 1],
                       }}
                       transition={{
                         duration: 8,
                         repeat: Infinity,
-                        ease: "linear"
+                        ease: "linear",
                       }}
                     />
 
@@ -238,7 +243,7 @@ const [formData, setFormData] = useState({
                       transition={{
                         duration: 2,
                         repeat: Infinity,
-                        ease: "easeInOut"
+                        ease: "easeInOut",
                       }}
                     />
 
@@ -254,7 +259,7 @@ const [formData, setFormData] = useState({
                       transition={{
                         duration: 2,
                         ease: "easeInOut",
-                        delay: 0.5
+                        delay: 0.5,
                       }}
                     />
 
@@ -274,7 +279,7 @@ const [formData, setFormData] = useState({
                           duration: 2,
                           repeat: Infinity,
                           delay: i * 0.2,
-                          ease: "easeInOut"
+                          ease: "easeInOut",
                         }}
                       />
                     ))}
@@ -292,7 +297,7 @@ const [formData, setFormData] = useState({
                       transition={{
                         duration: 10 + i * 5,
                         repeat: Infinity,
-                        ease: "linear"
+                        ease: "linear",
                       }}
                     />
                   ))}
@@ -327,7 +332,7 @@ const [formData, setFormData] = useState({
         <div className="w-full lg:w-7/12 p-8 relative overflow-hidden">
           {/* Background Gradient & Glassmorphism */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-md" />
-          
+
           {/* Form Content */}
           <div className="relative z-10 max-w-md mx-auto">
             <motion.div
@@ -338,44 +343,53 @@ const [formData, setFormData] = useState({
               <h2 className="text-3xl font-bold text-white mb-2">
                 Login to Your Account
               </h2>
-              <p className="text-gray-300">Welcome back! Please enter your details</p>
+              <p className="text-gray-300">
+                Welcome back! Please enter your details
+              </p>
             </motion.div>
-
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Input Fields */}
-               <div className="grid grid-cols-2 gap-3">
-                              {[
-                                { id: 'seller', icon: FaStore, label: 'Seller' },
-                                { id: 'buyer', icon: FaShoppingBag, label: 'Buyer' }
-                              ].map(({ id, icon: Icon, label }) => (
-                                <motion.button
-                                  key={id}
-                                  type="button"
-                                  onClick={() => handleRoleClick(id)}
-                                  whileHover={{ y: -2 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${
-                                    selectedRole === id
-                                      ? 'border-blue-400 bg-blue-500/20 backdrop-blur-sm'
-                                      : 'border-white/10 hover:border-white/30 bg-white/5 backdrop-blur-sm'
-                                  }`}
-                                >
-                                  <div className="flex flex-col items-center gap-2">
-                                    <div className={`p-2 rounded-lg ${
-                                      selectedRole === id ? 'bg-blue-500 text-white' : 'bg-white/10 text-gray-300'
-                                    }`}>
-                                      <Icon className="text-xl" />
-                                    </div>
-                                    <span className={`font-medium ${
-                                      selectedRole === id ? 'text-blue-400' : 'text-gray-300'
-                                    }`}>
-                                      {label}
-                                    </span>
-                                  </div>
-                                </motion.button>
-                              ))}
-                            </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: "seller", icon: FaStore, label: "Seller" },
+                  { id: "buyer", icon: FaShoppingBag, label: "Buyer" },
+                ].map(({ id, icon: Icon, label }) => (
+                  <motion.button
+                    key={id}
+                    type="button"
+                    onClick={() => handleRoleClick(id)}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${
+                      selectedRole === id
+                        ? "border-blue-400 bg-blue-500/20 backdrop-blur-sm"
+                        : "border-white/10 hover:border-white/30 bg-white/5 backdrop-blur-sm"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <div
+                        className={`p-2 rounded-lg ${
+                          selectedRole === id
+                            ? "bg-blue-500 text-white"
+                            : "bg-white/10 text-gray-300"
+                        }`}
+                      >
+                        <Icon className="text-xl" />
+                      </div>
+                      <span
+                        className={`font-medium ${
+                          selectedRole === id
+                            ? "text-blue-400"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
               <motion.div className="space-y-4">
                 {/* Email Input */}
                 <div>
@@ -405,7 +419,7 @@ const [formData, setFormData] = useState({
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
@@ -432,7 +446,10 @@ const [formData, setFormData] = useState({
                     <input type="checkbox" className="mr-2" />
                     Remember me
                   </label>
-                  <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300">
+                  <Link
+                    to="/forgot-password"
+                    className="text-blue-400 hover:text-blue-300"
+                  >
                     Forgot password?
                   </Link>
                 </div>
@@ -484,8 +501,8 @@ const [formData, setFormData] = useState({
 
               {/* Sign Up Link */}
               <p className="text-center text-gray-400 mt-8">
-                Don't have an account?{' '}
-                <Link 
+                Don't have an account?{" "}
+                <Link
                   to="/signup"
                   className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
                 >
@@ -497,7 +514,7 @@ const [formData, setFormData] = useState({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login 
+export default Login;
