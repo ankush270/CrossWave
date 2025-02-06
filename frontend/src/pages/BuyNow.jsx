@@ -379,54 +379,7 @@ const BuyNow = () => {
                   </div>
                 </div>
                 {/* Render form fields based on section.id */}
-                {/* {section.id === "company" && (
-                  <div className="grid gap-6">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Company Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="companyName"
-                          value={formData.companyName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          GSTIN *
-                        </label>
-                        <input
-                          type="text"
-                          name="gstin"
-                          value={formData.gstin}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Business Type
-                      </label>
-                      <select
-                        name="businessType"
-                        value={formData.businessType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="manufacturer">Manufacturer</option>
-                        <option value="distributor">Distributor</option>
-                        <option value="retailer">Retailer</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                )} */}
+
                 {section.id === "contact" && (
                   <div className="grid gap-6">
                     <div className="grid sm:grid-cols-2 gap-4">
@@ -582,219 +535,6 @@ const BuyNow = () => {
                     </div>
                   </div>
                 )}
-                {/* Render form fields based on section.id */}
-                {/* {section.id === "company" && (
-                  <div className="grid gap-6">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Company Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="companyName"
-                          value={formData.companyName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          GSTIN *
-                        </label>
-                        <input
-                          type="text"
-                          name="gstin"
-                          value={formData.gstin}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Business Type
-                      </label>
-                      <select
-                        name="businessType"
-                        value={formData.businessType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="manufacturer">Manufacturer</option>
-                        <option value="distributor">Distributor</option>
-                        <option value="retailer">Retailer</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                )} */}
-                {/* {section.id === "contact" && (
-                  <div className="grid gap-6">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Contact Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="contactName"
-                          value={formData.contactName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email *
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number *
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-                )}
-                {section.id === "shipping" && (
-                  <div className="grid gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address Line 1 *
-                      </label>
-                      <input
-                        type="text"
-                        name="addressLine1"
-                        value={formData.addressLine1}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address Line 2
-                      </label>
-                      <input
-                        type="text"
-                        name="addressLine2"
-                        value={formData.addressLine2}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          City *
-                        </label>
-                        <input
-                          type="text"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          State *
-                        </label>
-                        <input
-                          type="text"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          PIN Code *
-                        </label>
-                        <input
-                          type="text"
-                          name="pincode"
-                          value={formData.pincode}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Country *
-                        </label>
-                        <select
-                          name="country"
-                          value={formData.country}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="India">India</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )} */}
-                {/* {section.id === "delivery" && (
-                  <div className="grid gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Delivery Type
-                      </label>
-                      <select
-                        name="deliveryType"
-                        value={formData.deliveryType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="standard">Standard Delivery</option>
-                        <option value="express">Express Delivery</option>
-                        <option value="priority">Priority Delivery</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Special Instructions
-                      </label>
-                      <textarea
-                        name="specialInstructions"
-                        value={formData.specialInstructions}
-                        onChange={handleInputChange}
-                        rows="3"
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Any special instructions for delivery..."
-                      ></textarea>
-                    </div>
-                  </div>
-                )} */}
               </motion.div>
             ))}
           </motion.div>
@@ -840,19 +580,70 @@ const BuyNow = () => {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">
-                      Shipping ({formData.deliveryType})
+                    <span className="text-gray-600">Platform Fee</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? dealDetails.finalQuantity * 20
+                        : product.pricing[selectedPricing].moq * 20}
                     </span>
-                    <span className="font-medium">₹{calculateShipping()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax (18% GST)</span>
-                    <span className="font-medium">₹{calculateTax()}</span>
+                    <span className="text-gray-600">Custom Duty</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() * 0.05
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price *
+                          0.05}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">insurance</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() * 0.03
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price *
+                          0.03}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">GST(5%)</span>
+                    <span className="font-medium">
+                      ₹{" "}
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() * 0.05
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price *
+                          0.05}
+                    </span>
                   </div>
                   <div className="border-t pt-4 mt-4">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-blue-600">₹{calculateTotal()}</span>
+                      <span className="text-blue-600">
+                        ₹
+                        {isNegotiatedDeal
+                          ? calculateSubtotal() * 0.05 +
+                            calculateSubtotal() * 0.03 +
+                            calculateSubtotal() * 0.05 +
+                            calculateSubtotal()
+                          : product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price *
+                              0.05 +
+                            product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price *
+                              0.03 +
+                            product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price *
+                              0.05 +
+                            product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price +
+                            product.pricing[selectedPricing].moq * 20}
+                      </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
                       * All prices are inclusive of taxes and shipping
