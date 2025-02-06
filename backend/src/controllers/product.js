@@ -59,6 +59,7 @@ export const addProduct = async (req, res, next) => {
   }
 };
 
+//  get all products......................
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.find({});
@@ -72,19 +73,39 @@ export const getProducts = async (req, res) => {
   }
 };
 
+
+import mongoose from "mongoose";
+
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id)
     if (!product) {
-      return res.status(404).json({ error: "No products found" });
+      return res.status(200).json({ error: "No products found" });
     }
     res.json(product);
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.status(500).json({ error: "Failed to fetch products" });
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 }
+
+export const getProductBySellerId = async (req, res) => {
+  try {
+    const { seller_id } = req.params;
+    const products = await Product.find({ seller_id }); // Use find() to get all products for a seller
+    
+    if (!products.length) {
+      return res.status(404).json({ error: "No products found" });
+    }
+
+    res.json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+};
+
 
 export const removeProduct = async (req, res) => {
   try {
@@ -106,7 +127,12 @@ export const removeProduct = async (req, res) => {
 export const getUserProduct = async (req, res, next) => {
   try {
     const { sellerId } = req.params;
+
+    console.log("seller ID :" , sellerId);
     const products = await Product.find({ seller: sellerId });
+
+    console.log("products :" , products);
+
     if (!products || products.length === 0) {
       return res.status(404).json({ error: "No products found" });
     }

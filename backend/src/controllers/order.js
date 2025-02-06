@@ -1,6 +1,7 @@
 import prisma from "../config/prisma_db.js";
 import { createPaymentDoc } from "./Payment.js";
 import { createLogistics } from "./logistics.js";
+import validator from "validator";
 
 /**
  * Create a new order
@@ -13,8 +14,8 @@ export const createOrder = async (req, res) => {
     const order = await prisma.order.create({
       data: {
         buyer_id: data.buyer_id,
-        seller_id: "0ca9db35-b652-4f73-a00c-64972696aaea",
-        // seller_id: data.seller_id,
+        // seller_id: "0ca9db35-b652-4f73-a00c-64972696aaea",
+        seller_id: data.seller_id,
         product_id: data.product_id,
         quote_id: data.quote_id,
         // logistics_id: data.logistics_id,
@@ -65,33 +66,121 @@ export const createOrder = async (req, res) => {
 /**
  * Get an order by ID
  */
-export const getOrderById = async (req, res) => {
+export const getOrderBySellerId = async (req, res) => {
+  console.log("Fetching orders for seller");
+
   try {
-    const { orderId } = req.params;
+    let seller_Id = req.params.sellerId?.trim();
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        buyer_status: true,
-        seller_status: true,
-      },
-    });
-
-    if (!order) {
-      return res.status(404).json({
+    if (!seller_Id) {
+      return res.status(400).json({
         success: false,
-        error: "Order not found",
+        error: "Seller ID is required",
       });
     }
 
-    res.status(200).json(order);
+    if (!validator.isUUID(seller_Id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid Seller ID format",
+      });
+    }
+
+    const orders = await prisma.order.findMany({
+      where: { seller_id: seller_Id },
+      select: {
+        id: true,
+        product_id: true,
+        buyer_id: true,
+        quantity: true,
+        price: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        buyer_status: {
+          select: { id: true, email: true },
+        },
+        seller_status: {
+          select: { id: true, email: true },
+        },
+      },
+    });
+
+    console.log(`Found ${orders.length} orders for Seller ID: ${seller_Id}`);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
   } catch (error) {
+    console.error("Error fetching orders:", error);
     res.status(500).json({
       success: false,
-      error: "Error fetching order: " + error.message,
+      error: "Error fetching orders: " + error.message,
     });
   }
 };
+
+
+
+export const getOrderByBuyerId = async (req, res) => {
+  console.log("Fetching orders for buyer");
+
+  try {
+    let buyer_Id = req.params.buyerId?.trim();
+
+    // Check if buyerId exists
+    if (!buyer_Id) {
+      return res.status(400).json({
+        success: false,
+        error: "Buyer ID is required",
+      });
+    }
+
+    // Validate if buyer_Id is a UUID
+    if (!validator.isUUID(buyer_Id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid Buyer ID format",
+      });
+    }
+
+    // Fetch orders from database
+    const orders = await prisma.order.findMany({
+      where: { buyer_id: buyer_Id },
+      select: {
+        id: true,
+        product_id: true,
+        seller_id: true,
+        quantity: true,
+        price: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        buyer_status: {
+          select: { id: true, email: true },
+        },
+        seller_status: {
+          select: { id: true, email: true },
+        },
+      },
+    });
+
+    console.log(`Found ${orders.length} orders for Buyer ID: ${buyer_Id}`);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching orders: " + error.message,
+    });
+  }
+};
+
 
 /**
  * Get orders of a user based on their role (buyer or seller)
