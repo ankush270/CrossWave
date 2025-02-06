@@ -29,6 +29,7 @@ export const createOrder = async (req, res) => {
         delivery_preferences: data.delivery_preferences,
       },
     });
+    console.log(order)
 
     const payment_details = {
       razorpayPaymentId: data.paymentId,
@@ -248,6 +249,8 @@ export const getAllOrders = async (req, res) => {
 /**
  * Update an order
  */
+
+
 import axios from 'axios';
 
 const RAZORPAY_USERNAME = 'rzp_test_wqW0Rfkhr0ZOcw';
@@ -315,7 +318,7 @@ export const updateOrder = async (req, res) => {
     if (amountToRelease > 0) {
       const response =  await releasePaymentToSeller(order, amountToRelease);
       if(response){
-         console.log("payment has done!", response);
+        console.log("payment has done!", response);
       }
     }
 
@@ -334,7 +337,6 @@ export const updateOrder = async (req, res) => {
     });
   }
 };
-
 /**
  * Delete an order
  */

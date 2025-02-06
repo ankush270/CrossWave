@@ -38,8 +38,8 @@ const PayNow = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:3000/payment/verify-payment",
-        credentials
+         "http://localhost:3000/payment/verify-payment",
+         credentials
       );
       console.log("data :", data);
 
@@ -137,25 +137,25 @@ const PayNow = () => {
   };
 
   return (
-    <div className="flex items-center justify-center mt-64 ">
-      <div className="payment-container ">
-        <h2>Complete Your Payment</h2>
-        <div className="payment-details">
-          <p>Order ID: {order_id}</p>
-          <p>Total Amount: ₹{amount}</p>
-        </div>
+     <div className="flex items-center justify-center mt-64 ">
+       <div className="payment-container ">
+         <h2>Complete Your Payment</h2>
+         <div className="payment-details">
+           <p>Order ID: {order_id}</p>
+           <p>Total Amount: ₹{amount}</p>
+         </div>
 
-        <button
-          onClick={initiatePayment}
-          disabled={isProcessing}
-          className="payment-button"
-        >
-          {isProcessing ? "Processing..." : "Pay Now"}
-        </button>
+         <button
+            onClick={initiatePayment}
+            disabled={isProcessing}
+            className="payment-button"
+         >
+           {isProcessing ? "Processing..." : "Pay Now"}
+         </button>
 
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-      </div>
-    </div>
+         {errorMessage && <p className="error-message">{errorMessage}</p>}
+       </div>
+     </div>
   );
 };
 
