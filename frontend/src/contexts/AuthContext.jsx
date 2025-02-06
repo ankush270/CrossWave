@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const {data} = await authAPI.getCurrentUser();
       setUser(data);
+      console.log(data);
       localStorage.setItem("user", JSON.stringify(data));
     }catch (e) {
       console.error('Auth check failed:', e);
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     try{
       const {data} = await authAPI.login(email, password, role);
       console.log(data.logged_in_as);
+      console.log(data.user);
       setUser(data.user);
       setRole(data.logged_in_as);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -77,7 +79,6 @@ export const AuthProvider = ({ children }) => {
       const { data } = await authAPI.register(userData);
       setUser(data.user);
       setRole(data.logged_in_as);
-      localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("role", data.logged_in_as);
       return data.user;
     }catch (e) {

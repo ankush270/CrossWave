@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { fullName, email, password, role } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const is_buyer = role === "buyer";
     const is_seller = role === "seller";
@@ -15,6 +15,19 @@ export const register = async (req, res) => {
         passwordHash: hashedPassword,
         is_buyer,
         is_seller,
+        profile:{
+          create:{
+            companyName : null,
+            address: null,
+            state: null,
+            city: null,
+            pinCode: null, // Ensure it's stored as an integer
+            country: null,
+            GST: null,
+            phoneNo: null,
+            name: fullName,
+          }
+        }
       },
     });
     user.logged_in_as = role;
@@ -67,22 +80,17 @@ export const login = async (req, res) => {
         profile: true,
       },
     });
-    // console.log(user);
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    console.log(user);
+    let validRole = true;
+    if(role === 'seller'){
+      validRole = user.is_seller;
+    }else{
+      validRole = user.is_buyer;
+    }
+    if (!user || !validRole || !(await bcrypt.compare(password, user.passwordHash))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    // console.log(user);
 
-    //   const profileData = await prisma.user.findUnique({
-    //     where: {
-    //         id: user.id
-    //     },
-    //     include:{
-    //         profile: true
-    //     }
-    // })
-    // destructure profile data to user doc itself
-    // user = {...user, ...profileData};
     user.logged_in_as = role;
     console.log(user);
 
@@ -91,7 +99,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       {
         id: user.id,
-        role: is_buyer ? "buyer" : "seller",
+        role: role,
       },
       process.env.JWT_SECRET,
       {
@@ -153,6 +161,7 @@ export const getCurrentUser = async (req, res) => {
       is_kyc_done: true,
       is_personal_docs_done: true,
       is_company_docs_done: true,
+      profile: true,
     },
   });
 
