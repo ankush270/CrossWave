@@ -69,10 +69,10 @@ export const requiredDocumentsUAE = [
     description: "UAE ESMA Certificate",
     required: true,
   },
-  {
-    id: "UAEcoo",
-    name: "UAE Certificate Of Origin",
-    description: "UAE Certificate Of Origin",
-    required: false,
-  },
+  // {
+  //   id: "UAEcoo",
+  //   name: "UAE Certificate Of Origin",
+  //   description: "UAE Certificate Of Origin",
+  //   required: false,
+  // },
 ];

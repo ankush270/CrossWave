@@ -41,12 +41,32 @@ export const productAPI = {
     return api.post('/product/add',productData)
   },
 
+  getUserProduct:(userId)=>{
+
+    return api.get('/product/user/get')
+
+  },
+
   getProducts: ()=>{
     return api.get('/product/get')
   },
 
   getProductById:(id)=>{
-    return api.get('/product/getId/'+id);
+    try {
+      return api.get('/product/getId/'+id);
+    } catch (error) {
+      return {}
+    }
+    
   }
+}
 
+export const analyticsAPI = {
+  getSellerAnalytics: (selectedPeriod)=>{
+    return api.get('/analytics/get-seller-analytics?period='+selectedPeriod);
+  },
+
+  getBuyerAnalytics: ()=>{
+    return api.get('/analytics/get-buyer-analytics');
+  }
 }

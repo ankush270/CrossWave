@@ -54,7 +54,8 @@ const requiredDocuments = {
     "gstin",
     "cic",
   ],
-  uae: ["UAEid", "UAEvat", "UAEesma", "UAEcoo"],
+  uae: ["UAEid", "UAEvat", "UAEesma"],
+  // uae: ["UAEid", "UAEvat", "UAEesma", "UAEcoo"],
   personal: ["aadhaar", "pan"],
 };
 

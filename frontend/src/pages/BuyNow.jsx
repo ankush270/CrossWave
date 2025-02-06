@@ -5,18 +5,19 @@ import {
   FaArrowLeft,
   FaTruck,
   FaCreditCard,
-  FaShieldAlt,
-  FaCheckCircle,
-  FaBuilding,
   FaUser,
   FaShippingFast,
   FaFileInvoice,
+  FaLock,
 } from "react-icons/fa";
-import { productsData } from "../data/productsData";
+
 import axios from "axios";
 import { productAPI } from "../api/api.js";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import { toast } from "sonner";
 
 const BuyNow = () => {
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,7 +27,8 @@ const BuyNow = () => {
   const [amount, setAmount] = useState(null);
 
   const { selectedPricing } = location.state;
-
+  const dealDetails = location.state?.dealDetails;
+  const isNegotiatedDeal = !!dealDetails;
   const [formData, setFormData] = useState({
     companyName: "",
     gstin: "",
@@ -49,6 +51,19 @@ const BuyNow = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        if (dealDetails) {
+          setProduct({
+            _id: dealDetails.productId,
+            name: dealDetails.productName,
+            price: dealDetails.finalPrice,
+            quantity: dealDetails.finalQuantity,
+            totalAmount: dealDetails.finalPrice * dealDetails.finalQuantity,
+            image: dealDetails.productImage || "", // Add default image if needed
+            seller_id: dealDetails.sellerId,
+          });
+          setLoading(false);
+          return;
+        }
         const { data } = await productAPI.getProductById(id);
         setProduct(data);
 
@@ -61,7 +76,7 @@ const BuyNow = () => {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, dealDetails]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,7 +88,7 @@ const BuyNow = () => {
 
   useEffect(() => {
     setAmount(calculateTotal());
-  }, [formData, product]);
+  }, [formData, product, dealDetails]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +96,14 @@ const BuyNow = () => {
     console.log(product);
 
     try {
+      // const verifyBuyer
+      console.log(user);
+      if (!user.is_kyc_done || !user.is_company_docs_done) {
+        return toast.error(
+          "Please complete KYC and upload all the documents before proceeding",
+          { duration: 5000 }
+        );
+      }
       const { data } = await axios.post(
         "http://localhost:3000/payment/create-payment",
         { amount }
@@ -97,9 +120,13 @@ const BuyNow = () => {
             product_id: product._id,
             seller_id: product.seller_id,
             formData,
-            price: product.pricing[selectedPricing].price,
-            quantity: product.pricing[selectedPricing].moq,
-            // order_details: details of order
+            price: isNegotiatedDeal
+              ? dealDetails.finalPrice
+              : product.pricing[selectedPricing].price,
+            quantity: isNegotiatedDeal
+              ? dealDetails.finalQuantity
+              : product.pricing[selectedPricing].moq,
+            dealDetails,
           },
         });
       } else {
@@ -112,6 +139,11 @@ const BuyNow = () => {
   
    
   const calculateSubtotal = () => {
+    if (isNegotiatedDeal) {
+      const basePrice = dealDetails.finalPrice;
+      const quantity = dealDetails.finalQuantity;
+      return (basePrice * quantity).toFixed(2);
+    }
     if (!product?.pricing?.[selectedPricing]) return 0;
 
     const price = product.pricing[selectedPricing].price;
@@ -122,6 +154,16 @@ const BuyNow = () => {
         : parseFloat(price.replace(/[^0-9.]/g, ""));
     const quantity = parseInt(product.pricing[selectedPricing].moq);
     return (priceValue * quantity).toFixed(2);
+  };
+
+  const calculatePlatformFee = () => {
+    // Platform fee is 20 per unit
+    if (isNegotiatedDeal) {
+      return (0.1 * dealDetails.finalQuantity * dealDetails.finalPrice).toFixed(
+        2
+      );
+    }
+    return 0;
   };
 
   const calculateShipping = () => {
@@ -149,6 +191,37 @@ const BuyNow = () => {
     const total = (subtotal + shipping + tax).toFixed(2);
     return total;
   };
+
+  const renderNegotiatedDetails = () => (
+    <div className="bg-green-50 p-6 rounded-xl border border-green-100 mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <FaLock className="text-green-600" />
+        <h3 className="text-lg font-semibold text-green-800">
+          Negotiated Deal Details
+        </h3>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm text-green-600">Price per unit (Locked)</p>
+          <p className="text-xl font-semibold text-green-700">
+            ₹{dealDetails?.finalPrice}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-green-600">Quantity (Locked)</p>
+          <p className="text-xl font-semibold text-green-700">
+            {dealDetails?.finalQuantity} units
+          </p>
+        </div>
+        <div className="col-span-2">
+          <p className="text-sm text-green-600">Total Value</p>
+          <p className="text-xl font-semibold text-green-700">
+            ₹{(dealDetails?.finalPrice * dealDetails?.finalQuantity).toFixed(2)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 
   const formSections = [
     // {
@@ -269,18 +342,27 @@ const BuyNow = () => {
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg">{product.name}</h3>
-                  <p className="text-gray-600">
+                  {/* <p className="text-gray-600">
                     {product.specifications.technical.size}
-                  </p>
+                  </p> */}
                   <div className="mt-2 text-sm text-gray-500">
-                    Quantity: {product.pricing[selectedPricing].moq} units
+                    Quantity:{" "}
+                    {isNegotiatedDeal
+                      ? dealDetails.finalQuantity
+                      : product.pricing[selectedPricing].moq}{" "}
+                    units
                   </div>
                   <div className="text-blue-600 font-semibold">
-                    {product.pricing[selectedPricing].price} per unit
+                    {isNegotiatedDeal
+                      ? dealDetails.finalPrice
+                      : product.pricing[selectedPricing].price}{" "}
+                    per unit
                   </div>
                 </div>
               </div>
             </div>
+
+            {isNegotiatedDeal && renderNegotiatedDetails()}
 
             {/* Form Sections with Enhanced Design */}
             {formSections.map((section) => (
@@ -298,54 +380,7 @@ const BuyNow = () => {
                   </div>
                 </div>
                 {/* Render form fields based on section.id */}
-                {section.id === "company" && (
-                  <div className="grid gap-6">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Company Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="companyName"
-                          value={formData.companyName}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          GSTIN *
-                        </label>
-                        <input
-                          type="text"
-                          name="gstin"
-                          value={formData.gstin}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Business Type
-                      </label>
-                      <select
-                        name="businessType"
-                        value={formData.businessType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="manufacturer">Manufacturer</option>
-                        <option value="distributor">Distributor</option>
-                        <option value="retailer">Retailer</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
+
                 {section.id === "contact" && (
                   <div className="grid gap-6">
                     <div className="grid sm:grid-cols-2 gap-4">
@@ -496,17 +531,8 @@ const BuyNow = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Special Instructions
-                      </label>
-                      <textarea
-                        name="specialInstructions"
-                        value={formData.specialInstructions}
-                        onChange={handleInputChange}
-                        rows="3"
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Any special instructions for delivery..."
-                      ></textarea>
+                      <h3 className="text-xl font-bold">{section.title}</h3>
+                      <p className="text-gray-600">{section.description}</p>
                     </div>
                   </div>
                 )}
@@ -529,23 +555,96 @@ const BuyNow = () => {
                 {/* Enhanced Price Breakdown */}
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">₹{calculateSubtotal()}</span>
+                    <span className="text-gray-600">Base Price</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() /
+                          product.pricing[selectedPricing].moq
+                        : product.pricing[selectedPricing].price}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">
-                      Shipping ({formData.deliveryType})
+                      Subtotal (
+                      {isNegotiatedDeal
+                        ? dealDetails.finalQuantity
+                        : product.pricing[selectedPricing].moq}{" "}
+                      units)
                     </span>
-                    <span className="font-medium">₹{calculateShipping()}</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? calculateSubtotal()
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax (18% GST)</span>
-                    <span className="font-medium">₹{calculateTax()}</span>
+                    <span className="text-gray-600">Platform Fee</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? dealDetails.finalQuantity * 20
+                        : product.pricing[selectedPricing].moq * 20}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Custom Duty</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() * 0.05
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price *
+                          0.05}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">insurance</span>
+                    <span className="font-medium">
+                      ₹
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() * 0.03
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price *
+                          0.03}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">GST(5%)</span>
+                    <span className="font-medium">
+                      ₹{" "}
+                      {isNegotiatedDeal
+                        ? calculateSubtotal() * 0.05
+                        : product.pricing[selectedPricing].moq *
+                          product.pricing[selectedPricing].price *
+                          0.05}
+                    </span>
                   </div>
                   <div className="border-t pt-4 mt-4">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-blue-600">₹{calculateTotal()}</span>
+                      <span className="text-blue-600">
+                        ₹
+                        {isNegotiatedDeal
+                          ? calculateSubtotal() * 0.05 +
+                            calculateSubtotal() * 0.03 +
+                            calculateSubtotal() * 0.05 +
+                            calculateSubtotal()
+                          : product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price *
+                              0.05 +
+                            product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price *
+                              0.03 +
+                            product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price *
+                              0.05 +
+                            product.pricing[selectedPricing].moq *
+                              product.pricing[selectedPricing].price +
+                            product.pricing[selectedPricing].moq * 20}
+                      </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
                       * All prices are inclusive of taxes and shipping
@@ -564,17 +663,17 @@ const BuyNow = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={`w-full p-4 rounded-lg border ${
-                          formData.paymentMethod === method 
-                            ? 'border-blue-500 bg-blue-50' 
+                          formData.paymentMethod === method
+                            ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200'
                         } flex items-center gap-3`}
-                        onClick={() => handleInputChange({ 
+                        onClick={() => handleInputChange({
                           target: { name: 'paymentMethod', value: method }
                         })}
                       >
                         <FaCreditCard className={
-                          formData.paymentMethod === method 
-                            ? 'text-blue-500' 
+                          formData.paymentMethod === method
+                            ? 'text-blue-500'
                             : 'text-gray-400'
                         } />
                         <span className="capitalize">{method.replace(/_/g, ' ')}</span>

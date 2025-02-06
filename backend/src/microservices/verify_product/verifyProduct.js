@@ -4,8 +4,10 @@ import fs from "fs";
 import path from "path";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI("AIzaSyDiHYdawicnFhpGcZMoMSbpTBi65Rg6F68");
+const fileManager = new GoogleAIFileManager(
+  "AIzaSyDiHYdawicnFhpGcZMoMSbpTBi65Rg6F68"
+);
 import { fileURLToPath } from "url";
 // import { log } from "console";
 
@@ -51,39 +53,65 @@ async function uploadToGemini(path, mimeType) {
   return file;
 }
 
+// const schema = {
+//   description: "Product Verification Results",
+//   type: SchemaType.ARRAY,
+//   items: {
+//     type: SchemaType.OBJECT,
+//     properties: {
+//       status: {
+//         type: SchemaType.BOOLEAN,
+//         description: "Whether the image matches the product description.",
+//       },
+//       score: {
+//         type: SchemaType.NUMBER,
+//         description:
+//           "Confidence score of the image matching the product description.",
+//       },
+//       manualReview: {
+//         type: SchemaType.BOOLEAN,
+//         description: "Whether the result requires manual review.",
+//       },
+//       reason: {
+//         type: SchemaType.STRING,
+//         description: "Reason for the result.",
+//       },
+//     },
+//     required: ["status"],
+//   },
+// };
+
 const schema = {
   description: "Product Verification Results",
-  type: SchemaType.ARRAY,
-  items: {
-    type: SchemaType.OBJECT,
-    properties: {
-      status: {
-        type: SchemaType.BOOLEAN,
-        description: "Whether the image matches the product description.",
-      },
-      score: {
-        type: SchemaType.NUMBER,
-        description:
-          "Confidence score of the image matching the product description.",
-      },
-      manualReview: {
-        type: SchemaType.BOOLEAN,
-        description: "Whether the result requires manual review.",
-      },
-      reason: {
-        type: SchemaType.STRING,
-        description: "Reason for the result.",
-      },
+  type: SchemaType.OBJECT,
+
+  properties: {
+    status: {
+      type: SchemaType.BOOLEAN,
+      description: "Whether the image matches the product description.",
     },
-    required: ["status"],
+    score: {
+      type: SchemaType.NUMBER,
+      description:
+        "Confidence score of the image matching the product description.",
+    },
+    // manualReview: {
+    //   type: SchemaType.BOOLEAN,
+    //   description: "Whether the result requires manual review.",
+    // },
+    reason: {
+      type: SchemaType.STRING,
+      description: "Reason for the result.",
+    },
   },
+  required: ["status"],
 };
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.0-flash",
   //   systemInstruction: "Explain the images to the user.",
   systemInstruction:
-    "You are an AI system responsible for verifying product listings on an e-commerce platform. Here are the things you need to check - 1. Is the product legal and suitable to be listed online. 2. Given the product description, name and images, determine if the images matches the product name and description. Give separate result for each image.\n",
+    "You are an AI system responsible for verifying product listings on an e-commerce platform. Here are the things you need to check - 1. Is the product legal and suitable to be listed online. 2. Given the product description, name and images, determine if the images matches the product name and description. Explain the picture as you see it in the reason field of response.\n",
   generationConfig: {
     responseMimeType: "application/json",
     responseSchema: schema,
@@ -91,33 +119,112 @@ const model = genAI.getGenerativeModel({
 });
 
 // export a function that takes in an array of image paths and returns the result of the model
+// const verify = async (name, description, imagePaths) => {
+//   // upload all images to gemini
+//   console.log(name, description);
+
+//   const promises = imagePaths.map((image) =>
+//     uploadToGemini(image, "image/jpg")
+//   );
+//   const uploadResults = await Promise.all(promises);
+//   console.log(uploadResults);
+
+//   const allFiles = uploadResults.map((uploadResult) => ({
+//     fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
+//   }));
+
+//   const result = await model.generateContent({
+//     contents: [
+//       {
+//         role: "user",
+//         parts: [
+//           {
+//             text: `Product Name : ${name} | Product description : ${description}`,
+//           },
+//           ...allFiles,
+//         ],
+//       },
+//     ],
+//   });
+//   // console.log(result.response.text());
+//   return result.response.text();
+// };
+
+// Helper function to wait for a given number of milliseconds
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Generic retry function
+const retry = async (fn, retries = 3, delayMs = 1000) => {
+  let lastError;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      console.warn(`Attempt ${attempt} failed. Retrying in ${delayMs}ms...`);
+      if (attempt < retries) {
+        await delay(delayMs);
+      }
+    }
+  }
+  throw lastError;
+};
+
 const verify = async (name, description, imagePaths) => {
-  // upload all images to gemini
-  const promises = imagePaths.map((image) =>
-    uploadToGemini(image, "image/jpg")
-  );
-  const uploadResults = await Promise.all(promises);
-  // console.log(uploadResults);
+  try {
+    console.log(name, description);
 
-  const allFiles = uploadResults.map((uploadResult) => ({
-    fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
-  }));
+    // Attempt to upload all images using a retry mechanism and wait for all results,
+    // regardless of success or failure.
+    const uploadPromises = imagePaths.map((image) =>
+      retry(() => uploadToGemini(image, "image/jpg"), 3, 1000)
+    );
 
-  const result = await model.generateContent({
-    contents: [
-      {
-        role: "user",
-        parts: [
+    // Use Promise.allSettled so that we get the outcome of each upload
+    const uploadResultsSettled = await Promise.allSettled(uploadPromises);
+
+    // Check if any upload failed.
+    for (const result of uploadResultsSettled) {
+      if (result.status === "rejected") {
+        console.error("Image upload failed:", result.reason);
+        return { status: false };
+      }
+    }
+
+    // Extract the resolved values (they all succeeded if we reached here)
+    const uploadResults = uploadResultsSettled.map((result) => result.value);
+    console.log("Upload Results:", uploadResults);
+
+    // Prepare file data from upload results
+    const allFiles = uploadResults.map((uploadResult) => ({
+      fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType },
+    }));
+
+    // Wrap the generateContent call in a function to pass to the retry mechanism
+    const generateContentCall = () =>
+      model.generateContent({
+        contents: [
           {
-            text: `Product Name : ${name} | Product description : ${description}`,
+            role: "user",
+            parts: [
+              {
+                text: `Product Name: ${name} | Product Description: ${description}`,
+              },
+              ...allFiles,
+            ],
           },
-          ...allFiles,
         ],
-      },
-    ],
-  });
-  // console.log(result.response.text());
-  return result.response.text();
+      });
+
+    // Call generateContent with retry
+    const contentResult = await retry(generateContentCall, 3, 1000);
+
+    // Return the generated content text if everything succeeds.
+    return contentResult.response.text();
+  } catch (error) {
+    console.error("Error in verify function:", error);
+    return { status: false };
+  }
 };
 
 export const verifyProduct = async (req, res) => {
@@ -152,16 +259,18 @@ export const verifyProduct = async (req, res) => {
     }
   }
   res.json({ success: true });
-  // else return failure
-  // res.json({ success: false, message: result });
 };
 
 // =================================================================================================
-// const images = ["image1.jpg", "image2.jpg", "image3.jpg"];
+const images = ["image1.jpg", "image2.jpg", "knife.jpg"];
+const imagePaths = images.map((file) => path.join(__dirname, file));
+
+// const res = await verify("Laptop", "Laptop", imagePaths);
+// console.log(res);
 
 // const promises = images.map((image) => uploadToGemini(image, "image/jpg"));
 // const uploadResults = await Promise.all(promises);
-// // console.log(uploadResults);
+// console.log(uploadResults);
 
 // // create data to send with prompt with all the image uris
 // const allFiles = uploadResults.map((uploadResult) => ({

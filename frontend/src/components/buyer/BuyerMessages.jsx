@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaInbox, FaUserCircle, FaPaperPlane, FaSearch, 
@@ -14,14 +14,15 @@ const socket = io("http://localhost:3000" ,  {
   withCredentials: true,
 }); // Connect to backend
 
-
-
+ 
 
 
 const BuyerMessages = () => {
 
+   const user = useAuth();
   // hard coded
-  const buyerId = "4ca9eb87-9c1a-4ecf-8fc5-2ba1132223bc";
+  const buyerId = user.user.id;
+  console.log("buyerID :", buyerId);
   const sellerId = "5fadbbd2-d0b8-4a6d-81c5-cb467cc4a1b7";
   const userType = "buyer";
   const [chats, setChats] = useState([]); // set all chats

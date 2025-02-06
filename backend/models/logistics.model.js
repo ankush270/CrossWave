@@ -6,6 +6,10 @@ const logisticsSchema = new Schema(
       type: String,
       required: true,
     },
+    isCancelled: {
+      type: Boolean,
+      default: false,
+    },
     trackingNumber: {
       type: String,
       required: true,

@@ -112,7 +112,7 @@ const Buyer = () => {
     },
     {
       id: "wishlist",
-      title: "Wishlist & RFQs",
+      title: "Negotiations",
       icon: <FaHeart />,
       component: BuyerWishlist,
       badge: "8",
@@ -191,7 +191,7 @@ const Buyer = () => {
 
   return (
     <div
-      className={`min-h-screen relative ${
+      className={`min-h-screen relative mt-16 ${
         isDarkMode ? "dark bg-gray-900" : "bg-gray-50"
       }`}
     >
@@ -205,7 +205,7 @@ const Buyer = () => {
       {/* Existing Content */}
       <div className="relative z-10 h-screen flex flex-col">
         {/* Header */}
-        <motion.header
+        {/* <motion.header
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className={`h-16 backdrop-blur-xl ${
@@ -250,7 +250,7 @@ const Buyer = () => {
               </span>
             </div>
           </div>
-        </motion.header>
+        </motion.header> */}
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
@@ -259,15 +259,13 @@ const Buyer = () => {
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             className={`w-72 border-r shrink-0 ${
-              isDarkMode
-                ? "bg-gray-800/50 border-gray-700/50"
-                : "bg-white/50 border-gray-200/50"
+              isDarkMode ? "bg-gray-800/50 border-gray-700/50" : ""
             } backdrop-blur-lg relative`}
             style={scrollbarHiddenStyles}
           >
             <motion.div className="overflow-y-auto custom-scrollbar h-full pb-10">
               {/* Logo/Brand Section */}
-              <div
+              {/* <div
                 className={`h-16 flex items-center justify-center border-b ${
                   isDarkMode
                     ? "border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-900/50"
@@ -284,14 +282,12 @@ const Buyer = () => {
                 >
                   CrossWave
                 </motion.h1>
-              </div>
+              </div> */}
 
               {/* Profile Quick View */}
               <div
                 className={`p-4 border-b ${
-                  isDarkMode
-                    ? "border-gray-700/50 bg-gradient-to-r from-gray-800/30 to-gray-900/30"
-                    : "border-white/30 bg-white/10"
+                  isDarkMode ? " " : "border-white/30 bg-white/10"
                 }`}
               >
                 <motion.div
@@ -471,8 +467,7 @@ const Buyer = () => {
           {/* Main Content with margin */}
           <main className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8">
             <div className="max-w-7xl mx-auto">
-              {/* <AnimatePresence mode="wait"> */}
-              <AnimatePresence mode="popLayout">
+              <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}
                   initial={{ opacity: 0, y: 20 }}

@@ -28,7 +28,7 @@ const docTypeDetails = {
   iec: "Import Export Code Certificate",
   shipping: "Shipping Bill",
   tradeLicense: "Trade License",
-  UAEcoo: "UAE Certificate Of Origin",
+  // UAEcoo: "UAE Certificate Of Origin",
   UAEesma: "UAE ESMA Certificate",
   UAEid: "UAE ID Card",
   UAEvat: "UAE VAT Certificate",
@@ -72,7 +72,7 @@ export async function verifyDocument(filePath, docType) {
     //   verified: false,
     //   method: "ocr",
     // };
-    console.log("Calling LLM")
+    console.log("Calling LLM");
     // 3. Call the LLM API for further verification if OCR failed.
     const fullDocTypeName = docTypeDetails[docType] || docType;
     const llmResult = await LLMverifyDocument(filePath, fullDocTypeName);

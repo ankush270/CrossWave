@@ -129,7 +129,7 @@ class UploadService {
         "UAEvat",
         "UAEid",
         "UAEesma",
-        "UAEcoo",
+        // "UAEcoo",
       ];
 
       const status = requiredDocs.map((docType) => {
