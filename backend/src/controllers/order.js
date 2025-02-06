@@ -323,15 +323,14 @@ export const updateOrder = async (req, res) => {
     // Update order status
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
-      data: { status },
+      data: updateData,
     });
 
     res.status(200).json(updatedOrder);
   } catch (error) {
-    console.error('Error updating order:', error);
     res.status(500).json({
       success: false,
-      error: 'Error updating order: ' + error.message,
+      error: "Error updating order: " + error.message,
     });
   }
 };

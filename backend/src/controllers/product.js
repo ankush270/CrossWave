@@ -15,7 +15,7 @@ export const addProduct = async (req, res, next) => {
 
   try {
     const seller_id = req.id;
-    console.log(seller_id);
+
     if (req.role !== "seller") {
       return res.status(401).json({
         success: false,
@@ -101,7 +101,7 @@ export const getProductBySellerId = async (req, res) => {
   try {
     const { seller_id } = req.params;
     const products = await Product.find({ seller_id }); // Use find() to get all products for a seller
-    
+
     if (!products.length) {
       return res.status(404).json({ error: "No products found" });
     }

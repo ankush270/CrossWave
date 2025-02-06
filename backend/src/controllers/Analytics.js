@@ -3,7 +3,8 @@ import { Product } from "../models/product.model.js";
 import prisma from "../config/prisma_db.js";
 import mongoose from "mongoose";
 
-export const getSellerAnalytics = async (req, res) => {
+// Get seller analytics
+export const getSellerAnalytics =  async (req, res) => {
   try {
     const sellerId = req.id;
     const { period } = req.query; // Get the selected period from the frontend
@@ -26,6 +27,7 @@ export const getSellerAnalytics = async (req, res) => {
     // Fetch total orders for the seller
     const totalOrders = await prisma.order.count({
       where: { seller_id: sellerId },
+      where: { seller_id: sellerId },
     });
 
     // Fetch total revenue from delivered orders
@@ -36,6 +38,7 @@ export const getSellerAnalytics = async (req, res) => {
 
     // Fetch active shipments (Processing or Shipped)
     const activeShipments = await prisma.order.count({
+      where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
       where: { seller_id: sellerId, status: { in: ["PROCESSING", "SHIPPED"] } },
     });
 
@@ -86,11 +89,12 @@ export const getSellerAnalytics = async (req, res) => {
       totalRevenue: String(totalRevenue._sum.price) || 0,
       activeShipments,
       ordersPerDay,
+      ordersPerDay,
       productCategories,
     });
 
   } catch (error) {
-    console.error("❌ Error in getSellerAnalytics:", error);
+    console.error("❌ Error in getSellerAnalytics:", "❌ Error in getSellerAnalytics:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -102,7 +106,7 @@ export const getBuyerAnalytics = async (req, res) => {
     const buyerId = req.id;
     const currentYear = new Date().getFullYear();
 
-    // Active orders (Accepted)
+    // ✅ Active orders (Accepted)
     const activeOrders = await prisma.order.count({
       where: { buyer_id: buyerId, status: "PROCESSING" }
     });
@@ -110,9 +114,10 @@ export const getBuyerAnalytics = async (req, res) => {
     // Pending RFCs
     const pendingRFCs = await prisma.order.count({
       where: { buyer_id: buyerId, status: "PENDING" }
+      where: { buyer_id: buyerId, status: "PENDING" }
     });
 
-    // In-transit orders
+    // ✅ In-transit orders
     const inTransitOrders = await prisma.order.count({
       where: { buyer_id: buyerId, status: "SHIPPED" }
     });
@@ -123,6 +128,16 @@ export const getBuyerAnalytics = async (req, res) => {
       where: { buyer_id: buyerId },
     });
 
+    // ✅ Purchase volume by month (Fix Prisma `groupBy` issue with raw SQL)
+    const purchaseVolume = await prisma.$queryRaw`
+      SELECT TO_CHAR(created_at, 'YYYY-MM') as month, SUM(quantity) as quantity
+      FROM "orders"
+      WHERE buyer_id = ${buyerId} AND created_at >= ${new Date(`${currentYear}-01-01`)}
+      GROUP BY month
+      ORDER BY month ASC;
+    `;
+
+    // ✅ Fetch product categories correctly
     // Purchase volume by month (quantity)
     const orders = await prisma.order.findMany({
       where: { buyer_id: buyerId, created_at: { gte: new Date(`${currentYear}-01-01`) } },
@@ -181,7 +196,7 @@ export const getBuyerAnalytics = async (req, res) => {
       productCategories: productCategories.map(c => ({ category: c._id, count: c.count }))
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in getBuyerAnalytics:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
